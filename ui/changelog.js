@@ -2,8 +2,56 @@
 // Patch notes, newest first. Source for the window, CHANGELOG.md and the release notes
 // (installer/changelog.py). Keep it valid JSON between "= " and the final ";".
 // Each language has categories: new, fix, perf (performance), look (appearance and personalization).
-// "draft": true = still being worked on; the workflow only publishes the release once it is removed.
+// "draft": true = still being worked on (no release). "beta": true = published as a test version (GitHub
+// pre-release, only for "Receive test versions"); removing "beta" later promotes it to the stable release.
 const CHANGELOG = [
+{"v": "1.4.3",
+ "pt": {
+  "new": [
+   "Editor de layout por elemento: com um bloco selecionado, clique em qualquer elemento (valor, gauge, texto, relógio, logos, FPS...) para movê-lo, redimensioná-lo, girá-lo ou apagá-lo. A barra do topo também pode ser editada item por item.",
+   "Elementos para arrastar até a tela: dentro de um bloco eles entram no bloco; fora, viram um bloco novo.",
+   "Fonte e tamanho do texto por elemento.",
+   "Ao apagar ou redimensionar um bloco, os vizinhos se ajustam sozinhos (dá para desligar).",
+   "Desligar a tela num horário, como o brilho à noite.",
+   "Voltar para uma versão anterior em Avançado › Atualizações, com a opção de não receber de novo a versão que não agradou.",
+   "Opção de receber versões de teste antes de saírem para todos.",
+   "Seção Sobre em Avançado, com licença, créditos e links do projeto."
+  ],
+  "fix": [
+   "Ao desligar a mídia (ou o FPS) na barra do topo, o lugar ficava vazio; agora os logos aparecem nele.",
+   "Os elementos da barra do topo tinham nomes repetidos e pouco claros no editor."
+  ],
+  "look": [
+   "Intervalo de cada item separado por grupos (CPU, GPU, RAM, Discos, Rede), mostrando primeiro só o que é diferente do padrão.",
+   "Brilho à noite com o horário em cima da barra, em 24 h.",
+   "Uso de CPU e memória da Tela! numa segunda linha ao passar o mouse no ícone da bandeja.",
+   "Notas de versão com mais espaço entre as versões.",
+   "Em Aparência, as opções da tela vêm primeiro e o tema da janela fica por último."
+  ]
+ },
+ "en": {
+  "new": [
+   "Element-level layout editor: with a block selected, click any element (value, gauge, text, clock, logos, FPS...) to move, resize, rotate or delete it. The top bar can be edited item by item too.",
+   "Elements to drag onto the screen: inside a block they join the block; outside, they become a new block.",
+   "Font and text size per element.",
+   "When a block is deleted or resized, its neighbours adjust by themselves (can be turned off).",
+   "Turn the screen off at set hours, like the night brightness.",
+   "Go back to an older version in Advanced › Updates, with an option not to be offered the version you did not like again.",
+   "Option to receive test versions before they go out to everyone.",
+   "About section in Advanced, with license, credits and project links."
+  ],
+  "fix": [
+   "Turning off the media (or the FPS) in the top bar left an empty space; the logos now show there.",
+   "Top bar elements had repeated, unclear names in the editor."
+  ],
+  "look": [
+   "Interval per item split into groups (CPU, GPU, RAM, Disks, Network), showing first only what differs from the default.",
+   "Night brightness with the hours above the slider, in 24 h.",
+   "Tela!'s CPU and memory use on a second line when hovering the tray icon.",
+   "More space between versions in the patch notes.",
+   "In Appearance, the screen options come first and the window theme last."
+  ]
+ }},
 {"v": "1.4.2",
  "pt": {
   "new": [

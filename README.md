@@ -2,8 +2,19 @@
 
 **A free, modern alternative to the official Turing Smart Screen software.**
 
+> [!NOTE]
+> **Tela! is a fan-made, independent project.** It has no connection with Turing, XuanFang, Kipye or any
+> other maker or seller of these screens, and none of them supports or reviews it. Brand names such as
+> Turing, AMD, NVIDIA or Intel appear here only to say what Tela! works with, and belong to their owners.
+>
+> Questions about the screen itself or the app that came with it go to the store where you bought it.
+> Issues here are for Tela! only.
+
 [![Download for Windows](https://img.shields.io/badge/Download-Tela--Setup.exe-2ea44f?style=for-the-badge)](https://github.com/Fekaziroh/Tela/releases/latest/download/Tela-Setup.exe)
-&nbsp; [All releases](https://github.com/Fekaziroh/Tela/releases) · [Changelog](CHANGELOG.md)
+[![Latest version](https://img.shields.io/github/v/release/Fekaziroh/Tela?style=for-the-badge&label=version&color=444)](https://github.com/Fekaziroh/Tela/releases)
+[![Changelog](https://img.shields.io/badge/changelog-what's%20new-444?style=for-the-badge)](CHANGELOG.md)
+[![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-444?style=for-the-badge)](#compatibility)
+[![License MIT](https://img.shields.io/badge/license-MIT-444?style=for-the-badge)](LICENSE)
 
 <p align="center">
   <img src="docs/screen-landscape.png" width="480" alt="The 3.5 inch screen in landscape">
@@ -23,7 +34,8 @@ yourself, all set up from a clean window instead of config files.
 - **Music and video** playing (Spotify, YouTube, any app in the Windows media controls) with progress line;
   during a game it moves to the date's place
 - Network panel with ping, packet loss and internet outage warning
-- **Layout editor**: drag, resize, turn blocks on and off, rename, pick sensors from a live list, add blocks
+- **Layout editor**: drag, resize, turn blocks on and off, rename, pick sensors from a live list; edit every
+  element (move, resize, rotate, font and size) and drag new ones from a palette
 - Landscape and portrait (and both flipped), screen color themes, background picture
 - Window themes (automatic, ready-made or your own colors), Portuguese, English, Spanish and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
@@ -80,6 +92,18 @@ Everything stays on your PC. Tela! only goes online to ping the servers you conf
 panel) and to ask GitHub whether there is a new version (can be turned off in *Advanced › Updates*); the
 setup downloads PawnIO and WebView2 from their official sources when they are missing.
 
+## Code signing policy
+
+The setup is not code-signed yet, so Windows may show a warning when you download or open it. We applied
+for free code signing for open-source projects from [SignPath.io](https://signpath.io), with a certificate
+by the [SignPath Foundation](https://signpath.org); this section will say so when it is in place.
+
+- Every release is built from this repository by GitHub Actions (`.github/workflows/release.yml`); nothing
+  is built on a personal PC.
+- Committers and reviewers: [Fekaziroh](https://github.com/Fekaziroh). Approver of each signed release:
+  [Fekaziroh](https://github.com/Fekaziroh).
+- Privacy: see [Privacy](#privacy). Tela! sends no data about you anywhere.
+
 ## Building
 
 Every push builds the setup on GitHub Actions (`.github/workflows/release.yml`). When the version in
@@ -88,6 +112,14 @@ Every push builds the setup on GitHub Actions (`.github/workflows/release.yml`).
 
 Without the setup, `python app.py` runs Tela! from the source folder (`--demo` uses fake data,
 `--simulate` draws to `preview.png` instead of the screen).
+
+## Acknowledgements
+
+The screen protocol is based on the work of
+[turing-smart-screen-python](https://github.com/mathoudebine/turing-smart-screen-python) by mathoudebine,
+another open-source project for these screens (no code from it is included). Sensors come from
+[LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) and FPS from
+[PresentMon](https://github.com/GameTechDev/PresentMon); see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## License
 

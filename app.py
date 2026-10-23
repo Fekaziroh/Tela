@@ -16,21 +16,21 @@ from icon import app_icon, temp_icon
 from updater import Updater
 
 TEXT = {
-    "pt": {"update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
+    "pt": {"usage": "Tela! usando {cpu}% de CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
            "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
            "pause": "Pausar", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
-    "es": {"update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
+    "es": {"usage": "Tela! usa {cpu}% de CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
            "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
            "pause": "Pausar", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
-    "zh": {"update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
+    "zh": {"usage": "Tela! 占用 {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
            "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
            "pause": "暂停", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
-    "en": {"update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
+    "en": {"usage": "Tela! using {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
            "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
            "pause": "Pause", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
@@ -61,7 +61,9 @@ class App:
         self.engine = Engine(self.cfg_path, self.log, demo=demo, simulate=simulate)
         self.api = Api(self)
         self.updater = Updater(VERSION, self.log, enabled=lambda: bool(
-            (self.engine.cfg.get("updates") or {}).get("check", True)))
+            (self.engine.cfg.get("updates") or {}).get("check", True)),
+            options=lambda: {"test": bool((self.engine.cfg.get("updates") or {}).get("test")),
+                             "skip": str((self.engine.cfg.get("updates") or {}).get("skip") or "") or None})
         self.start_hidden = start_hidden
         self.visible = not start_hidden   # while hidden in the tray the window gets no previews (saves CPU)
         self.force_browser = force_browser
@@ -319,6 +321,12 @@ class App:
             up = self.updater.info.get("version") if self.updater.state == "available" and self.updater.info else None
             if up:
                 tip += f"  ·  ↑ {up}"
+            try:   # second line: what Tela! itself uses (program + window), to see the gain of closing the window
+                u = self.api._usage_total()
+                tip += "\n" + self.T["usage"].format(cpu=f"{u['cpu']:.1f}".replace(".", "," if self.lang in ("pt", "es") else "."),
+                                                      ram=u["ram_mb"])
+            except Exception:  # noqa: BLE001
+                pass
             if up and up != self._told_update:   # tell once per version, in the tray
                 self._told_update = up
                 try:

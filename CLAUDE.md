@@ -36,6 +36,9 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
 - This session cannot create or delete releases/tags: only the workflow (GITHUB_TOKEN) creates releases;
   the owner deletes them in the GitHub UI (Releases › Delete, then Tags › delete the tag).
 - The owner wants suggestions mentioned, and no new update started before he finishes sending ideas.
+- Owner's rule (from 1.4.4 on): every new version is first published as a TEST version (`"beta": true` in
+  ui/changelog.js → GitHub pre-release); he updates from the app with "Receive test versions" on; when he
+  approves, remove "beta" and push (the workflow promotes it to the stable release).
 - Releases: a push to main whose `engine.VERSION` has no release (and is not a draft in ui/changelog.js)
   makes the workflow create `v<version>` with `Tela-Setup-<version>.exe` and `Tela-Setup.exe` (the updater
   downloads the fixed name). Bump VERSION in engine.py and installer/Tela.iss together.
@@ -65,6 +68,11 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
 - Only the latest version gets fixes.
 
 ## Roadmap (owner's roadmap file of 2026-10-23, organized; on hold until he says to start)
+- The living roadmap is the owner's Claude doc "Tela! — Roadmap" (https://claude.ai/artifact/2HAXJyThY8ZJLaarXTfAQz):
+  he writes ideas under "Ideias novas"; at the start of a session read it, sort new ideas into versions,
+  empty that list, keep these notes in sync. Under "Ideias do Claude" the owner writes OK in front of the
+  suggestions he approves: move those into a version. Decided: Performance preset keeps update checks on; tray
+  consumption goes on a second line of the tooltip.
 - 1.4.2 Presets, profiles and fixes: presets Performance (pause preview while the window is open, lower
   drawing quality, longer intervals) / Default / Custom (automatic when anything differs); profiles
   save/load/import/export; FIX "auto" window theme falls back to graphite (CSS defaults in style.css and the
@@ -78,12 +86,15 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
 - 1.4.3 (also) Test channel: option "Receive test versions" in Advanced; the updater then also sees
   prereleases (GET /releases, newest non-draft); the workflow publishes a version marked "beta": true in
   ui/changelog.js as a prerelease (not latest), so only the owner/testers get it
+- 1.4.3 (also) quick UI: "interval per item" grouped by component (CPU/GPU/RAM/Disks/Network), collapsible,
+  showing only items that differ from the base first + "Show all"; night brightness: times above the slider,
+  24 h; patch notes: more space and a divider between versions
 - 1.4.3 Element-level layout editor: delete/rotate/resize gauges, icons, texts; palette to drag elements in;
   fonts and sizes; automatic re-flow on/off; top bar split into its items (clock, logos, FPS...);
   Layout tab gives priority to the screen layout (window theme and app settings lower / elsewhere)
 - 1.4.4 Orientation, portrait and organization: orientation in Layout + shortcut on Home (out of Settings ›
   screen connection); portrait layout using the space better, media mini player in the date's place during a
-  game; frametime graph bigger, customizable, integrated with the FPS; collapsible "interval per item";
+  game; frametime graph bigger, customizable, integrated with the FPS;
   search in Settings
 - 1.4.5 Themes and personalization (moved up from 1.5.0, owner's focus): at least 5 themes with different
   shapes and arrangements (bars, gauges, graphs, drawings), not only colors, each in landscape and portrait,
@@ -94,17 +105,33 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
   block joining Network (UP/DOWN) and Volume; cleaner than today, dark background, thin borders. Existing
   users keep their layout and get a notice. Also: editable screen texts; disks title automatic + manual;
   weather (city, temperature on by default, condition; Open-Meteo, only the city goes online) next to the
-  date in the themes; export/import a theme as a file (with the 1.4.2 profiles)
+  date in the themes; export/import a theme as a file (with the 1.4.2 profiles); automatic re-flow also for
+  the elements inside a block (deleting/resizing one rearranges the others)
 - 1.4.6 History: average per game, compare two games, game icon before the name in the summary
 - 1.5.0 New window interface: visual identity (mockups first), deeper performance mode, sharper preview tied
   to the preset, review of settings/files/data
 - Undecided, later: Lite build (decide after measuring the Performance preset); "Landscape" screen mode
   (picture, clock, slideshow, GIF; real video probably too slow for the USB link)
-- Outside versions: SignPath free code signing (owner applies, Claude writes the text and wires the build)
+- 1.4.3 (also) updater/tray: roll back to an older release (Advanced › Updates: list releases, reinstall
+  the chosen setup; Inno allows downgrades; "skip this version" so the notice does not insist); tray tooltip
+  with Tela!'s CPU/RAM (program + window); 
+- 1.4.3 (also) signing prep: version resource in Tela.exe (product "Tela!", version) via PyInstaller
+  --version-file; "About" section in Advanced (version, license, credits, independent-project notice)
+- SignPath: owner applied (README has "Code signing policy"); when approved, wire SignPath signing of
+  Tela.exe and Tela-Setup.exe into release.yml and update that README section. Owner also submits the
+  setup to Microsoft (wdsi/filesubmission) for SmartScreen reputation
 
 ## 1.4.2 — in progress (draft in ui/changelog.js)
 - [x] Fixes, presets, profiles, tray update notice, history 15, compatibility, categorized notes, prints
 - [x] Published as v1.4.2 (owner tests the update from 1.4.1; if bad he deletes release + tag, fixes go to 1.4.3)
+
+## 1.4.3 — in progress (draft in ui/changelog.js)
+- [x] Fixes (top bar place freed for logos, clear item names), quick UI, screen-off schedule, tray usage line
+- [x] Updates: test channel ("beta": true → pre-release), rollback list + skip version
+- [x] Element editor: element boxes measured by api.layout_boxes (render.item_box), move/resize/rotate/delete,
+      font per element (render.FONT_FAMILIES), palette drag (pointer events), block reflow (ui.reflow)
+- [x] Version resource (installer/version_info.py), About card, GitHub issue forms
+- [x] Published as stable v1.4.3 (1.4.2 cannot see test versions, so this one had to be stable)
 
 ## Compatibility notes (applied to README in 1.4.2)
 Compatibility section (also in release notes):

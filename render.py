@@ -14,6 +14,17 @@ DEFAULT_FONTS = {
     "bold": ["bahnschrift.ttf:Bold", "segoeuib.ttf", "DejaVuSans-Bold.ttf"],
 }
 
+# fonts an element can choose in the layout editor (all come with Windows 10/11; DejaVu is the Linux fallback)
+FONT_FAMILIES = {
+    "segoe": (["segoeui.ttf"], ["segoeuib.ttf"]),
+    "arial": (["arial.ttf"], ["arialbd.ttf"]),
+    "verdana": (["verdana.ttf"], ["verdanab.ttf"]),
+    "trebuchet": (["trebuc.ttf"], ["trebucbd.ttf"]),
+    "georgia": (["georgia.ttf"], ["georgiab.ttf"]),
+    "consolas": (["consola.ttf"], ["consolab.ttf"]),
+    "impact": (["impact.ttf"], ["impact.ttf"]),
+}
+
 DEFAULT_COLORS = {
     "background": "#000000", "panel": "#141414", "text": "#FFFFFF", "secondary": "#8C8C8C",
     "track": "#333333", "accent": "#FFFFFF", "warn": "#FF9F0A", "crit": "#FF453A",
@@ -98,11 +109,13 @@ class Renderer:
         self.widgets = cfg.get("widgets") or []
         if str((cfg.get("ssd") or {}).get("number", "activity")).lower() == "space":
             self.widgets = [self._swap_ssd(w) for w in self.widgets]
+        self._slots = self._group_slots(self.widgets)
         f = cfg.get("fonts") or {}
         self.font_lists = {k: f.get(k) or v for k, v in DEFAULT_FONTS.items()}
         if lang == "zh":   # Chinese needs a font with the characters (Microsoft YaHei comes with Windows)
             self.font_lists = {k: CJK_FONTS[k] + v for k, v in self.font_lists.items()}
         self._fonts = {}
+        self._family = None      # font family of the element being drawn (layout editor choice)
         self._glyphs = {}
         self._measure = {}
         self.cache_static = cache_static
@@ -148,11 +161,15 @@ class Renderer:
         return self.colors.get(c, c)
 
     def font(self, size, bold=False):
-        key = (size, bold)
+        fam = self._family if self._family in FONT_FAMILIES else None
+        key = (size, bold, fam)
         if key not in self._fonts:
             px = max(1, int(round(size * self.S)))
             ft = None
-            for name in self.font_lists["bold" if bold else "regular"]:
+            names = self.font_lists["bold" if bold else "regular"]
+            if fam:
+                names = FONT_FAMILIES[fam][1 if bold else 0] + list(names)
+            for name in names:
                 file, _, var = name.partition(":")
                 try:
                     ft = ImageFont.truetype(file, px)
@@ -277,6 +294,20 @@ class Renderer:
             self.wake_at = t
 
     # ------------------------------------------------------------ visibility
+    @staticmethod
+    def _group_slots(widgets):
+        """Per block: which shared places are really filled (an item turned off frees its place)."""
+        slots = {}
+        for w in widgets:
+            when = w.get("when") or []
+            when = [when] if isinstance(when, str) else when
+            s = slots.setdefault(w.get("group"), set())
+            if w.get("type") == "media":
+                s.add("media_right" if "media_in_game" in when else "media_left")
+            if w.get("type") == "value" and w.get("sensor") == "fps":
+                s.add("fps")
+        return slots
+
     def _visible(self, w, col):
         if w.get("requires") and not self.fields.get(w["requires"]):
             return False   # e.g. the 2nd disk only shows if it exists
@@ -288,10 +319,13 @@ class Renderer:
         # a game counts while its process is open (minimized or alt-tabbed too), see Collector.game_open
         game = fps or (hasattr(col, "game_open") and col.game_open())
         media = bool(col.media_info()) if hasattr(col, "media_info") else False
+        slots = self._slots.get(w.get("group"), {"fps", "media_left", "media_right"})
         state = {"game": game, "no_game": not game, "fps": fps, "no_fps": not fps, "media": media,
-                 "no_media": not media, "media_in_game": game and media and self.media_in_game,
-                 # logos: no FPS on the left and the music is not there either
-                 "logos": not fps and not (media and not game)}
+                 "no_media": not media,
+                 "media_in_game": game and media and self.media_in_game and "media_right" in slots,
+                 # logos: the FPS is not on the left and the media is not there either (counting only the
+                 # items that are turned on in this block, so turning one off shows the logos instead)
+                 "logos": not (fps and "fps" in slots) and not (media and not game and "media_left" in slots)}
         state["no_media_in_game"] = not state["media_in_game"]
         return all(state.get(c, True) for c in conds)
 
@@ -859,7 +893,55 @@ class Renderer:
         fn = getattr(self, "_w_" + str(w.get("type")), None)
         if fn is None:
             raise ValueError(f"unknown widget type: {w.get('type')!r}")
-        fn(d, w, col)
+        before = self._family
+        self._family = w.get("font")
+        try:
+            rot = float(w.get("rotate") or 0) % 360
+            if not rot:
+                fn(d, w, col)
+                return
+            # rotated element: drawn alone on a transparent layer, turned around its center, then laid on the frame
+            base = self._frame
+            layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+            self._frame = layer
+            try:
+                fn(ImageDraw.Draw(layer), w, col)
+            finally:
+                self._frame = base
+            box = layer.getbbox()
+            if not box:
+                return
+            cx, cy = self._center(w, box)
+            turned = layer.rotate(-rot, resample=Image.BICUBIC, center=(cx, cy))
+            base.paste(turned, (0, 0), turned)
+        finally:
+            self._family = before
+
+    def _center(self, w, box):
+        """Rotation center in frame pixels: the element's box when it has one, else what was drawn."""
+        S = self.S
+        if "cx" in w and "cy" in w:
+            return w["cx"] * S, w["cy"] * S
+        if "w" in w and "h" in w and "x" in w and "y" in w:
+            return (w["x"] + w["w"] / 2) * S, (w["y"] + w["h"] / 2) * S
+        return (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+
+    def item_box(self, w, col):
+        """Screen rectangle [x, y, w, h] an element covers (for the layout editor), or None if it draws nothing."""
+        S = self.S
+        base = getattr(self, "_frame", None)
+        layer = Image.new("RGBA", (self.W * S, self.H * S), (0, 0, 0, 0))
+        self._frame = layer
+        try:
+            self._draw(dict(w, fade=False), ImageDraw.Draw(layer), col)
+        except Exception:  # noqa: BLE001
+            return None
+        finally:
+            self._frame = base
+        box = layer.getbbox()
+        if not box:
+            return None
+        return [box[0] / S, box[1] / S, (box[2] - box[0]) / S, (box[3] - box[1]) / S]
 
     def _static_layer(self):
         if self._static is None:

@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.2"
+VERSION = "1.4.3"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -221,21 +221,33 @@ class Engine(threading.Thread):
     def stopped(self):
         return self._halt.is_set()
 
+    @staticmethod
+    def in_hours(start, end, now=None):
+        """True when the local time is between two "HH:MM" times (the range may cross midnight)."""
+        try:
+            t = now or time.localtime()
+            m = t.tm_hour * 60 + t.tm_min
+            a = [int(x) for x in str(start).split(":")]
+            b = [int(x) for x in str(end).split(":")]
+            s, e = a[0] * 60 + a[1], b[0] * 60 + b[1]
+            return (s <= m < e) if s < e else (m >= s or m < e)
+        except (ValueError, IndexError):
+            return False
+
     def _target_brightness(self):
         """Normal brightness, or the night one during the configured hours."""
         d = self.cfg.get("display") or {}
         if not d.get("night_enabled"):
             return self.normal_brightness
-        try:
-            t = time.localtime()
-            m = t.tm_hour * 60 + t.tm_min
-            a = [int(x) for x in str(d.get("night_start", "22:00")).split(":")]
-            b = [int(x) for x in str(d.get("night_end", "07:00")).split(":")]
-            start, end = a[0] * 60 + a[1], b[0] * 60 + b[1]
-            night = (start <= m < end) if start < end else (m >= start or m < end)   # crosses midnight
-        except (ValueError, IndexError):
-            night = False
+        night = self.in_hours(d.get("night_start", "22:00"), d.get("night_end", "07:00"))
         return int(d.get("night_brightness", 15)) if night else self.normal_brightness
+
+    def _check_schedule(self):
+        """Screen off during the configured hours ("off" schedule in Settings)."""
+        d = self.cfg.get("display") or {}
+        want = bool(d.get("off_enabled")) and self.in_hours(d.get("off_start", "02:00"), d.get("off_end", "07:00"))
+        if want != ("schedule" in self._sleep):
+            self._on_command("sleep" if want else "wake", "schedule")
 
     def _apply_brightness(self):
         target = self._target_brightness()
@@ -259,7 +271,7 @@ class Engine(threading.Thread):
                         self.screen.turn_off()
                     except Exception:  # noqa: BLE001
                         pass
-                self.log("Screen off (" + {"lock": "PC locked", "monitor": "monitor asleep"}.get(value, value) + ")")
+                self.log("Screen off (" + {"lock": "PC locked", "monitor": "monitor asleep", "schedule": "scheduled hours"}.get(value, value) + ")")
             elif before and not self.sleeping:
                 if self.connected:
                     try:
@@ -546,6 +558,7 @@ class Engine(threading.Thread):
         crashes = deque(maxlen=5)
         while not self._halt.is_set():
             try:
+                self._check_schedule()
                 if self.paused or self.sleeping:
                     self._wait(0.5)
                     continue
