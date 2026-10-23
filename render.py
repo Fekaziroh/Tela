@@ -796,13 +796,21 @@ class Renderer:
             d.polygon(pts + [(pts[-1][0], (y + h) * S), (pts[0][0], (y + h) * S)], fill=self.color(fill))
         d.line(pts, fill=self.color(w.get("color"), "accent"), width=max(1, int(1.2 * S)), joint="curve")
         k = w.get("k", 1)
-        if w.get("show_ms", True):
-            self._line(d, x, y - 7 * k, [(f"{median:.1f}", self.font(8 * k, True), self.color("text")),
-                                         (" ms", self.font(7 * k), self.color("secondary"))], "left")
+        fs = float(w.get("label_size", 8)) * k
+        ms_part = [(f"{median:.1f}", self.font(fs, True), self.color("text")),
+                   (" ms", self.font(fs * 0.875), self.color("secondary"))] if w.get("show_ms", True) else []
         low = col.value(w.get("low_sensor", "fps_1low")) if w.get("show_1low", True) else None
-        if low is not None:
-            self._line(d, x + wd, y - 7 * k, [("1% ", self.font(7 * k), self.color("secondary")),
-                                              (f"{low:.0f}", self.font(8 * k, True), self.color("text"))], "right")
+        low_part = [("1% ", self.font(fs * 0.875), self.color("secondary")),
+                    (f"{low:.0f}", self.font(fs, True), self.color("text"))] if low is not None else []
+        if w.get("labels") == "right":   # both labels after the graph, on its middle line
+            parts = ms_part + ([("   ", self.font(fs), self.color("text"))] if ms_part and low_part else []) + low_part
+            if parts:
+                self._line(d, x + wd + 6 * k, y + h / 2, parts, "left")
+        else:
+            if ms_part:
+                self._line(d, x, y - 7 * k, ms_part, "left")
+            if low_part:
+                self._line(d, x + wd, y - 7 * k, low_part, "right")
         self.animating = True  # keeps drawing while there is a game
 
     # ------------------------------------------------------------ game session summary

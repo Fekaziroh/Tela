@@ -350,3 +350,16 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .rot .num{width:62px}
 .chip-el.ghost{position:fixed;z-index:99;pointer-events:none;background:var(--accent);color:var(--win);box-shadow:0 6px 18px rgba(0,0,0,.4)}
 .chip-el{touch-action:none}
+
+#ed-block{order:-1}
+.ibox{background:none;border:1px dashed rgba(120,190,255,.35)}
+.ibox:hover{border-style:solid;border-color:rgba(120,190,255,.9)}
+.ibox.sel{border:1.5px solid #7cc4ff;background:none}
+.box.sel{box-shadow:0 0 0 9999px rgba(0,0,0,.22)}
+.box.sel2{border:2px dashed var(--accent);z-index:2}
+.orient-row{justify-content:flex-start;gap:14px}
+.set-search{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.set-search input{max-width:420px;width:100%}
+.s-hide{display:none!important}
+.conflict{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:12px 14px;border-radius:10px;
+  background:color-mix(in srgb,var(--warn) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}

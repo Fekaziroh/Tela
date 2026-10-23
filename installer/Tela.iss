@@ -3,7 +3,7 @@
 ; Expects build\dist\Tela (PyInstaller), build\components\lhm and build\components\presentmon, build\tela.ico.
 
 #ifndef AppVersion
-  #define AppVersion "1.4.3"
+  #define AppVersion "1.4.4"
 #endif
 #ifndef PawnIOUrl
   #define PawnIOUrl ""
@@ -77,6 +77,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Type: filesandordirs; Name: "{app}\_internal"
 Type: filesandordirs; Name: "{app}\ui"
 Type: filesandordirs; Name: "{app}\layouts"
+Type: filesandordirs; Name: "{app}\lhm"
+Type: filesandordirs; Name: "{app}\presentmon"
 
 [Files]
 Source: "{#Build}\dist\Tela\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

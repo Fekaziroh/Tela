@@ -17,9 +17,9 @@
 [![License MIT](https://img.shields.io/badge/license-MIT-444?style=for-the-badge)](LICENSE)
 
 <p align="center">
-  <img src="docs/screen-landscape.png" width="480" alt="The 3.5 inch screen in landscape">
+  <img src="https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/screen-landscape.png" width="480" alt="The 3.5 inch screen in landscape">
   &nbsp;
-  <img src="docs/screen-portrait.png" width="214" alt="The 3.5 inch screen in portrait">
+  <img src="https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/screen-portrait.png" width="214" alt="The 3.5 inch screen in portrait">
 </p>
 
 Those small USB screens sold on AliExpress and Amazon come with an app that only shows a few fixed sensors.
@@ -40,16 +40,17 @@ yourself, all set up from a clean window instead of config files.
 - Window themes (automatic, ready-made or your own colors), Portuguese, English, Spanish and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
 - **Presets** (Performance, Default, Custom) and **profiles** you can save, switch, export and import
+- Temperature alerts, screen off at set hours, search in Settings
 - Eco mode when you are away, automatic recovery, diagnostics report
 - Updates itself: a button lights up when a new version is out
 
-![The Tela! window](docs/window.png)
+![The Tela! window](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/window.png)
 
 | Layout editor | Game history |
 |---|---|
-| ![Layout editor](docs/editor.png) | ![Game history](docs/history.png) |
+| ![Layout editor](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/editor.png) | ![Game history](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/history.png) |
 
-![Presets and profiles](docs/settings.png)
+![Presets and profiles](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/settings.png)
 
 ## Install
 

@@ -21,7 +21,7 @@ from engine import HERE, VERSION, system_language
 from render import DEFAULT_COLORS, Renderer
 
 NOT_FOR_INTERVALS = {"fps", "volume"}
-UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow")}
+UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow"), ("ui", "unload_hidden")}
 
 
 def _png_data_url(img):
@@ -106,6 +106,11 @@ class Api:
         up = getattr(self._app, "updater", None)
         return up.check() if up else None
 
+    def close_conflict(self):
+        """Closes the known program that holds the screen so Tela! can use it."""
+        fn = getattr(self._app, "close_conflict", None)
+        return fn() if fn else 0
+
     def open_url(self, url):
         """Opens one of the project's own pages in the browser (nothing else)."""
         import webbrowser
@@ -187,6 +192,7 @@ class Api:
         out["temps"] = {"cpu": e.value("cpu_temp"), "gpu": e.value("gpu_temp")}
         up = getattr(self._app, "updater", None)
         out["update"] = up.snapshot() if up else None
+        out["conflict"] = sorted({n for _, n in getattr(self._app, "conflict", [])})
         return out
 
     def _hardware_line(self):

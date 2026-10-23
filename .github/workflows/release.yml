@@ -99,3 +99,42 @@ jobs:
           gh release create "v$v" --target $env:GITHUB_SHA --title $title --notes-file build\notes.md $kind `
             "build\Tela-Setup-$v.exe" build\Tela-Setup.exe
           if ($LASTEXITCODE) { throw 'could not create the release' }
+
+  # README pictures: drawn from the real window in demo mode and kept on the "screenshots" branch (main keeps
+  # one commit per version). Updated when a version is released as stable, or when the branch is missing.
+  screenshots:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Should the pictures change?
+        id: need
+        run: |
+          v=$(grep -oP 'VERSION = "\K[^"]+' engine.py)
+          channel=$(python installer/changelog.py --channel "$v")
+          if [ "$channel" = "stable" ] || ! git ls-remote --exit-code --heads origin screenshots >/dev/null; then
+            echo "go=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=no" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Pictures
+        if: steps.need.outputs.go == 'yes'
+        run: |
+          python -m pip install --quiet pillow pyyaml psutil numpy pyserial playwright
+          python -m playwright install --with-deps chromium
+          python tests/screenshots.py build/shots
+      - name: Publish on the screenshots branch
+        if: steps.need.outputs.go == 'yes'
+        run: |
+          cd build/shots
+          git init -q -b screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "README pictures"
+          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" screenshots
+
