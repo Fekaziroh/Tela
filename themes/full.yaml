@@ -1,0 +1,19 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Completo, en: Full, es: Completo, zh: 完整}
+order: 2
+tela: 1
+
+colors:
+  background: '#000000'
+  panel: '#141414'
+  text: '#FFFFFF'
+  secondary: '#8C8C8C'
+  track: '#333333'
+  accent: '#FFFFFF'
+  warn: '#FF9F0A'
+  crit: '#FF453A'
+
+landscape: default
+
+portrait: default

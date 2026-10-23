@@ -1,7 +1,8 @@
 """Screen layouts: blocks (groups) of widgets with coordinates relative to the block.
 
-The default layouts ship in layouts/<family>.yaml and are replaced by updates. The layout editor saves the
-user's own copy as layout_<family>.yaml in the data folder; that one wins when it exists.
+Each screen theme (themes.py) has a layout per orientation; layouts/<family>.yaml holds the screen size, the
+sensors and the "full" theme. The layout editor saves the user's copy of the current theme in the data
+folder (themes.edits_path); that one wins when it exists.
 Moving a block changes its x/y; resizing changes w/h and every item scales with it.
 """
 import copy
@@ -26,13 +27,29 @@ def default_path(fam):
     return config.HERE / "layouts" / f"{fam}.yaml"
 
 
-def user_path(fam):
-    return config.DATA / f"layout_{fam}.yaml"
+def user_path(fam, theme=None):
+    import themes
+    return themes.edits_path(theme or themes.LEGACY, fam)
+
+
+def theme_of(cfg):
+    import themes
+    return themes.current(cfg)
 
 
 # default items that changed in a version: a user's copy that still has the old item untouched gets the new one
 UPGRADES = {
-    "portrait": [  # 1.4.5: frame time under the media, bigger FPS (the FPS was squeezed)
+    "landscape": [  # 1.4.6: weather next to the date
+        ("top", {"type": "clock", "format": "{weekday} %d/%m", "x": 468, "y": 19, "align": "right", "size": 14,
+                 "color": "secondary", "when": "no_media_in_game", "fade": True},
+         {"type": "clock", "format": "{weekday} %d/%m{weather}", "x": 468, "y": 19, "align": "right", "size": 11,
+          "color": "secondary", "when": "no_media_in_game", "fade": True}),
+    ],
+    "portrait": [
+        ("top", {"type": "clock", "format": "{weekday} %d/%m", "x": 310, "y": 16, "align": "right", "size": 13,
+                 "color": "secondary", "when": "no_media_in_game", "fade": True},
+         {"type": "clock", "format": "{weekday} %d/%m{weather}", "x": 310, "y": 16, "align": "right", "size": 13,
+          "color": "secondary", "when": "no_media_in_game", "fade": True}),  # 1.4.5: frame time under the media, bigger FPS (the FPS was squeezed)
         ("top", {"type": "value", "sensor": "fps", "x": 10, "y": 39, "size": 18, "bold": True, "unit": " FPS",
                  "unit_size": 9, "empty": ""},
          {"type": "value", "sensor": "fps", "x": 10, "y": 43, "size": 24, "bold": True, "unit": " FPS",
@@ -59,21 +76,31 @@ def upgrade(fam, groups):
     return changed
 
 
-def load(fam, user=True):
-    """{"size", "sensors", "groups", "custom"}. The user's copy gets sensors added in newer versions."""
+def load(fam, user=True, theme=None):
+    """{"size", "sensors", "groups", "custom", "theme"} of a theme (default: "full", the program's own layout).
+    The user's copy gets sensors added in newer versions."""
+    import themes
+    theme = theme or themes.LEGACY
     base = yaml.safe_load(default_path(fam).read_text(encoding="utf-8")) or {}
-    base["custom"] = False
-    if user and user_path(fam).exists():
+    sensors = dict(base.get("sensors") or {})
+    sensors.update(themes.sensors(theme))
+    try:
+        groups = copy.deepcopy(themes.groups(theme, fam))
+    except (KeyError, ValueError, OSError, yaml.YAMLError):   # a theme that is gone or damaged: the program's layout
+        theme, groups = themes.LEGACY, base.get("groups") or []
+    out = {"size": base.get("size"), "sensors": sensors, "groups": groups, "custom": False, "theme": theme}
+    path = user_path(fam, theme)
+    if user and path.exists():
         try:
-            mine = yaml.safe_load(user_path(fam).read_text(encoding="utf-8")) or {}
+            mine = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
             if mine.get("groups"):
-                sensors = dict(base.get("sensors") or {})
                 sensors.update(mine.get("sensors") or {})
-                upgrade(fam, mine["groups"])
-                return {"size": base.get("size"), "sensors": sensors, "groups": mine["groups"], "custom": True}
-        except Exception:  # noqa: BLE001 — a damaged copy falls back to the default
+                if theme == themes.LEGACY:
+                    upgrade(fam, mine["groups"])
+                return dict(out, groups=mine["groups"], custom=True)
+        except Exception:  # noqa: BLE001 — a damaged copy falls back to the theme
             pass
-    return base
+    return out
 
 
 def _flow(v):
@@ -100,13 +127,13 @@ def dump(data):
     return "\n".join(out) + "\n"
 
 
-def save(fam, data):
+def save(fam, data, theme=None):
     data = {k: v for k, v in data.items() if k in ("size", "sensors", "groups")}
-    user_path(fam).write_text(dump(data), encoding="utf-8")
+    user_path(fam, theme).write_text(dump(data), encoding="utf-8")
 
 
-def reset(fam):
-    user_path(fam).unlink(missing_ok=True)
+def reset(fam, theme=None):
+    user_path(fam, theme).unlink(missing_ok=True)
 
 
 def base_size(g):
@@ -155,11 +182,11 @@ def flatten(groups):
 def apply(cfg):
     """Puts the layout for the configured orientation into cfg ('sensors', 'widgets', 'layout')."""
     fam = family((cfg.get("display") or {}).get("orientation"))
-    lay = load(fam)
+    lay = load(fam, theme=theme_of(cfg))
     cfg["sensors"] = lay.get("sensors") or {}
     cfg["widgets"] = flatten(lay.get("groups"))
     cfg["layout"] = {"family": fam, "size": lay.get("size"), "custom": lay.get("custom", False),
-                     "overlap": overlapping(lay.get("groups"))}
+                     "overlap": overlapping(lay.get("groups")), "theme": lay.get("theme")}
     return cfg
 
 

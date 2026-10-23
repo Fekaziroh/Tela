@@ -1,0 +1,174 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Cockpit, en: Cockpit, es: Cockpit, zh: 仪表}
+order: 3
+tela: 1
+
+colors:
+  background: '#05070A'
+  panel: '#0B1016'
+  text: '#EAF2FA'
+  secondary: '#6F7D8C'
+  track: '#1B2430'
+  accent: '#FF7A1A'
+  warn: '#FFB020'
+  crit: '#FF3B30'
+
+landscape:
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 34
+      items:
+        - {type: value, sensor: fps, x: 12, y: 18, size: 22, unit: ' FPS', unit_size: 10, bold: true, empty: ''}
+        - {type: image, files: logos, when: logos, x: 12, y: 9, w: 90, h: 16}
+        - {type: clock, format: '%H:%M', x: 240.0, y: 18, align: center, size: 24, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 18, align: right, size: 11, color: secondary, when: no_media_in_game, fade: true}
+        - {type: media, x: 298, y: 3, w: 172, h: 28, when: media_in_game, fade: true}
+        - {type: media, x: 298, y: 3, w: 172, h: 28, when: [no_game, media], fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 38
+      w: 234
+      h: 182
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 182, title: CPU, subtitle: '{cpu_name}'}
+        - {type: gauge, sensor: cpu_temp, cx: 117.0, cy: 109.2, radius: 74.61999999999999, thickness: 10, min: 20, max: 95, unit: °C, size: 34, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], start_angle: 150, end_angle: 390}
+        - {type: gauge, sensor: cpu_load, cx: 117.0, cy: 109.2, radius: 60.61999999999999, thickness: 3, min: 0, max: 100, unit: '', size: 0, start_angle: 150, end_angle: 390, color: secondary}
+        - {type: text, text: '#load', x: 83.421, y: 168, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: cpu_load, x: 83.421, y: 154, size: 15, unit: '%', align: center, unit_size: 9}
+        - {type: text, text: '#power', x: 150.579, y: 168, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: cpu_power, x: 150.579, y: 154, size: 15, unit: W, align: center, unit_size: 9}
+    - id: gpu
+      name: GPU
+      x: 242
+      y: 38
+      w: 234
+      h: 182
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 182, title: GPU, subtitle: '{gpu_name}'}
+        - {type: gauge, sensor: gpu_temp, cx: 117.0, cy: 109.2, radius: 74.61999999999999, thickness: 10, min: 20, max: 95, unit: °C, size: 34, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], start_angle: 150, end_angle: 390}
+        - {type: gauge, sensor: gpu_load, cx: 117.0, cy: 109.2, radius: 60.61999999999999, thickness: 3, min: 0, max: 100, unit: '', size: 0, start_angle: 150, end_angle: 390, color: secondary}
+        - {type: text, text: '#load', x: 83.421, y: 168, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: gpu_load, x: 83.421, y: 154, size: 15, unit: '%', align: center, unit_size: 9}
+        - {type: text, text: '#power', x: 150.579, y: 168, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: gpu_power, x: 150.579, y: 154, size: 15, unit: W, align: center, unit_size: 9}
+    - id: ram
+      name: RAM
+      x: 4
+      y: 224
+      w: 115
+      h: 92
+      items:
+        - {type: panel, x: 0, y: 0, w: 115, h: 92, title: RAM}
+        - {type: gauge, sensor: ram_pct, cx: 57.5, cy: 70, radius: 34.96, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360}
+    - id: vram
+      name: VRAM
+      x: 123
+      y: 224
+      w: 115
+      h: 92
+      items:
+        - {type: panel, x: 0, y: 0, w: 115, h: 92, title: VRAM}
+        - {type: gauge, sensor: vram_mb, cx: 57.5, cy: 70, radius: 34.96, thickness: 5, min: 0, max: 12288, unit: GB, size: 14, start_angle: 180, end_angle: 360, scale: 0.001, format: '{:.1f}'}
+    - id: disks
+      name: '{disks_title}'
+      x: 242
+      y: 224
+      w: 115
+      h: 92
+      items:
+        - {type: panel, x: 0, y: 0, w: 115, h: 92, title: '{disks_title}'}
+        - {type: gauge, sensor: disk1_act, cx: 57.5, cy: 70, radius: 34.96, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360, ssd: true}
+    - id: volume
+      name: '#volume'
+      x: 361
+      y: 224
+      w: 115
+      h: 92
+      items:
+        - {type: panel, x: 0, y: 0, w: 115, h: 92, title: '#volume'}
+        - {type: gauge, sensor: volume, cx: 57.5, cy: 70, radius: 34.96, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360}
+
+portrait:
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 56
+      items:
+        - {type: value, sensor: fps, x: 10, y: 16, size: 20, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
+        - {type: image, files: logos, when: logos, x: 10, y: 9, w: 80, h: 15}
+        - {type: clock, format: '%H:%M', x: 310, y: 16, align: right, size: 22, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media, fade: true}
+        - {type: media, x: 10, y: 30, w: 300, h: 24, when: media, fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 60
+      w: 312
+      h: 150
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 150, title: CPU, subtitle: '{cpu_name}'}
+        - {type: gauge, sensor: cpu_temp, cx: 156.0, cy: 90.0, radius: 61.49999999999999, thickness: 10, min: 20, max: 95, unit: °C, size: 34, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], start_angle: 150, end_angle: 390}
+        - {type: gauge, sensor: cpu_load, cx: 156.0, cy: 90.0, radius: 47.49999999999999, thickness: 3, min: 0, max: 100, unit: '', size: 0, start_angle: 150, end_angle: 390, color: secondary}
+        - {type: text, text: '#load', x: 128.325, y: 136, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: cpu_load, x: 128.325, y: 122, size: 15, unit: '%', align: center, unit_size: 9}
+        - {type: text, text: '#power', x: 183.675, y: 136, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: cpu_power, x: 183.675, y: 122, size: 15, unit: W, align: center, unit_size: 9}
+    - id: gpu
+      name: GPU
+      x: 4
+      y: 214
+      w: 312
+      h: 150
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 150, title: GPU, subtitle: '{gpu_name}'}
+        - {type: gauge, sensor: gpu_temp, cx: 156.0, cy: 90.0, radius: 61.49999999999999, thickness: 10, min: 20, max: 95, unit: °C, size: 34, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], start_angle: 150, end_angle: 390}
+        - {type: gauge, sensor: gpu_load, cx: 156.0, cy: 90.0, radius: 47.49999999999999, thickness: 3, min: 0, max: 100, unit: '', size: 0, start_angle: 150, end_angle: 390, color: secondary}
+        - {type: text, text: '#load', x: 128.325, y: 136, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: gpu_load, x: 128.325, y: 122, size: 15, unit: '%', align: center, unit_size: 9}
+        - {type: text, text: '#power', x: 183.675, y: 136, size: 9, color: secondary, align: center, bold: true}
+        - {type: value, sensor: gpu_power, x: 183.675, y: 122, size: 15, unit: W, align: center, unit_size: 9}
+    - id: ram
+      name: RAM
+      x: 4
+      y: 368
+      w: 75
+      h: 108
+      items:
+        - {type: panel, x: 0, y: 0, w: 75, h: 108, title: RAM}
+        - {type: gauge, sensor: ram_pct, cx: 37.5, cy: 86, radius: 27.0, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360}
+    - id: vram
+      name: VRAM
+      x: 83
+      y: 368
+      w: 75
+      h: 108
+      items:
+        - {type: panel, x: 0, y: 0, w: 75, h: 108, title: VRAM}
+        - {type: gauge, sensor: vram_mb, cx: 37.5, cy: 86, radius: 27.0, thickness: 5, min: 0, max: 12288, unit: GB, size: 14, start_angle: 180, end_angle: 360, scale: 0.001, format: '{:.1f}'}
+    - id: disks
+      name: '{disks_title}'
+      x: 162
+      y: 368
+      w: 75
+      h: 108
+      items:
+        - {type: panel, x: 0, y: 0, w: 75, h: 108, title: '{disks_title}'}
+        - {type: gauge, sensor: disk1_act, cx: 37.5, cy: 86, radius: 27.0, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360, ssd: true}
+    - id: volume
+      name: '#volume'
+      x: 241
+      y: 368
+      w: 75
+      h: 108
+      items:
+        - {type: panel, x: 0, y: 0, w: 75, h: 108, title: '#volume'}
+        - {type: gauge, sensor: volume, cx: 37.5, cy: 86, radius: 27.0, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360}

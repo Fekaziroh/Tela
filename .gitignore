@@ -21,3 +21,6 @@ games/
 version.txt
 updated_from.txt
 themes.json
+user_themes/
+theme_colors.json
+profiles/

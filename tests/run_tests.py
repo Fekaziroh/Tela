@@ -391,10 +391,14 @@ def engine_runs_and_handles_commands():
         e.command("summary_example")
         time.sleep(1.2)
         assert e.collector.summary and e.renderer.layout == "summary"
-        e.command("pause", True)
+        e.command("pause", True)                   # pause = freeze: the port stays open
         time.sleep(0.8)
-        assert e.paused and not e.connected
+        assert e.paused and e.connected
         e.command("pause", False)
+        e.command("release", True)                 # release: the port is free for another program
+        time.sleep(0.8)
+        assert e.released and not e.connected
+        e.command("release", False)
         e.command("sleep", "lock")
         time.sleep(0.6)
         assert e.sleeping
@@ -727,7 +731,21 @@ def media_stays_right_while_the_game_is_open():
     s = sensors.Session(42, "Game")
     s.fps_samples = [100.0] * 40
     c.sessions[42] = s
-    assert c.game_open()                                       # the game process is still open
+    c._front_pid = None
+    real = sensors.pids_with_windows
+    try:
+        sensors.pids_with_windows = lambda: {42}
+        c._game_in_background = bool(c._background_games(time.monotonic()))
+        assert c.game_open()                                   # the game is minimized: still a game
+        sensors.pids_with_windows = lambda: {7}
+        c._game_in_background = bool(c._background_games(time.monotonic()))
+        assert not c.game_open()                               # its window is gone (process left behind)
+        sensors.pids_with_windows = lambda: {42}
+        s.last_fps -= 31 * 60
+        c._game_in_background = bool(c._background_games(time.monotonic()))
+        assert not c.game_open()                               # no FPS for half an hour: not a game anymore
+    finally:
+        sensors.pids_with_windows = real
 
 
 @test
@@ -855,7 +873,7 @@ def profiles_save_apply_import():
             cfg_path = Path(d) / "config.yaml"
             cfg_path.write_text((ROOT / config.DEFAULT).read_text(encoding="utf-8"), encoding="utf-8")
             config.Settings(cfg_path).set_many([("display", "brightness", 70), ("ui", "theme", "preset:red"),
-                                                ("display", "port", "COM9")])
+                                                ("display", "port", "COM9"), ("theme", "name", "full")])
             layout.user_path("landscape").write_text("groups: []\n", encoding="utf-8")
             name = profiles.save(config.load(cfg_path), "Noite/Jogo", "1.4.2")
             assert name == "Noite Jogo" and profiles.entries()[0]["layouts"] == ["landscape"]
@@ -993,11 +1011,142 @@ def cjk_titles_and_old_portrait_layouts():
     assert r._script_font("Hello", ft) is ft and r._script_font("さくら", ft) is not None
     r._line(__import__("PIL.ImageDraw", fromlist=["x"]).Draw(__import__("PIL.Image", fromlist=["x"]).new("RGB", (100, 40))),
             0, 20, [("さくら 東京", ft, (255, 255, 255))])
-    groups = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][1][1], enabled=False)]}]
+    groups = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][2][1], enabled=False)]}]
     assert layout.upgrade("portrait", groups) and groups[0]["items"][0]["x"] == 128
     assert groups[0]["items"][0]["enabled"] is False
-    moved = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][1][1], x=20)]}]
+    moved = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][2][1], x=20)]}]
     assert not layout.upgrade("portrait", moved)                         # the user moved it: kept as is
+
+
+# ---------------------------------------------------------------- 1.4.6: screen themes, weather, texts, summary
+@test
+def themes_fit_and_draw_in_both_orientations():
+    import themes
+    ids = [t["id"] for t in themes.entries()]
+    assert ids[:5] == ["clean", "full", "cockpit", "lines", "retro"], ids
+    fields = hardware.fields(hardware.build(hardware.DEMO_RAW))
+    for tid in ids:
+        for fam in layout.FAMILIES:
+            lay = layout.load(fam, user=False, theme=tid)
+            W, H = lay["size"]
+            for g in lay["groups"]:
+                assert 0 <= g["x"] and 0 <= g["y"] and g["x"] + g["w"] <= W and g["y"] + g["h"] <= H, (tid, fam, g["id"])
+            assert not layout.overlapping(lay["groups"]), (tid, fam)
+            cfg = default_cfg(fam)
+            cfg["widgets"] = layout.flatten(lay["groups"])
+            cfg["colors"] = themes.colors(tid)
+            r = render.Renderer(cfg, W, H, base=ROOT, fields=fields)
+            for game in (True, False):
+                for media in (True, False):
+                    assert r.draw(FakeCollector(game, media)).size == (W, H), (tid, fam)
+
+
+@test
+def themes_keep_edits_save_export_and_import():
+    import themes
+    old = config.DATA
+    with tempfile.TemporaryDirectory() as d:
+        try:
+            config.DATA = Path(d)
+            assert themes.current({}) == "clean" and themes.current({"theme": {"name": "gone"}}) == "clean"
+            lay = layout.load("landscape", theme="cockpit")
+            lay["groups"][0]["x"] = 2
+            layout.save("landscape", lay, "cockpit")
+            assert (Path(d) / "layout_landscape_cockpit.yaml").exists() and themes.edited("cockpit")
+            assert layout.load("landscape", theme="cockpit")["custom"] and not layout.load("landscape", theme="clean")["custom"]
+            themes.keep_colors("cockpit", dict(themes.colors("cockpit"), accent="#123456"))
+            assert themes.colors_for("cockpit")["accent"] == "#123456"
+            themes.keep_colors("cockpit", themes.colors("cockpit"))      # back to its own: nothing kept
+            assert themes.saved_colors("cockpit") is None
+            new = themes.save_as("cockpit", "Meu Cockpit", dict(themes.colors("cockpit"), accent="#00FF00"))
+            assert new == "meu-cockpit" and not themes.load(new)["builtin"]
+            assert layout.load("landscape", theme=new)["groups"][0]["x"] == 2          # the edits went into it
+            assert themes.colors(new)["accent"] == "#00FF00"
+            out = Path(d) / "x.tela-theme"
+            themes.export(new, out)
+            again = themes.import_file(out)
+            assert again == "meu-cockpit-2" and themes.name(themes.load(again)) == "Meu Cockpit"
+            assert themes.delete(again) and not themes.exists(again)
+            assert not themes.delete("clean") and themes.exists("clean")               # built-in themes stay
+            bad = Path(d) / "bad.tela-theme"
+            bad.write_text("name: X\nlandscape: {groups: [{x: 1}]}\n", encoding="utf-8")
+            try:
+                themes.import_file(bad)
+                raise AssertionError("a broken theme must be refused")
+            except ValueError:
+                pass
+            themes.reset("cockpit")
+            assert not themes.edited("cockpit")
+        finally:
+            config.DATA = old
+
+
+@test
+def updating_keeps_the_old_layout_as_the_full_theme():
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        shutil.copy(ROOT / config.DEFAULT, d / config.DEFAULT)
+        old = (ROOT / config.DEFAULT).read_text(encoding="utf-8")
+        old = old[:old.index("theme:\n  name:")] + old[old.index("weather:"):]    # a 1.4.5 settings file
+        (d / config.CONFIG).write_text(old, encoding="utf-8")
+        config.prepare(d, search_old=False)
+        cfg = config.load(d / config.CONFIG)
+        assert cfg["theme"]["name"] == "full" and cfg["theme"]["notice"] is True
+        (d / config.CONFIG).unlink()
+        config.prepare(d, search_old=False)                 # a new install gets the new default
+        cfg = config.load(d / config.CONFIG)
+        assert cfg["theme"]["name"] == "clean" and cfg["theme"]["notice"] is False
+
+
+@test
+def weather_next_to_the_date_and_own_screen_words():
+    import weather
+    answers = {"geocoding": {"results": [{"name": "Sao Paulo", "country": "Brasil", "latitude": -23.5, "longitude": -46.6}]},
+               "forecast": {"current": {"temperature_2m": 24.4, "weather_code": 61, "is_day": 1}}}
+    calls = []
+
+    def fetch(url):
+        calls.append(url)
+        return answers["geocoding" if "geocoding" in url else "forecast"]
+    w = weather.Weather("São Paulo", "celsius", "pt", fetch=fetch)
+    assert w.refresh() and w.current()["condition"] == "rain" and "S%C3%A3o%20Paulo" in calls[0]
+    assert w.refresh() and len(calls) == 3                  # the city is looked up once
+    cfg = dict(default_cfg(), weather={"temperature": True, "condition": True}, texts={"load": "UTIL", "x": "no"})
+    r = render.Renderer(cfg, 480, 320, base=ROOT, lang="pt")
+    col = FakeCollector()
+    col.weather_info = w.current
+    assert r.weather_text(col) == " · 24° chuva"
+    assert r.words["load"] == "UTIL" and "x" not in r.words and render.SCREEN_TEXT["pt"]["load"] == "USO"
+    r.weather_cfg = {"condition": False}
+    assert r.weather_text(col) == " · 24°"
+    nf = weather.Weather("Nowhere", fetch=lambda url: {"results": []})
+    assert nf.refresh() is None and nf.current() is None and nf.error == "city not found"
+    off = weather.Weather("X", fetch=lambda url: (_ for _ in ()).throw(OSError("offline")))
+    assert off.refresh() is False and off.current() is None
+
+
+@test
+def summary_shows_what_the_user_chose():
+    fake = {"name": "Jogo", "duration": "1h", "fps_avg": 100.0, "fps_1low": 70.0, "fps_max": 140.0,
+            "max": {"cpu": 70.0, "gpu": 60.0, "hotspot": 75.0}, "fps_series": [100] * 50,
+            "expires": time.monotonic() + 10, "total": 10}
+    for fam, (W, H) in (("landscape", (480, 320)), ("portrait", (320, 480))):
+        for opts in ({}, {"show_graph": False}, {"show_temps": False, "graph": "top"},
+                     {"show_fps": False, "show_temps": False, "show_duration": False}):
+            cfg = default_cfg(fam)
+            cfg["session"] = dict(cfg["session"], **opts)
+            r = render.Renderer(cfg, W, H, base=ROOT)
+            lay = r._summary_layout(fake)
+            panels = [w for w in lay if w["type"] == "panel"]
+            assert all(p["y"] + p["h"] <= H - 4 for p in panels), (fam, opts)
+            graph = [w for w in lay if w["type"] == "graph"]
+            assert bool(graph) == (opts.get("show_graph", True) is not False)
+            assert any(w.get("text") == "1h" for w in lay) == (opts.get("show_duration", True) is not False)
+            if opts.get("graph") == "top":
+                assert graph[0]["y"] < min(p["y"] for p in panels if p["w"] < W - 8)
+            col = FakeCollector()
+            col.summary = fake
+            assert r.draw(col).size == (W, H)
 
 
 def main():

@@ -6,6 +6,94 @@
 // pre-release, only for "Receive test versions"); removing "beta" later promotes it to the stable release.
 const CHANGELOG = [
 {
+ "v": "1.4.6",
+ "beta": true,
+ "pt": {
+  "new": [
+   "Temas da tela (Aparência): Clean, Completo, Cockpit, Linhas e Retrô, com formatos diferentes e não só cores, cada um na horizontal e na vertical. Passe o mouse num tema para ver a prévia e clique para usar.",
+   "Salve a tela do seu jeito como um tema novo, exporte e importe arquivos .tela-theme para compartilhar. As mudanças do Layout e as cores ficam guardadas em cada tema, e “Restaurar original” desfaz.",
+   "Clima ao lado da data: temperatura e céu da sua cidade (Configurações › Clima, pelo Open-Meteo; só o nome da cidade sai do PC).",
+   "Textos da tela editáveis (ex.: CONSUMO por POTÊNCIA) e título do bloco dos discos automático (SSD, HD ou Discos) ou do seu jeito.",
+   "Resumo da partida personalizável: escolha FPS, temperaturas, gráfico (em cima ou embaixo) e duração; o que fica aparece maior.",
+   "Editor: copiar, colar e duplicar (Ctrl+C / Ctrl+V / Ctrl+D), guias de alinhamento ao arrastar (com Shift move livre, sem grade), zoom (Ctrl+roda do mouse) com grade, e ajuste automático dos elementos dentro do bloco ao apagar ou redimensionar um deles.",
+   "Reconectar a tela e Reiniciar a Tela! no menu da bandeja e em Avançado, para quando algo travar. Liberar a tela para outro programa e Liberar memória da janela também no menu da bandeja.",
+   "Voltar para outra versão mostra o tamanho de cada uma."
+  ],
+  "fix": [
+   "Sem jogo aberto, a música às vezes ia para a direita e o logo ficava no lugar dela: um programa que tinha mostrado FPS continuava contando como jogo. Agora só conta um jogo que ainda tem janela (minimizado também) e teve FPS na última meia hora.",
+   "Pausar agora só congela a tela; ao continuar, ela segue de onde parou sem redesenhar tudo. Liberar a tela para outro programa virou uma opção separada.",
+   "As notificações do Windows mostram só “Tela!” como nome do app."
+  ],
+  "look": [
+   "Novo tema padrão, Clean, inspirado na primeira versão: logos nas pontas, relógio grande no meio, painéis de CPU e GPU mais limpos e um bloco só para rede e volume. Quem já usava continua com o layout de antes (agora o tema Completo) e recebe um aviso.",
+   "Aparência reorganizada: Temas da tela, Cores e fundo juntos, Logos e Tema da janela. Textos da janela mais diretos (ex.: “Fundo”)."
+  ]
+ },
+ "en": {
+  "new": [
+   "Screen themes (Appearance): Clean, Full, Cockpit, Lines and Retro, with different shapes and not just colors, each in landscape and portrait. Hover a theme to preview it and click to use it.",
+   "Save the screen your way as a new theme, export and import .tela-theme files to share. Layout changes and colors are kept per theme, and “Restore original” undoes them.",
+   "Weather next to the date: temperature and sky for your city (Settings › Weather, from Open-Meteo; only the city name leaves the PC).",
+   "Editable screen texts (e.g. POWER to WATTS) and a disks block title that is automatic (SSD, HD or Disks) or your own.",
+   "Customizable game summary: choose FPS, temperatures, graph (top or bottom) and duration; what stays shows bigger.",
+   "Editor: copy, paste and duplicate (Ctrl+C / Ctrl+V / Ctrl+D), alignment guides while dragging (Shift moves freely, without the grid), zoom (Ctrl+mouse wheel) with a grid, and automatic adjustment of the elements inside a block when one is deleted or resized.",
+   "Reconnect the screen and Restart Tela! in the tray menu and in Advanced, for when something gets stuck. Release the screen for another program and Free the window's memory also in the tray menu.",
+   "Going back to another version shows the size of each one."
+  ],
+  "fix": [
+   "With no game open, the music sometimes moved to the right and the logo took its place: a program that had shown FPS kept counting as a game. Now only a game that still has a window (minimized too) and had FPS in the last half hour counts.",
+   "Pause now only freezes the screen; when resumed it carries on without redrawing everything. Releasing the screen for another program is a separate option.",
+   "Windows notifications show just “Tela!” as the app name."
+  ],
+  "look": [
+   "New default theme, Clean, inspired by the first version: logos at the ends, a big clock in the middle, cleaner CPU and GPU panels and one block for network and volume. If you already used Tela!, you keep your layout (now the Full theme) and get a notice.",
+   "Appearance reorganized: Screen themes, Colors and background together, Logos and Window theme."
+  ]
+ },
+ "es": {
+  "new": [
+   "Temas de la pantalla (Apariencia): Clean, Completo, Cockpit, Líneas y Retro, con formas diferentes y no solo colores, cada uno en horizontal y vertical. Pasa el ratón sobre un tema para ver la vista previa y haz clic para usarlo.",
+   "Guarda la pantalla a tu manera como un tema nuevo, exporta e importa archivos .tela-theme para compartir. Los cambios del Diseño y los colores se guardan en cada tema, y “Restaurar original” los deshace.",
+   "Clima junto a la fecha: temperatura y cielo de tu ciudad (Ajustes › Clima, de Open-Meteo; solo el nombre de la ciudad sale del PC).",
+   "Textos de la pantalla editables (ej.: CONSUMO por POTENCIA) y título del bloque de discos automático (SSD, HD o Discos) o a tu manera.",
+   "Resumen de la partida personalizable: elige FPS, temperaturas, gráfico (arriba o abajo) y duración; lo que queda se ve más grande.",
+   "Editor: copiar, pegar y duplicar (Ctrl+C / Ctrl+V / Ctrl+D), guías de alineación al arrastrar (con Shift se mueve libre, sin cuadrícula), zoom (Ctrl+rueda) con cuadrícula y ajuste automático de los elementos dentro del bloque al borrar o redimensionar uno.",
+   "Reconectar la pantalla y Reiniciar Tela! en el menú de la bandeja y en Avanzado, para cuando algo se trabe. Liberar la pantalla para otro programa y Liberar la memoria de la ventana también en el menú de la bandeja.",
+   "Volver a otra versión muestra el tamaño de cada una."
+  ],
+  "fix": [
+   "Sin juego abierto, la música a veces iba a la derecha y el logo se quedaba en su lugar: un programa que había mostrado FPS seguía contando como juego. Ahora solo cuenta un juego que aún tiene ventana (minimizado también) y tuvo FPS en la última media hora.",
+   "Pausar ahora solo congela la pantalla; al continuar sigue desde donde estaba sin redibujar todo. Liberar la pantalla para otro programa es una opción aparte.",
+   "Las notificaciones de Windows muestran solo “Tela!” como nombre de la app."
+  ],
+  "look": [
+   "Nuevo tema predeterminado, Clean, inspirado en la primera versión: logos en los extremos, reloj grande en el centro, paneles de CPU y GPU más limpios y un solo bloque para red y volumen. Quien ya lo usaba conserva su diseño (ahora el tema Completo) y recibe un aviso.",
+   "Apariencia reorganizada: Temas de la pantalla, Colores y fondo juntos, Logos y Tema de la ventana."
+  ]
+ },
+ "zh": {
+  "new": [
+   "屏幕主题（外观）：Clean、完整、仪表、曲线和复古，不只是颜色，布局也各不相同，每个都支持横屏和竖屏。鼠标悬停可预览，点击即可使用。",
+   "可将自己调整的屏幕另存为新主题，并导出、导入 .tela-theme 文件进行分享。布局修改和颜色按主题分别保存，“恢复原样”可撤销。",
+   "日期旁显示天气：你所在城市的温度和天气（设置 › 天气，数据来自 Open-Meteo；只有城市名称会发送到网络）。",
+   "屏幕文字可编辑（例如把“功耗”改成“功率”），磁盘区块标题可自动（SSD、HD 或 磁盘）或自定义。",
+   "游戏总结可自定义：选择 FPS、温度、曲线（上方或下方）和时长；保留的内容显示得更大。",
+   "编辑器：复制、粘贴和复制一份（Ctrl+C / Ctrl+V / Ctrl+D），拖动时显示对齐参考线（按住 Shift 自由移动，不受网格限制），缩放（Ctrl+鼠标滚轮）并可显示网格；删除或调整元素大小时，区块内的其他元素自动调整。",
+   "托盘菜单和高级页面新增“重新连接屏幕”和“重启 Tela!”，在卡住时使用。托盘菜单也新增“释放屏幕给其他程序”和“释放窗口内存”。",
+   "回退到其他版本时会显示每个版本的大小。"
+  ],
+  "fix": [
+   "没有打开游戏时，音乐有时会移到右侧，左侧仍显示徽标：曾显示过 FPS 的程序一直被当作游戏。现在只有仍有窗口（包括最小化）且在最近半小时内有 FPS 的游戏才算。",
+   "暂停现在只会冻结屏幕；继续后从原处接着显示，不再全部重绘。“释放屏幕给其他程序”成为单独的选项。",
+   "Windows 通知中的应用名称只显示“Tela!”。"
+  ],
+  "look": [
+   "新的默认主题 Clean，灵感来自第一个版本：两端是徽标，中间是大时钟，CPU 和 GPU 面板更简洁，网络和音量合为一个区块。老用户保留原来的布局（现在是“完整”主题），并会收到提示。",
+   "外观页面重新整理：屏幕主题、颜色与背景、徽标和窗口主题。"
+  ]
+ }
+},
+{
  "v": "1.4.5",
  "beta": true,
  "pt": {

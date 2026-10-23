@@ -159,11 +159,14 @@ def build(raw):
     return info
 
 
-def fields(info):
+def fields(info, cfg=None):
     """Values the layout can use as {name} in texts and sensor selectors."""
     t = {k: v for k, v in info.items() if not isinstance(v, (list, dict))}
     for i, d in enumerate(info.get("disks", [])[:4], start=1):
         t[f"disk{i}_name"], t[f"disk{i}_letter"], t[f"disk{i}_model"] = d["name"], d["letter"], d["model"]
+    title = str(((cfg or {}).get("ssd") or {}).get("title") or "").strip()
+    if title:   # the user's own title for the disks block (Settings); empty = SSD, HD or Disks by the hardware
+        t["disks_title"] = title[:20]
     return t
 
 

@@ -24,9 +24,11 @@ function applyTexts() {
   renderThemes();
   renderColors();
   renderScreenThemes();
+  if (typeof stRender === "function") stRender();
   renderIntervals();
   renderNight();
   renderDisks();
+  if (S.tab === "settings") { renderWords(); pollWeather(); }
   renderPorts();
   if (S.logos) renderLogos();
   if (S.tab === "layout" && E.lay) edRender();
@@ -56,9 +58,12 @@ async function setSetting(path, value, quiet) {
   } catch (e) { toast(String(e)); }
   if (path === "ui.theme") applyTheme();
   if (path === "updates.test" && value) setTimeout(() => checkUpdate(true), 1500);
-  if (path === "display.orientation") { E.lay = null; setTimeout(() => { if (S.tab === "layout") edLoad(); }, 900); }
+  if (path === "display.orientation") { E.lay = null; setTimeout(() => { if (S.tab === "layout") edLoad(); stLoad(); }, 900); }
   if (path === "ui.language") { S.lang = effectiveLang(); applyTexts(); }
-  if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("alerts.") || path.startsWith("history.")) renderNight();
+  if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("alerts.") || path.startsWith("history.")
+      || path.startsWith("weather.") || path.startsWith("session.")) renderNight();
+  if (path.startsWith("weather.")) { setTimeout(pollWeather, 2500); setTimeout(pollWeather, 7000); }
+  if (path === "ui.language") setTimeout(renderWords, 1500);
   syncControls();
   refreshPreset();
 }
@@ -167,18 +172,25 @@ function bindControls() {
     if (S.state) { S.state.status.paused = !S.state.status.paused; renderState(S.state, true); }
   });
   $("#quit").addEventListener("click", () => api.quit());
+  $("#release").addEventListener("click", async () => {
+    await api.command("release");
+    if (S.state) { S.state.status.released = !S.state.status.released; renderState(S.state, true); }
+  });
+  $("#restart-btn").addEventListener("click", () => openModal({ title: t("adv.restart_title"), desc: t("adv.restart_desc"), buttons: [
+    { label: t("modal.cancel") }, { label: t("adv.restart"), primary: true, onClick: () => { api.restart(); } }] }));
   $("#bg-pick").addEventListener("click", async () => {
     const rel = await api.pick_background();
     if (rel) { (S.settings.background = S.settings.background || {}).image = rel; syncControls(); toast(t("toast.saved")); }
   });
   $("#bg-remove").addEventListener("click", () => setSetting("background.image", ""));
   $("#reset-colors").addEventListener("click", async () => {
-    S.settings.colors = await api.reset_colors();
+    S.settings.colors = await api.theme_colors_reset();
     renderColors();
     renderScreenThemes();
     toast(t("toast.saved"));
   });
   $("#rescan").addEventListener("click", async () => { S.init.ports = await api.ports(); renderPorts(); });
+  $("#tx-reset").addEventListener("click", async () => { await api.reset_screen_words(); renderWords(); toast(t("toast.saved")); });
   $("#folder-btn").addEventListener("click", () => api.open_folder());
   $("#edit-btn").addEventListener("click", () => api.edit_config());
   $("#diag-btn").addEventListener("click", showDiagnostics);
@@ -210,8 +222,10 @@ function showTab(name) {
   $("#main").scrollTop = 0;
   try { localStorage.setItem("tela.tab", name); } catch (e) { /* storage may be unavailable */ }
   if (name === "look" && !S.logos) loadLogos();
+  if (name === "look") { stLoad(); stMirror(); }
   if (name === "layout") edLoad();
   if (name === "advanced") { pollUsage(); renderLog(true); }
+  if (name === "settings") { renderWords(); pollWeather(); }
 }
 function flagSvg(l) {
   const b = $(`#lang-menu [data-l="${l}"] svg`);
@@ -231,6 +245,38 @@ function bindLangMenu() {
   $$("#lang-menu [data-l]").forEach(b => b.addEventListener("click", () => { close(); setSetting("ui.language", b.dataset.l); }));
   document.addEventListener("click", e => { if (!menu.contains(e.target)) close(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { close(); closeModal(); } });
+}
+
+// ------------------------------------------------------------------ screen texts and weather
+async function renderWords() {
+  const box = $("#tx-list");
+  if (!box || !api) return;
+  let w;
+  try { w = await api.screen_words(); } catch (e) { return; }
+  S.words = w;
+  box.innerHTML = "";
+  for (const k of w.keys) {
+    const lab = document.createElement("label");
+    lab.innerHTML = `<span>${esc(w.words[k] || k)}</span><input class="txt" maxlength="24">`;
+    const inp = $("input", lab);
+    inp.placeholder = w.words[k] || "";
+    inp.value = w.custom[k] || "";
+    inp.addEventListener("change", async () => {
+      await api.set_screen_word(k, inp.value.trim());
+      w.custom[k] = inp.value.trim();
+      toast(t("toast.saved"));
+    });
+    box.appendChild(lab);
+  }
+}
+async function pollWeather() {
+  const el = $("#wx-status");
+  if (!el || S.tab !== "settings") return;
+  let st;
+  try { st = await api.weather_status(); } catch (e) { return; }
+  const city = ((S.settings.weather || {}).city || "").trim();
+  el.textContent = !city ? t("wx.no_city") : st.state === "ok" ? t("wx.now", { place: [st.place, st.country].filter(Boolean).join(", "), text: st.text || "" })
+    : st.state === "error" ? t(st.error === "city not found" ? "wx.not_found" : "wx.offline") : st.state === "off" ? "" : t("wx.waiting");
 }
 
 // ------------------------------------------------------------------ static sections
@@ -262,13 +308,16 @@ function renderScreenThemes() {
   if (!box || !S.screenThemes) return;
   const cur = S.settings.colors || {};
   const same = c => ["background", "panel", "accent", "text", "secondary", "track"].every(x => String(cur[x] || "").toUpperCase() === String(c[x] || "").toUpperCase());
-  const preset = SCREEN_THEME_KEYS.find(k => same(S.screenThemes[k]));
+  const own = typeof stCur === "function" && stCur() ? stCur().colors : null;   // the screen theme's own colors
+  const palettes = { theme: own, ...S.screenThemes };
+  const keys = [...(own ? ["theme"] : []), ...SCREEN_THEME_KEYS];
+  const preset = keys.find(k => same(palettes[k]));
   const mine = S.settings.custom_colors || {};
   const custom = Object.keys(mine).length ? { ...S.screenThemes.dark, ...mine } : null;
   box.innerHTML = "";
-  for (const k of [...SCREEN_THEME_KEYS, "custom"]) {
+  for (const k of [...keys, "custom"]) {
     if (k === "custom" && !custom && preset) continue;   // shown once the user has own colors
-    const c = k === "custom" ? (custom || cur) : S.screenThemes[k];
+    const c = k === "custom" ? (custom || cur) : palettes[k];
     const on = k === "custom" ? !preset : k === preset;
     const b = document.createElement("button");
     b.className = "theme";
@@ -277,7 +326,7 @@ function renderScreenThemes() {
       <div style="background:${c.panel};border-radius:3px;padding:4px;display:grid;gap:3px;align-content:start"><b style="height:3px;background:${c.secondary};border-radius:2px;width:60%"></b><b style="height:8px;background:${c.text};border-radius:2px;width:45%"></b><b style="height:3px;background:${c.accent};border-radius:2px"></b></div>
       <div style="background:${c.panel};border-radius:3px;display:grid;place-items:center"><i style="width:22px;height:22px;border-radius:50%;border:3px solid ${c.accent};border-bottom-color:${c.track}"></i></div></div><span>${t("stheme." + k)}</span>`;
     b.addEventListener("click", async () => {
-      const colors = await api.screen_theme(k);
+      const colors = k === "theme" ? await api.theme_colors_reset() : await api.screen_theme(k);
       S.settings.colors = { ...(S.settings.colors || {}), ...colors };
       renderColors(); renderScreenThemes(); toast(t("toast.saved"));
     });
@@ -340,6 +389,10 @@ function renderNight() {
   $("#night-sub").classList.toggle("off", !d.night_enabled);
   $("#off-sub").classList.toggle("off", !d.off_enabled);
   $("#al-sub").classList.toggle("off", !(S.settings.alerts || {}).enabled);
+  $("#wx-sub").classList.toggle("off", (S.settings.weather || {}).enabled === false);
+  $("#sum-sub").classList.toggle("off", (S.settings.session || {}).summary === false);
+  const sg = $("[data-set='session.graph']");
+  if (sg) sg.classList.toggle("off", (S.settings.session || {}).show_graph === false);
   $("#night-desc").textContent = t("home.night_desc", { b: d.night_brightness ?? 15, a: d.night_start || "22:00", z: d.night_end || "07:00" });
 }
 function renderDisks() {
@@ -401,6 +454,7 @@ function mmss(sec) {
   return (h ? h + ":" + String(m).padStart(2, "0") : String(m).padStart(2, "0")) + ":" + String(s).padStart(2, "0");
 }
 function screenState(st) {
+  if (st.released) return ["warn", t("st.released")];
   if (st.paused) return ["warn", t("st.paused")];
   if (st.sleeping && st.sleeping.length) {
     const r = st.sleeping[0];
@@ -452,8 +506,11 @@ function renderState(s, quick) {
   dev.className = "device " + sk;
   $("#device-port").textContent = st.port || "—";
   $("#preview-size").textContent = S.frameSize ? `· ${S.frameSize}` : "";
-  $("#preview-note").textContent = st.paused ? t("home.paused") : (st.sleeping && st.sleeping.length) ? t("home.off") : st.eco ? t("home.eco") : "";
+  $("#preview-note").textContent = st.released ? t("home.released") : st.paused ? t("home.paused") : (st.sleeping && st.sleeping.length) ? t("home.off") : st.eco ? t("home.eco") : "";
   $("#pause").textContent = st.paused ? t("home.resume") : t("home.pause");
+  $("#pause").disabled = !!st.released;
+  $("#release").textContent = st.released ? t("home.retake") : t("home.release");
+  $("#release").title = t("home.release_hint");
   $("#port-now").textContent = t("set.port_now", { port: st.connected ? st.port : t("set.port_none") });
   if (s.frame) showFrame(s.frame);
   $("#preview-paused").hidden = s.preview !== false;
@@ -638,6 +695,7 @@ async function start() {
   bindControls();
   bindLangMenu();
   bindThemes();
+  bindScreenThemes();
   bindEditor();
   $$("nav [role=tab]").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
   $("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
@@ -646,6 +704,7 @@ async function start() {
   syncControls();
   showTab(["home", "layout", "look", "settings", "advanced"].includes(tab) ? tab : "home");
   applyTexts();
+  stLoad(false);
   poll();
   $("#wizard-btn").addEventListener("click", wizStart);
   bindHistory();

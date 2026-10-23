@@ -2,6 +2,30 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.6
+
+### New
+
+- Screen themes (Appearance): Clean, Full, Cockpit, Lines and Retro, with different shapes and not just colors, each in landscape and portrait. Hover a theme to preview it and click to use it.
+- Save the screen your way as a new theme, export and import .tela-theme files to share. Layout changes and colors are kept per theme, and “Restore original” undoes them.
+- Weather next to the date: temperature and sky for your city (Settings › Weather, from Open-Meteo; only the city name leaves the PC).
+- Editable screen texts (e.g. POWER to WATTS) and a disks block title that is automatic (SSD, HD or Disks) or your own.
+- Customizable game summary: choose FPS, temperatures, graph (top or bottom) and duration; what stays shows bigger.
+- Editor: copy, paste and duplicate (Ctrl+C / Ctrl+V / Ctrl+D), alignment guides while dragging (Shift moves freely, without the grid), zoom (Ctrl+mouse wheel) with a grid, and automatic adjustment of the elements inside a block when one is deleted or resized.
+- Reconnect the screen and Restart Tela! in the tray menu and in Advanced, for when something gets stuck. Release the screen for another program and Free the window's memory also in the tray menu.
+- Going back to another version shows the size of each one.
+
+### Fixes
+
+- With no game open, the music sometimes moved to the right and the logo took its place: a program that had shown FPS kept counting as a game. Now only a game that still has a window (minimized too) and had FPS in the last half hour counts.
+- Pause now only freezes the screen; when resumed it carries on without redrawing everything. Releasing the screen for another program is a separate option.
+- Windows notifications show just “Tela!” as the app name.
+
+### Appearance and personalization
+
+- New default theme, Clean, inspired by the first version: logos at the ends, a big clock in the middle, cleaner CPU and GPU panels and one block for network and volume. If you already used Tela!, you keep your layout (now the Full theme) and get a notice.
+- Appearance reorganized: Screen themes, Colors and background together, Logos and Window theme.
+
 ## Tela! 1.4.5
 
 ### New

@@ -8,13 +8,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from engine import VERSION  # noqa: E402
 
+# FileDescription is the name Windows shows on notifications, so it is just "Tela!"
 TEMPLATE = """VSVersionInfo(
   ffi=FixedFileInfo(filevers=({v}, 0), prodvers=({v}, 0), mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1,
                     subtype=0x0, date=(0, 0)),
   kids=[
     StringFileInfo([StringTable('040904B0', [
       StringStruct('CompanyName', 'Tela!'),
-      StringStruct('FileDescription', 'Tela! - sensor panel for the Turing Smart Screen'),
+      StringStruct('FileDescription', 'Tela!'),
       StringStruct('FileVersion', '{s}'),
       StringStruct('InternalName', 'Tela'),
       StringStruct('LegalCopyright', 'MIT License - Tela! contributors'),

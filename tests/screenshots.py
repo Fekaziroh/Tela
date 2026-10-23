@@ -3,7 +3,8 @@
     python tests/screenshots.py [out folder]        (needs: pip install playwright; playwright install chromium)
 
 Starts tests/ui_server.py, seeds a few example games and profiles, and saves window.png, editor.png,
-history.png, settings.png, screen-landscape.png and screen-portrait.png. Leaves no data behind.
+history.png, settings.png, appearance.png, screen-landscape.png, screen-portrait.png and one picture per screen
+theme (theme-<id>.png, both orientations side by side). Leaves no data behind.
 """
 import asyncio
 import base64
@@ -23,7 +24,8 @@ import history  # noqa: E402
 
 GAMES = [("Cyberpunk 2077", 72), ("Counter-Strike 2", 288), ("Forza Horizon 5", 118), ("Elden Ring", 59),
          ("Baldur's Gate 3", 94)]
-CREATED = ["games", "profiles", "config.yaml", "layout_landscape.yaml", "layout_portrait.yaml", "version.txt"]
+CREATED = ["games", "profiles", "config.yaml", "layout_landscape.yaml", "layout_portrait.yaml", "version.txt",
+           "theme_colors.json", "user_themes"]
 
 
 def seed():
@@ -81,6 +83,11 @@ async def shoot(url, out):
         await pg.screenshot(path=out / "editor.png")
         await pg.keyboard.press("Escape")
         await pg.keyboard.press("Escape")
+        # screen themes (Appearance)
+        await pg.click("nav [data-tab=look]")
+        await pg.wait_for_timeout(3500)
+        await pg.evaluate("document.querySelector('#main').scrollTop = 0")
+        await pg.screenshot(path=out / "appearance.png")
         # history
         await pg.click("nav [data-tab=settings]")
         await pg.click("#hist-open")
@@ -109,6 +116,52 @@ async def shoot(url, out):
         await b.close()
 
 
+def theme_pictures(out):
+    """Every built-in screen theme drawn with the demo values: landscape and portrait side by side."""
+    import math
+    import random
+
+    import hardware
+    import layout
+    import render
+    import sensors
+    import themes
+    from PIL import Image
+    fields = hardware.fields(hardware.build(hardware.DEMO_RAW))
+    random.seed(7)
+    for t in themes.entries("en"):
+        if not t["builtin"]:
+            continue
+        tiles = []
+        for fam, size in (("landscape", (480, 320)), ("portrait", (320, 480))):
+            cfg = config.load(ROOT / config.DEFAULT)
+            cfg["theme"] = {"name": t["id"]}
+            cfg["display"]["orientation"] = fam
+            cfg["ui"]["language"] = "en"
+            layout.apply(cfg)
+            cfg["colors"] = themes.colors(t["id"])
+            col = sensors.Collector(cfg, demo=True, base=ROOT, fields=fields, demo_game=False, demo_media=True)
+            col.update()
+            r = render.Renderer(cfg, *size, base=ROOT, fields=fields, lang="en")
+            r.draw(col)
+            for _ in range(120):
+                col.update()
+            if "net_down" in col._hist:
+                col._hist["net_down"].extend(220 + 120 * math.sin(i / 9) + random.uniform(-40, 40) for i in range(120))
+            img = None
+            for _ in range(3):
+                img = r.draw(col)
+            tiles.append(img.convert("RGB"))
+            col.close()
+        pad = 16
+        sheet = Image.new("RGB", (sum(x.width for x in tiles) + pad * 3, 480 + pad * 2), "#16161a")
+        x = pad
+        for tile in tiles:
+            sheet.paste(tile, (x, pad + (480 - tile.height) // 2))
+            x += tile.width + pad
+        sheet.save(out / f"theme-{t['id']}.png")
+
+
 def main():
     out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / "docs")
     out.mkdir(parents=True, exist_ok=True)
@@ -120,6 +173,7 @@ def main():
         url = srv.stdout.readline().strip()
         time.sleep(4)
         asyncio.run(shoot(url, out))
+        theme_pictures(out)
     finally:
         srv.terminate()
         srv.wait(10)

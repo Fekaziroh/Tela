@@ -41,7 +41,7 @@ groups:
     h: 60
     items:
       - {type: clock, format: '%H:%M', x: 10, y: 16, size: 26, bold: true}
-      - {type: clock, format: '{weekday} %d/%m', x: 310, y: 16, align: right, size: 13, color: secondary, when: no_media_in_game, fade: true}
+      - {type: clock, format: '{weekday} %d/%m{weather}', x: 310, y: 16, align: right, size: 13, color: secondary, when: no_media_in_game, fade: true}
       - {type: media, x: 128, y: 3, w: 184, h: 27, when: media_in_game, fade: true}
       - {type: value, sensor: fps, x: 10, y: 43, size: 24, bold: true, unit: ' FPS', unit_size: 11, empty: ''}
       - {type: frametime, x: 128, y: 44, w: 184, h: 12, seconds: 2, label_size: 9}

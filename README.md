@@ -35,8 +35,12 @@ yourself, all set up from a clean window instead of config files.
   during a game it moves to the date's place
 - Network panel with ping, packet loss and internet outage warning
 - **Layout editor**: drag, resize, turn blocks on and off, rename, pick sensors from a live list; edit every
-  element (move, resize, rotate, font and size) and drag new ones from a palette
-- Landscape and portrait (and both flipped), screen color themes, background picture
+  element (move, resize, rotate, font and size) and drag new ones from a palette; alignment guides, zoom,
+  copy/paste/duplicate
+- **Screen themes** with different shapes, not just colors (Clean, Full, Cockpit, Lines, Retro), each in
+  landscape and portrait; change any of them in the editor, save your own, export and import them as files
+- **Weather** next to the date (Open-Meteo: only the city name leaves the PC), editable screen texts
+- Landscape and portrait (and both flipped), screen colors, background picture
 - Window themes (automatic, ready-made or your own colors), Portuguese, English, Spanish and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
 - **Presets** (Performance, Default, Custom) and **profiles** you can save, switch, export and import
@@ -51,6 +55,16 @@ yourself, all set up from a clean window instead of config files.
 | ![Layout editor](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/editor.png) | ![Game history](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/history.png) |
 
 ![Presets and profiles](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/settings.png)
+
+### Screen themes
+
+| Clean (default) | Full |
+|---|---|
+| ![Clean](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-clean.png) | ![Full](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-full.png) |
+| **Cockpit** | **Lines** |
+| ![Cockpit](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-cockpit.png) | ![Lines](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-lines.png) |
+| **Retro** | **Appearance tab** |
+| ![Retro](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-retro.png) | ![Appearance](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/appearance.png) |
 
 ## Install
 

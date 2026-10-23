@@ -40,6 +40,7 @@
 
     <!-- HOME -->
     <section data-panel="home" style="display:grid;gap:18px">
+      <div class="notice" id="st-notice" hidden><span data-i18n="st.notice"></span><span class="btns"><button class="btn" id="st-notice-no" data-i18n="st.notice_no"></button><button class="btn pri" id="st-notice-go" data-i18n="st.notice_go"></button></span></div>
       <div class="conflict" id="conflict" hidden><span id="conflict-msg"></span><button class="btn pri" id="conflict-btn" data-i18n="conf.take"></button></div>
       <div class="pills" id="pills"></div>
       <div class="home">
@@ -53,7 +54,7 @@
             <div class="row"><span class="lbl" data-i18n="set.orientation"></span><div class="seg" id="home-orient"><button data-v="landscape" data-i18n="orient.h"></button><button data-v="portrait" data-i18n="orient.v"></button></div></div>
             <div class="row"><span class="lbl" data-i18n="home.rotate"></span><button class="sw" role="switch" id="rotate" data-label="home.rotate"></button></div>
             <div class="row"><span class="lbl"><span data-i18n="home.night"></span><small id="night-desc"></small></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="home.night"></button></div>
-            <div class="btns"><button class="btn" id="pause"></button></div>
+            <div class="btns"><button class="btn" id="pause"></button><button class="btn" id="release"></button></div>
           </div>
           <div class="card" id="last-game">
             <div class="row"><h3 data-i18n="home.last"></h3><small class="hint" id="last-when"></small></div>
@@ -67,11 +68,14 @@
     <section data-panel="layout" hidden style="display:grid;gap:14px">
       <div class="row orient-row"><span class="lbl" data-i18n="set.orientation"></span>
         <div class="seg" data-set="display.orientation"><button data-v="landscape" data-i18n="orient.landscape"></button><button data-v="landscape_flipped" data-i18n="orient.landscape_flipped"></button><button data-v="portrait" data-i18n="orient.portrait"></button><button data-v="portrait_flipped" data-i18n="orient.portrait_flipped"></button></div></div>
-      <div class="row"><p class="hint" style="margin:0" data-i18n="ed.hint"></p>
+      <div class="row"><div class="theme-bar" id="ed-theme"></div>
         <div class="btns"><button class="btn" id="ed-undo" data-i18n="ed.undo"></button><button class="btn" id="ed-reset" data-i18n="ed.reset"></button></div></div>
+      <p class="hint" style="margin:0" data-i18n="ed.hint"></p>
       <div class="editor">
-        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="stage-img" width="480" height="320"></canvas><div id="stage-boxes"></div></div>
-          <div class="legend-ed"><span id="ed-family"></span><span id="ed-pos"></span></div></div>
+        <div class="stage-wrap"><div class="stage-scroll" id="stage-scroll"><div class="stage" id="stage"><canvas id="stage-img" width="480" height="320"></canvas><div id="stage-grid"></div><div id="stage-boxes"></div></div></div>
+          <div class="legend-ed"><span id="ed-family"></span>
+            <span class="zoom"><button class="zb" id="ed-zoom-out" data-label="ed.zoom_out">−</button><b id="ed-zoom">100%</b><button class="zb" id="ed-zoom-in" data-label="ed.zoom_in">+</button><button class="zb" id="ed-grid" data-i18n="ed.grid" aria-pressed="false"></button></span>
+            <span id="ed-pos"></span></div></div>
         <div class="col">
           <div class="card">
             <div class="row"><h3 data-i18n="ed.blocks"></h3>
@@ -85,7 +89,7 @@
             <div class="row"><span class="lbl"><span data-i18n="ed.reflow"></span><small data-i18n="ed.reflow_hint"></small></span><button class="sw" role="switch" data-set="ui.reflow" data-label="ed.reflow"></button></div>
           </div>
           <div class="card" id="ed-block" hidden>
-            <div class="row"><h3 data-i18n="ed.selected"></h3><button class="btn danger" id="ed-del" data-i18n="ed.delete"></button></div>
+            <div class="row"><h3 data-i18n="ed.selected"></h3><span class="btns"><button class="btn" id="ed-dup" data-i18n="ed.duplicate"></button><button class="btn danger" id="ed-del" data-i18n="ed.delete"></button></span></div>
             <p class="hint" id="ed-multi" hidden></p>
             <div class="field"><label for="ed-name" data-i18n="ed.name"></label><input class="txt" id="ed-name"></div>
             <div class="nums">
@@ -103,13 +107,22 @@
 
     <!-- APPEARANCE -->
     <section data-panel="look" hidden style="display:grid;gap:16px">
-      <div class="card">
-        <div class="row"><h3 data-i18n="look.colors"></h3><button class="btn" id="reset-colors" data-i18n="look.reset"></button></div>
-        <div class="themes" id="screen-themes"></div>
-        <div class="colors" id="colors"></div>
+      <div class="card" id="st-card">
+        <div class="row"><h3 data-i18n="st.title"></h3>
+          <div class="btns"><button class="btn" id="st-import" data-i18n="st.import"></button><button class="btn" id="st-export" data-i18n="st.export"></button><button class="btn pri" id="st-save" data-i18n="st.save_as"></button></div></div>
+        <div class="st-wrap">
+          <div class="st-preview"><canvas id="st-canvas" width="480" height="320" aria-label="preview"></canvas>
+            <div class="legend"><b id="st-now"></b><span id="st-hint"></span></div>
+            <div class="btns" id="st-actions"></div></div>
+          <div class="st-grid" id="st-grid"></div>
+        </div>
       </div>
       <div class="card">
-        <h3 data-i18n="bg.title"></h3>
+        <div class="row"><h3 data-i18n="look.colors_bg"></h3><button class="btn" id="reset-colors" data-i18n="look.reset_theme"></button></div>
+        <p class="hint" style="margin:0" data-i18n="look.colors_hint"></p>
+        <div class="themes" id="screen-themes"></div>
+        <div class="colors" id="colors"></div>
+        <hr class="sep">
         <div class="row"><span class="lbl"><span data-i18n="bg.image"></span><small id="bg-name"></small></span>
           <span class="btns"><button class="btn" id="bg-pick" data-i18n="bg.pick"></button><button class="btn" id="bg-remove" data-i18n="bg.remove"></button></span></div>
         <div class="row"><label for="bg-dim" data-i18n="bg.dim"></label><span class="val" id="bg-dim-v"></span></div>
@@ -205,6 +218,13 @@
           <div class="row"><span class="lbl" data-i18n="set.summary_on"></span><button class="sw" role="switch" data-set="session.summary" data-label="set.summary_on"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.summary_time"></span><span class="inline"><input class="num" type="number" min="3" max="120" step="1" data-set="session.summary_seconds"><span data-i18n="s"></span></span></div>
           <div class="row"><span class="lbl" data-i18n="set.summary_min"></span><span class="inline"><input class="num" type="number" min="0" max="120" step="1" data-set="session.min_minutes"><span data-i18n="min"></span></span></div>
+          <div class="sub" id="sum-sub">
+            <div class="row"><span class="lbl" data-i18n="sum.fps"></span><button class="sw" role="switch" data-set="session.show_fps" data-label="sum.fps"></button></div>
+            <div class="row"><span class="lbl" data-i18n="sum.temps"></span><button class="sw" role="switch" data-set="session.show_temps" data-label="sum.temps"></button></div>
+            <div class="row"><span class="lbl" data-i18n="sum.graph"></span><button class="sw" role="switch" data-set="session.show_graph" data-label="sum.graph"></button></div>
+            <div class="row"><span class="lbl" data-i18n="sum.graph_pos"></span><div class="seg" data-set="session.graph"><button data-v="top" data-i18n="sum.top"></button><button data-v="bottom" data-i18n="sum.bottom"></button></div></div>
+            <div class="row"><span class="lbl" data-i18n="sum.duration"></span><button class="sw" role="switch" data-set="session.show_duration" data-label="sum.duration"></button></div>
+          </div>
           <div class="btns"><button class="btn" data-cmd="summary_example" data-i18n="set.summary_try"></button></div>
           <hr class="sep">
           <div class="row"><span class="lbl" data-i18n="hist.save"></span><button class="sw" role="switch" data-set="history.save" data-label="hist.save"></button></div>
@@ -223,6 +243,18 @@
           <div class="field"><label for="media-ignore" data-i18n="set.ignore"></label><input class="txt" id="media-ignore" data-set="media.ignore" data-placeholder="set.ignore_ph"></div>
         </div>
 
+        <div class="card"><h3 data-i18n="wx.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="wx.on"></span><small data-i18n="wx.on_desc"></small></span><button class="sw" role="switch" data-set="weather.enabled" data-label="wx.on"></button></div>
+          <div class="sub" id="wx-sub">
+            <div class="field"><label for="wx-city" data-i18n="wx.city"></label><input class="txt" id="wx-city" data-set="weather.city" data-placeholder="wx.city_ph"></div>
+            <div class="row"><small class="hint" id="wx-status"></small></div>
+            <div class="row"><span class="lbl" data-i18n="wx.temp"></span><button class="sw" role="switch" data-set="weather.temperature" data-label="wx.temp"></button></div>
+            <div class="row"><span class="lbl" data-i18n="wx.cond"></span><button class="sw" role="switch" data-set="weather.condition" data-label="wx.cond"></button></div>
+            <div class="row"><span class="lbl" data-i18n="wx.unit"></span><div class="seg" data-set="weather.unit"><button data-v="celsius">°C</button><button data-v="fahrenheit">°F</button></div></div>
+          </div>
+          <p class="hint" style="margin:0" data-i18n="wx.privacy"></p>
+        </div>
+
         <div class="card"><h3 data-i18n="set.network"></h3>
           <div class="row"><span class="lbl" data-i18n="set.ping"></span><button class="sw" role="switch" data-set="network.ping" data-label="set.ping"></button></div>
           <div class="field"><label for="servers" data-i18n="set.servers"></label><input class="txt" id="servers" data-set="network.servers"></div>
@@ -234,6 +266,12 @@
           <div class="row"><span class="lbl" data-i18n="set.disk_number"></span>
             <div class="seg" data-set="ssd.number"><button data-v="activity" data-i18n="disk.activity"></button><button data-v="space" data-i18n="disk.space"></button></div></div>
           <div class="row"><span class="lbl" data-i18n="set.detected"></span><span class="hint" id="disks"></span></div>
+          <div class="field"><label for="disk-title" data-i18n="set.disk_title"></label><input class="txt" id="disk-title" maxlength="20" data-set="ssd.title"></div>
+        </div>
+
+        <div class="card"><div class="row"><h3 data-i18n="tx.title"></h3><button class="btn" id="tx-reset" data-i18n="tx.reset"></button></div>
+          <p class="hint" style="margin:0" data-i18n="tx.desc"></p>
+          <div class="words" id="tx-list"></div>
         </div>
 
         <div class="card"><h3 data-i18n="set.connection"></h3>
@@ -256,6 +294,11 @@
             <button class="btn" id="wizard-btn" data-i18n="adv.wizard"></button>
             <button class="btn" id="folder-btn" data-i18n="adv.folder"></button>
             <button class="btn" id="edit-btn" data-i18n="adv.edit"></button>
+          </div>
+          <p class="hint" style="margin:6px 0 0" data-i18n="adv.stuck"></p>
+          <div class="btns">
+            <button class="btn" data-cmd="reconnect" data-i18n="adv.reconnect"></button>
+            <button class="btn" id="restart-btn" data-i18n="adv.restart"></button>
           </div>
         </div>
         <div class="card"><h3 data-i18n="upd.title"></h3>
@@ -289,6 +332,7 @@
 
 <script src="i18n.js"></script>
 <script src="themes.js"></script>
+<script src="screenthemes.js"></script>
 <script src="editor.js"></script>
 <script src="wizard.js"></script>
 <script src="history.js"></script>

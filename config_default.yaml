@@ -24,6 +24,17 @@ ui:
   reflow: true                 # layout editor: neighbour blocks follow when one is deleted or resized
   unload_hidden: false         # empty the window while it is in the tray (frees memory; it reloads when opened)
 
+theme:
+  name: clean                  # screen theme (Appearance tab): clean | full | cockpit | lines | retro | one of yours
+  notice: false                # show the "new themes" notice once (set when updating from 1.4.5 or older)
+
+weather:                       # next to the date on the screen (Open-Meteo: only the city and its coordinates go online)
+  enabled: true
+  city: ""                     # empty = no weather
+  unit: celsius                # celsius | fahrenheit
+  temperature: true
+  condition: true              # sunny, cloudy, rain...
+
 tray:
   temp_icon: none              # none | cpu | gpu  (temperature drawn in the tray icon)
 
@@ -72,11 +83,17 @@ background:
 
 ssd:
   number: activity             # activity (number = activity, bar = used space) | space
+  title: ""                    # title of the disks block; empty = automatic (SSD, HD or Disks)
 
 session:
   summary: true
   summary_seconds: 15
   min_minutes: 5
+  show_fps: true               # what the summary shows
+  show_temps: true
+  show_graph: true
+  show_duration: true
+  graph: bottom                # bottom | top
   temperatures: {cpu: cpu_temp, gpu: gpu_temp, hotspot: gpu_hotspot}
 
 history:
@@ -132,5 +149,7 @@ colors:
   accent: "#FFFFFF"
   warn: "#FF9F0A"
   crit: "#FF453A"
+
+texts:                         # your own words for the screen labels (Settings › Screen texts); empty = the language's word
 
 custom_colors:                 # the "Custom" screen theme (filled when you edit a color)

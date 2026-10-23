@@ -11,7 +11,7 @@ import layout
 EXT = ".tela-profile"
 FAMILIES = ("landscape", "portrait")
 # things that belong to this PC, not to a profile
-SKIP = {("display", "port"), ("history", "folder"), ("ui", "wizard_done"), ("ui", "language")}
+SKIP = {("display", "port"), ("history", "folder"), ("ui", "wizard_done"), ("ui", "language"), ("theme", "notice")}
 
 
 def folder():
@@ -24,15 +24,25 @@ def _safe(name):
 
 
 def snapshot(cfg, name, version=""):
+    import themes
     values, intervals = config.user_values(cfg)
+    theme = themes.current(cfg)
     layouts = {}
     for fam in FAMILIES:
-        p = layout.user_path(fam)
+        p = layout.user_path(fam, theme)
         if p.exists():
             layouts[fam] = p.read_text(encoding="utf-8")
-    return {"tela_profile": 1, "name": _safe(name), "version": version, "created": time.time(),
-            "settings": [[s, k, v] for s, k, v in values if (s, k) not in SKIP],
-            "intervals": intervals, "layouts": layouts}
+    out = {"tela_profile": 1, "name": _safe(name), "version": version, "created": time.time(),
+           "settings": [[s, k, v] for s, k, v in values if (s, k) not in SKIP],
+           "intervals": intervals, "layouts": layouts}
+    try:
+        data = themes.load(theme)
+        if not data["builtin"]:   # a theme of the user's travels with the profile
+            out["theme_id"] = theme
+            out["theme_file"] = (themes.user_dir() / f"{theme}.yaml").read_text(encoding="utf-8")
+    except (KeyError, OSError):
+        pass
+    return out
 
 
 def validate(data):
@@ -47,6 +57,9 @@ def validate(data):
     for fam, txt in (data.get("layouts") or {}).items():
         if fam not in FAMILIES or not isinstance(txt, str):
             raise ValueError("damaged profile layout")
+    if data.get("theme_file") is not None and not (isinstance(data["theme_file"], str)
+                                                   and re.fullmatch(r"[a-z0-9-]{1,48}", str(data.get("theme_id")))):
+        raise ValueError("damaged profile theme")
     return data
 
 
@@ -88,7 +101,14 @@ def delete(name):
 
 def apply(cfg_path, data):
     """Writes a profile over the current settings and layouts."""
+    import themes
+    import yaml
     data = validate(data)
+    if data.get("theme_file") and not themes.exists(data["theme_id"]):
+        theme_data = themes.validate(yaml.safe_load(data["theme_file"]) or {})
+        themes.user_dir().mkdir(parents=True, exist_ok=True)
+        (themes.user_dir() / f"{data['theme_id']}.yaml").write_text(themes.dump(theme_data), encoding="utf-8")
+    theme = next((v for sec, k, v in data["settings"] if sec == "theme" and k == "name"), None) or themes.LEGACY
     s = config.Settings(cfg_path)
     s.set_many([(sec, k, v) for sec, k, v in data["settings"]])
     base = next((v for sec, k, v in data["settings"] if sec is None and k == "interval"), None)
@@ -96,7 +116,7 @@ def apply(cfg_path, data):
         s.set_intervals(float(base), {k: float(v) for k, v in (data.get("intervals") or {}).items()})
     for fam in FAMILIES:
         txt = (data.get("layouts") or {}).get(fam)
-        p = layout.user_path(fam)
+        p = layout.user_path(fam, theme)
         if txt:
             p.write_text(txt, encoding="utf-8")
         elif p.exists():

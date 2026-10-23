@@ -21,7 +21,7 @@ FONT_FAMILIES = {
     "verdana": (["verdana.ttf"], ["verdanab.ttf"]),
     "trebuchet": (["trebuc.ttf"], ["trebucbd.ttf"]),
     "georgia": (["georgia.ttf"], ["georgiab.ttf"]),
-    "consolas": (["consola.ttf"], ["consolab.ttf"]),
+    "consolas": (["consola.ttf", "DejaVuSansMono.ttf"], ["consolab.ttf", "DejaVuSansMono-Bold.ttf"]),
     "impact": (["impact.ttf"], ["impact.ttf"]),
 }
 
@@ -41,6 +41,10 @@ SCREEN_TEXT = {
         "summary": "RESUMO DA SESSÃO", "fps_avg": "FPS MÉDIO", "fps_1low": "1% LOW", "fps_max": "FPS MÁXIMO",
         "cpu_max": "CPU · MÁX", "gpu_max": "GPU · MÁX", "hotspot_max": "HOTSPOT · MÁX",
         "fps_session": "FPS DURANTE A SESSÃO", "example_game": "Exemplo de jogo",
+        "used": "USADO", "duration": "DURAÇÃO",
+        "w_clear": "ensolarado", "w_clear_night": "céu limpo", "w_partly": "parc. nublado", "w_cloudy": "nublado",
+        "w_fog": "neblina", "w_drizzle": "garoa", "w_rain": "chuva", "w_showers": "pancadas", "w_snow": "neve",
+        "w_storm": "tempestade",
     },
     "en": {
         "weekdays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
@@ -51,6 +55,10 @@ SCREEN_TEXT = {
         "summary": "SESSION SUMMARY", "fps_avg": "AVG FPS", "fps_1low": "1% LOW", "fps_max": "MAX FPS",
         "cpu_max": "CPU · MAX", "gpu_max": "GPU · MAX", "hotspot_max": "HOTSPOT · MAX",
         "fps_session": "FPS DURING THE SESSION", "example_game": "Example game",
+        "used": "USED", "duration": "DURATION",
+        "w_clear": "sunny", "w_clear_night": "clear", "w_partly": "partly cloudy", "w_cloudy": "cloudy",
+        "w_fog": "fog", "w_drizzle": "drizzle", "w_rain": "rain", "w_showers": "showers", "w_snow": "snow",
+        "w_storm": "storm",
     },
     "es": {
         "weekdays": ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"],
@@ -61,6 +69,10 @@ SCREEN_TEXT = {
         "summary": "RESUMEN DE LA SESIÓN", "fps_avg": "FPS MEDIO", "fps_1low": "1% LOW", "fps_max": "FPS MÁXIMO",
         "cpu_max": "CPU · MÁX", "gpu_max": "GPU · MÁX", "hotspot_max": "HOTSPOT · MÁX",
         "fps_session": "FPS DURANTE LA SESIÓN", "example_game": "Juego de ejemplo",
+        "used": "USADO", "duration": "DURACIÓN",
+        "w_clear": "soleado", "w_clear_night": "despejado", "w_partly": "parc. nublado", "w_cloudy": "nublado",
+        "w_fog": "niebla", "w_drizzle": "llovizna", "w_rain": "lluvia", "w_showers": "chubascos", "w_snow": "nieve",
+        "w_storm": "tormenta",
     },
     "zh": {
         "weekdays": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
@@ -71,6 +83,9 @@ SCREEN_TEXT = {
         "summary": "游戏总结", "fps_avg": "平均 FPS", "fps_1low": "1% LOW", "fps_max": "最高 FPS",
         "cpu_max": "CPU · 最高", "gpu_max": "GPU · 最高", "hotspot_max": "热点 · 最高",
         "fps_session": "本局 FPS", "example_game": "示例游戏",
+        "used": "已用", "duration": "时长",
+        "w_clear": "晴", "w_clear_night": "晴朗", "w_partly": "多云", "w_cloudy": "阴", "w_fog": "雾",
+        "w_drizzle": "毛毛雨", "w_rain": "雨", "w_showers": "阵雨", "w_snow": "雪", "w_storm": "雷雨",
     },
 }
 # fonts for titles in other scripts (Windows fonts first, Linux fallbacks after)
@@ -116,10 +131,15 @@ class Renderer:
         self.bg_image = str(bg.get("image") or "")
         self.bg_dim = max(0.0, min(0.9, float(bg.get("dim", 40)) / 100))
         self.panel_opacity = max(0.2, min(1.0, float(bg.get("panel_opacity", 100)) / 100)) if self.bg_image else 1.0
-        self.words = SCREEN_TEXT.get(lang, SCREEN_TEXT["en"])
+        self.words = dict(SCREEN_TEXT.get(lang, SCREEN_TEXT["en"]))
+        # the user's own words for the screen labels (Settings › Screen texts)
+        self.words.update({k: str(v)[:24] for k, v in (cfg.get("texts") or {}).items()
+                           if k in self.words and isinstance(v, (str, int, float)) and str(v).strip()})
         self._images = {}
         self._frame = None
         self.logos_cfg = cfg.get("logos") or {}
+        self.weather_cfg = cfg.get("weather") or {}
+        self.summary_cfg = cfg.get("session") or {}
         mcfg = cfg.get("media") or {}
         self.media_in_game = str(mcfg.get("during_game", "date")).lower() == "date"
         self.media_progress = bool(mcfg.get("progress", True))
@@ -600,9 +620,26 @@ class Renderer:
         v = col.value(w.get("sensor"))
         self._line(d, w["x"], w["y"], self._value_parts(w, v), w.get("align", "left"))
 
+    def weather_text(self, col):
+        """' · 24° cloudy' for the "{weather}" mark in clock formats ('' with no city or no answer)."""
+        info = col.weather_info() if hasattr(col, "weather_info") else None
+        if not info:
+            return ""
+        parts = []
+        if self.weather_cfg.get("temperature", True) and info.get("temp") is not None:
+            unit = "°F" if str(self.weather_cfg.get("unit", "")).lower().startswith("f") else "°"
+            parts.append(f"{info['temp']:.0f}{unit}")
+        if self.weather_cfg.get("condition", True) and info.get("condition"):
+            key = "w_clear_night" if info["condition"] == "clear" and not info.get("day", True) else f"w_{info['condition']}"
+            parts.append(self.words.get(key, ""))
+        text = " ".join(p for p in parts if p)
+        return f" · {text}" if text else ""
+
     def _w_clock(self, d, w, col):
         now = datetime.datetime.now()
         fmt = w.get("format", "%H:%M").replace("{weekday}", self.words["weekdays"][now.weekday()])
+        if "{weather}" in fmt:
+            fmt = fmt.replace("{weather}", self.weather_text(col).replace("%", "%%"))
         self._line(d, w["x"], w["y"], [(now.strftime(fmt), self.font(w.get("size", 24), w.get("bold", False)),
                                         self.color(w.get("color"), "text"))], w.get("align", "left"))
 
@@ -779,13 +816,19 @@ class Renderer:
             fade = min(float(w.get("fade", 0.8)), every / 2) if self.anim_enabled else 0
         S = self.S
         x, y, wd, h = w["x"], w["y"], w["w"], w["h"]
+        pick = w.get("pick")   # a fixed one (e.g. CPU brand on the left, GPU board brand on the right)
         if not files and w.get("files") == "logos":   # no logo files: the brand names as text
             names = self.brand_names()
             if names:
-                name = names[int(time.time() // every) % len(names)]
-                self._line(d, x, y + h / 2, [(name, self.font(h * 1.05, True), self.color("text"))])
-                if len(names) > 1:
-                    self._wake(self._now + every - time.time() % every)
+                if pick is not None:
+                    name = names[int(pick) % len(names)]
+                else:
+                    name = names[int(time.time() // every) % len(names)]
+                    if len(names) > 1:
+                        self._wake(self._now + every - time.time() % every)
+                align = w.get("align", "left")
+                ax = x + (wd if align == "right" else wd / 2 if align == "center" else 0)
+                self._line(d, ax, y + h / 2, [(name, self.font(h * 1.05, True), self.color("text"))], align)
             return
         if not files:
             return
@@ -793,7 +836,9 @@ class Renderer:
         idx = int(t // every) % len(files)
         phase = t % every
         layers = [(files[idx], 1.0)]
-        if len(files) > 1:
+        if pick is not None:
+            layers = [(files[int(pick) % len(files)], 1.0)]
+        elif len(files) > 1:
             if fade > 0 and phase < fade:
                 a = phase / fade  # 1st half: the old one fades out; 2nd half: the new one fades in
                 if a < 0.5:
@@ -863,41 +908,68 @@ class Renderer:
 
     # ------------------------------------------------------------ game session summary
     def _summary_layout(self, r):
+        """Game summary screen. Settings › Game summary chooses what shows (FPS, temperatures, graph,
+        duration) and where the graph goes; the rows that stay grow to use the space."""
         T = self.words
+        sc = self.summary_cfg
+        show = lambda k: sc.get(k, True) is not False   # noqa: E731
+        W, H = self.W, self.H
+        land = W > H
 
-        def tile(x, y, w, h, label, key, unit, size):
+        def tile(x, y, w, h, base, label, key, unit, size):
+            k = min(1.45, max(1.0, h / base))
             return [{"type": "panel", "x": x, "y": y, "w": w, "h": h},
                     {"type": "text", "text": label, "x": x + 12, "y": y + 16, "size": 9, "color": "secondary", "bold": True},
-                    {"type": "value", "sensor": key, "x": x + 12, "y": y + h - 26, "size": size, "bold": True,
-                     "unit": unit, "unit_size": 12}]
+                    {"type": "value", "sensor": key, "x": x + 12, "y": y + h - 26 - (h - base) / 2, "size": round(size * k),
+                     "bold": True, "unit": unit, "unit_size": 12}]
         left = max(0.0, r["expires"] - time.monotonic())
-        W, H = self.W, self.H
         lay = [
             {"type": "text", "text": T["summary"], "x": 12, "y": 14, "size": 10, "color": "secondary", "bold": True},
-            {"type": "text", "text": r["duration"], "x": W - 12, "y": 14, "size": 10, "color": "secondary", "align": "right"},
-            {"type": "text", "text": r["name"][:28 if W > H else 22], "x": 12, "y": 40, "size": 22 if W > H else 19, "bold": True},
+            {"type": "text", "text": r["name"][:28 if land else 22], "x": 12, "y": 40, "size": 22 if land else 19, "bold": True},
         ]
+        if show("show_duration") and r.get("duration"):
+            lay.insert(1, {"type": "text", "text": r["duration"], "x": W - 12, "y": 14, "size": 10, "color": "secondary",
+                           "align": "right"})
+        parts = []
+        if show("show_fps"):
+            parts.append(["fps", 78 if land else 72])
+        if show("show_temps"):
+            parts.append(["temps", 70 if land else 62])
+        if show("show_graph"):
+            parts.insert(0 if str(sc.get("graph", "bottom")) == "top" else len(parts), ["graph", 0])
+        y0 = 62 if land else 60
+        avail = H - 8 - y0 - 4 * max(0, len(parts) - 1)
+        fixed = sum(h for _, h in parts)
+        rows = [p for p in parts if p[0] != "graph"]
+        if any(p[0] == "graph" for p in parts):
+            for p in parts:
+                if p[0] == "graph":
+                    p[1] = max(48, avail - fixed)
+        elif rows:   # no graph: the tiles share the space
+            extra = max(0, avail - fixed) / len(rows)
+            for p in rows:
+                p[1] = p[1] + extra
         tw = (W - 8 - 8) / 3   # three tiles with 4 px gaps
-        if W > H:
-            rows, big, small, graph = (62, 78), 30, 26, (218, H - 4 - 218 - 4)
-            temps_y, temps_h = 144, 70
-        else:
-            rows, big, small = (60, 72), 24, 20
-            temps_y, temps_h = 136, 62
-            graph = (202, H - 4 - 202 - 4)
         tile_x = [4, 4 + tw + 4, 4 + 2 * (tw + 4)]
-        for x, label, key in zip(tile_x, ("fps_avg", "fps_1low", "fps_max"), ("r.fps_avg", "r.fps_1low", "r.fps_max"), strict=True):
-            lay += tile(x, rows[0], tw, rows[1], T[label], key, "", big)
-        for x, label, key in zip(tile_x, ("cpu_max", "gpu_max", "hotspot_max"), ("r.cpu", "r.gpu", "r.hotspot"), strict=True):
-            lay += tile(x, temps_y, tw, temps_h, T[label], key, "°C", small)
-        gy, gh = graph
-        lay += [
-            {"type": "panel", "x": 4, "y": gy, "w": W - 8, "h": gh},
-            {"type": "text", "text": T["fps_session"], "x": 16, "y": gy + 14, "size": 9, "color": "secondary", "bold": True},
-            {"type": "graph", "sensor": "r.fps_series", "x": 16, "y": gy + 26, "w": W - 32, "h": gh - 36, "points": 120, "min": 0},
-            {"type": "rect", "x": 0, "y": H - 4, "w": max(1, round(W * min(1.0, left / r["total"]))), "h": 4,
-             "color": "accent"},
-        ]
+        y = y0
+        for kind, h in parts:
+            if kind == "fps":
+                base, big = (78, 30) if land else (72, 24)
+                for x, label, key in zip(tile_x, ("fps_avg", "fps_1low", "fps_max"), ("r.fps_avg", "r.fps_1low", "r.fps_max"), strict=True):
+                    lay += tile(x, y, tw, h, base, T[label], key, "", big)
+            elif kind == "temps":
+                base, small = (70, 26) if land else (62, 20)
+                for x, label, key in zip(tile_x, ("cpu_max", "gpu_max", "hotspot_max"), ("r.cpu", "r.gpu", "r.hotspot"), strict=True):
+                    lay += tile(x, y, tw, h, base, T[label], key, "°C", small)
+            else:
+                lay += [
+                    {"type": "panel", "x": 4, "y": y, "w": W - 8, "h": h},
+                    {"type": "text", "text": T["fps_session"], "x": 16, "y": y + 14, "size": 9, "color": "secondary", "bold": True},
+                    {"type": "graph", "sensor": "r.fps_series", "x": 16, "y": y + 26, "w": W - 32, "h": h - 36, "points": 120, "min": 0},
+                ]
+            y += h + 4
+        lay.append({"type": "rect", "x": 0, "y": H - 4, "w": max(1, round(W * min(1.0, left / r["total"]))), "h": 4,
+                    "color": "accent"})
         return lay
 
     def transition_steps(self):

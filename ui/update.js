@@ -104,7 +104,8 @@ async function showReleases() {
     const row = document.createElement("div");
     row.className = "prof";
     const cur = rel.version === r.current;
-    row.innerHTML = `<b>Tela! ${esc(rel.version)}</b><small>${esc(rel.date || "")}${rel.test ? " · " + t("upd.test_tag") : ""}${cur ? " · " + t("upd.installed") : ""}</small>`;
+    const mb = rel.size ? ` · ${num(rel.size / 1048576, 1)} MB` : "";   // download size of that version's setup
+    row.innerHTML = `<b>Tela! ${esc(rel.version)}</b><small>${esc(rel.date || "")}${mb}${rel.test ? " · " + t("upd.test_tag") : ""}${cur ? " · " + t("upd.installed") : ""}</small>`;
     if (!cur) {
       const b = document.createElement("button");
       b.className = "btn"; b.textContent = t("upd.install_this");

@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.5"
+VERSION = "1.4.6"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -123,7 +123,8 @@ class Engine(threading.Thread):
         self.demo_game, self.demo_media = demo_game, demo_media
         self.commands = queue.Queue()
         self._halt = threading.Event()
-        self.paused = False
+        self.paused = False          # frozen: the screen keeps the last picture, the port stays open
+        self.released = False        # the port is closed so another program can use the screen
         self.connected = False
         self.screen_error = None
         self.last_frame = None
@@ -173,7 +174,7 @@ class Engine(threading.Thread):
         self._apply_brightness()
         self.off_on_exit = bool(dcfg.get("off_on_exit", True))
         old = self.collector
-        fields = hw_fields(self.hw.info)
+        fields = hw_fields(self.hw.info, cfg)
         self.collector = Collector(cfg, demo=self.demo, base=HERE, fields=fields, demo_game=self.demo_game,
                                    demo_media=self.demo_media, previous=old)
         if old is not None:
@@ -284,15 +285,28 @@ class Engine(threading.Thread):
             self.screen.set_orientation(value)
             self._previous = None
             self._reload()   # portrait and landscape use different layouts
-        elif name == "pause":
+        elif name == "pause":      # freeze: nothing is sent; on resume only what changed goes out
             self.paused = bool(value)
-            if self.paused:
+            self.log("Paused: the screen keeps the last picture" if self.paused else "Resumed")
+        elif name == "release":    # close the port so another program can use the screen
+            self.released = bool(value)
+            if self.released:
                 if self.connected:
                     self.screen.close()
                     self.connected = False
-                self.log("Paused: the screen is free for other programs")
+                self._previous = None
+                self.log("Screen released for other programs")
             else:
-                self.log("Resumed")
+                self.log("Taking the screen back")
+        elif name == "reconnect":  # the screen froze or shows garbage: open the port again and send everything
+            try:
+                self.screen.close()
+            except Exception:  # noqa: BLE001
+                pass
+            self.connected = False
+            self._previous = None
+            self.released = False
+            self.log("Reconnecting the screen")
         elif name == "test":
             from PIL import Image
             try:
@@ -386,7 +400,7 @@ class Engine(threading.Thread):
     def status(self):
         st = self.collector.status if self.collector else {}
         return {
-            "paused": self.paused, "connected": self.connected, "screen_error": self.screen_error,
+            "paused": self.paused, "released": self.released, "connected": self.connected, "screen_error": self.screen_error,
             "sleeping": sorted(self._sleep), "eco": self.eco,
             "port": getattr(self.screen, "port_in_use", None), "demo": st.get("demo", False),
             "lhm_error": st.get("lhm"), "fps": st.get("fps"), "source": st.get("source"),
@@ -526,7 +540,7 @@ class Engine(threading.Thread):
         self._apply_brightness()
         next_read = t0 + (self.eco_interval if self.eco else self.interval)
         # between reads: frames only while something moves or a change is due
-        while not self._halt.is_set() and not self.paused and not self.sleeping:
+        while not self._halt.is_set() and not self.paused and not self.released and not self.sleeping:
             t_frame = time.monotonic()
             self.beat = t_frame
             if not self._send_frame():
@@ -534,7 +548,7 @@ class Engine(threading.Thread):
             if self.once:
                 self._halt.set()
                 return
-            while not self._halt.is_set() and not self.paused and not self.sleeping:
+            while not self._halt.is_set() and not self.paused and not self.released and not self.sleeping:
                 left = next_read - time.monotonic()
                 if left <= 0:
                     break
@@ -559,8 +573,12 @@ class Engine(threading.Thread):
         while not self._halt.is_set():
             try:
                 self._check_schedule()
-                if self.paused or self.sleeping:
-                    self._wait(0.5)
+                if self.paused or self.released or self.sleeping:
+                    if self.paused and not self.released and not self.sleeping:
+                        self._read_sensors(state)   # values (and the game sessions) stay current while frozen
+                        self._wait(self.interval)
+                    else:
+                        self._wait(0.5)
                     continue
                 self._cycle(state)
             except Exception as e:  # noqa: BLE001 — never let the screen die: log, reset and continue

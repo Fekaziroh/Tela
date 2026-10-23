@@ -344,6 +344,205 @@ class Api:
     def screen_themes(self):
         return self.SCREEN_THEMES
 
+    # ------------------------------------------------------------ screen texts and weather
+    SCREEN_WORDS = ("load", "clock", "power", "fan", "temp", "used", "mem", "network", "volume", "disks", "hotspot",
+                    "summary", "fps_avg", "fps_1low", "fps_max", "cpu_max", "gpu_max", "hotspot_max", "fps_session")
+
+    def screen_words(self):
+        """The words drawn on the screen in the current language, and the user's own ones."""
+        from render import SCREEN_TEXT
+        base = SCREEN_TEXT.get(self._engine.lang, SCREEN_TEXT["en"])
+        mine = self._cfg().get("texts") or {}
+        custom = {k: str(v) for k, v in mine.items() if k in self.SCREEN_WORDS and v not in (None, "")}
+        return {"keys": list(self.SCREEN_WORDS), "words": {k: base.get(k, "").strip() for k in self.SCREEN_WORDS},
+                "custom": custom, "all": {**{k: v.strip() for k, v in base.items() if isinstance(v, str)}, **custom}}
+
+    def set_screen_word(self, key, value):
+        if key not in self.SCREEN_WORDS:
+            return False
+        value = str(value or "").strip()[:24]
+        self._settings.set("texts", key, value)
+        self._schedule_reload()
+        return True
+
+    def reset_screen_words(self):
+        mine = self._cfg().get("texts") or {}
+        if mine:
+            self._settings.set_many([("texts", k, "") for k in mine])
+            self._schedule_reload()
+        return True
+
+    def weather_status(self):
+        c = self._engine.collector
+        w = getattr(c, "weather", None) if c else None
+        if w is None:
+            return {"state": "off"}
+        now = w.current()
+        place = w.place or {}
+        r = self._engine.renderer
+        text = r.weather_text(c).lstrip(" ·") if r is not None and now else ""
+        return {"state": "ok" if now else ("error" if w.error else "waiting"), "place": place.get("name"),
+                "country": place.get("country"), "text": text, "error": w.error}
+
+    # ------------------------------------------------------------ screen themes (layout + colors)
+    def theme_list(self):
+        import themes
+        cfg = self._cfg()
+        return {"themes": themes.entries(self._engine.lang), "current": themes.current(cfg),
+                "notice": bool((cfg.get("theme") or {}).get("notice"))}
+
+    def theme_apply(self, tid):
+        """Switches the screen theme. The colors the user had on the current theme are kept for it."""
+        import themes
+        if not themes.exists(tid):
+            return False
+        cfg = self._cfg()
+        themes.keep_colors(themes.current(cfg), cfg.get("colors") or {})
+        colors = themes.colors_for(tid)
+        self._settings.set_many([("theme", "name", tid), ("theme", "notice", False)] +
+                                [("colors", k, v) for k, v in colors.items()])
+        self._engine.command("reload")
+        self._engine.log(f"Screen theme: {themes.name(themes.load(tid), 'en')}")
+        return {"colors": colors, "current": tid}
+
+    def theme_colors_reset(self):
+        """Back to the current theme's own colors."""
+        import themes
+        cfg = self._cfg()
+        tid = themes.current(cfg)
+        colors = themes.colors(tid)
+        themes.keep_colors(tid, colors)
+        self._settings.set_many([("colors", k, v) for k, v in colors.items()])
+        self._schedule_reload()
+        return colors
+
+    def theme_notice_seen(self):
+        self.set("theme", "notice", False)
+        return True
+
+    def _theme_render(self, tid, fam=None, ss=2):
+        """The theme drawn with the live values (for the hover preview and the gallery)."""
+        import layout
+        import themes
+        e = self._engine
+        cfg = dict(e.cfg)
+        fam = fam or self._family()
+        lay = layout.load(fam, theme=tid)
+        cfg.update(sensors=lay.get("sensors") or {}, widgets=layout.flatten(lay.get("groups")),
+                   colors=themes.colors_for(tid) if tid != themes.current(self._cfg()) else e.cfg.get("colors"),
+                   animation={"enabled": False})
+        W, H = (320, 480) if fam == "portrait" else (480, 320)
+        r0 = getattr(e, "renderer", None)
+        r = Renderer(cfg, W, H, ss=ss, base=config.DATA, fields=getattr(r0, "fields", None), lang=e.lang,
+                     cache_static=False, logo_dirs=getattr(r0, "logo_dirs", None))
+        col = e.collector
+        if col is not None and getattr(col, "summary", None):   # the preview shows the theme, not the summary
+            class _NoSummary:
+                def __init__(self, c):
+                    self._c = c
+                    self.summary = None
+
+                def __getattr__(self, name):
+                    return getattr(self._c, name)
+            col = _NoSummary(col)
+        return r.draw(col)
+
+    def theme_preview(self, tid):
+        import themes
+        if not themes.exists(tid) or self._engine.collector is None:
+            return None
+        try:
+            return _png_data_url(self._theme_render(tid))
+        except Exception as e:  # noqa: BLE001
+            self._engine.log(f"Theme preview failed: {e}")
+            return None
+
+    def theme_thumbs(self):
+        """Small pictures of every theme in the current orientation: {id: data URL}."""
+        import themes
+        out = {}
+        fam = self._family()
+        for t in themes.entries(self._engine.lang):
+            key = (t["id"], fam, t["edited"], json.dumps(t["colors"], sort_keys=True))
+            hit = self._thumbs.get(("theme",) + key)
+            if hit and time.monotonic() - hit[0] < 300:
+                out[t["id"]] = hit[1]
+                continue
+            try:
+                img = self._theme_render(t["id"], fam, ss=1)
+                img = img.resize((img.width // 2, img.height // 2), 1)   # LANCZOS
+                url = _png_data_url(img)
+            except Exception:  # noqa: BLE001
+                url = None
+            self._thumbs[("theme",) + key] = (time.monotonic(), url)
+            out[t["id"]] = url
+        return out
+
+    def theme_save_as(self, name):
+        import themes
+        cfg = self._cfg()
+        new = themes.save_as(themes.current(cfg), name, cfg.get("colors"), self._engine.lang)
+        self._engine.log(f"Theme saved: {name}")
+        self.theme_apply(new)
+        return self.theme_list()
+
+    def theme_rename(self, tid, name):
+        import themes
+        themes.rename(tid, name)
+        return self.theme_list()
+
+    def theme_delete(self, tid):
+        import themes
+        cfg = self._cfg()
+        was = themes.current(cfg)
+        if not themes.delete(tid):
+            return self.theme_list()
+        self._engine.log(f"Theme deleted: {tid}")
+        if was == tid:
+            self.theme_apply(themes.DEFAULT)
+        return self.theme_list()
+
+    def theme_reset(self, tid=None):
+        """Undoes the layout editor's changes to a theme (both orientations) and its colors."""
+        import themes
+        cfg = self._cfg()
+        tid = tid or themes.current(cfg)
+        themes.reset(tid)
+        if tid == themes.current(cfg):
+            self.theme_colors_reset()
+            self._engine.command("reload")
+        else:
+            themes.keep_colors(tid, themes.colors(tid))
+        self._engine.log(f"Theme restored: {tid}")
+        return self.theme_list()
+
+    def theme_export(self, tid=None):
+        import themes
+        cfg = self._cfg()
+        tid = tid or themes.current(cfg)
+        nm = re.sub(r"[\\/:*?\"<>|']+", " ", themes.name(themes.load(tid), self._engine.lang)).strip() or "theme"
+        path = self._app.pick_save_path(f"{nm}{themes.EXT}", "Tela! theme", themes.EXT.lstrip("."))
+        if not path:
+            return None
+        colors = cfg.get("colors") if tid == themes.current(cfg) else None
+        themes.export(tid, path, colors, self._engine.lang)
+        self._engine.log(f"Theme exported: {path}")
+        return path
+
+    def theme_import(self):
+        import themes
+        path = self._app.pick_open_path("Tela! theme", themes.EXT.lstrip("."))
+        if not path:
+            return None
+        try:
+            tid = themes.import_file(path)
+        except Exception as e:  # noqa: BLE001 — a broken or foreign file
+            return {"error": str(e)}
+        self._engine.log(f"Theme imported: {tid}")
+        out = self.theme_list()
+        out["imported"] = tid
+        return out
+
     def pick_background(self):
         paths = self._app.pick_images()
         if not paths:
@@ -374,12 +573,15 @@ class Api:
 
     # ------------------------------------------------------------ commands
     def command(self, name, value=None):
-        allowed = {"pause", "test", "summary_example", "summary_last", "reload"}
+        allowed = {"pause", "release", "reconnect", "test", "summary_example", "summary_last", "reload"}
         if name not in allowed:
             return False
         if name == "pause":
             value = not self._engine.paused if value is None else bool(value)
             self._engine.paused = value   # shows at once; the engine confirms right after
+        elif name == "release":
+            value = not self._engine.released if value is None else bool(value)
+            self._engine.released = value
         self._engine.command(name, value)
         return True
 
@@ -400,6 +602,14 @@ class Api:
 
     def quit(self):
         threading.Timer(0.1, self._app.quit).start()
+        return True
+
+    def restart(self):
+        """Closes Tela! and opens it again (when something got stuck)."""
+        fn = getattr(self._app, "restart", None)
+        if fn is None:
+            return False
+        threading.Timer(0.1, fn).start()
         return True
 
     def hide(self):
@@ -556,19 +766,29 @@ class Api:
         import layout
         return layout.family((self._cfg().get("display") or {}).get("orientation"))
 
+    def _theme(self):
+        import themes
+        return themes.current(self._cfg())
+
     def layout_get(self):
         import layout
+        import themes
         fam = self._family()
-        lay = layout.load(fam)
+        lay = layout.load(fam, theme=self._theme())
         size = lay.get("size") or ([320, 480] if fam == "portrait" else [480, 320])
+        try:
+            tname = themes.name(themes.load(lay["theme"]), self._engine.lang)
+        except KeyError:
+            tname = lay["theme"]
         return {"family": fam, "size": size, "groups": lay.get("groups") or [], "custom": lay.get("custom", False),
-                "sensors": self.sensor_values(), "kinds": list(layout.BLOCK_KINDS)}
+                "sensors": self.sensor_values(), "kinds": list(layout.BLOCK_KINDS),
+                "theme": lay["theme"], "theme_name": tname}
 
     def sensor_values(self):
         """Configured sensors with their value now (for the picker)."""
         import layout
         c = self._engine.collector
-        lay = layout.load(self._family())
+        lay = layout.load(self._family(), theme=self._theme())
         out = []
         for name in (lay.get("sensors") or {}):
             v = c.values.get(name) if c else None
@@ -577,9 +797,9 @@ class Api:
 
     def layout_save(self, groups):
         import layout
-        fam = self._family()
-        lay = layout.load(fam)
-        layout.save(fam, {"size": lay.get("size"), "sensors": lay.get("sensors"), "groups": groups})
+        fam, theme = self._family(), self._theme()
+        lay = layout.load(fam, theme=theme)
+        layout.save(fam, {"size": lay.get("size"), "sensors": lay.get("sensors"), "groups": groups}, theme)
         self._engine.command("reload")
         return True
 
@@ -614,9 +834,9 @@ class Api:
 
     def layout_reset(self):
         import layout
-        layout.reset(self._family())
+        layout.reset(self._family(), self._theme())
         self._engine.command("reload")
-        self._engine.log("Layout restored to the default")
+        self._engine.log("Layout restored to the theme's original")
         return self.layout_get()
 
     def layout_new_block(self, kind, x=10, y=10, sensor=None):
@@ -626,8 +846,8 @@ class Api:
     def add_sensor(self, selector, groups=None):
         """Adds a sensor from the full list (e.g. 'gpu|voltage|GPU Core') and returns its name."""
         import layout
-        fam = self._family()
-        lay = layout.load(fam)
+        fam, theme = self._family(), self._theme()
+        lay = layout.load(fam, theme=theme)
         sensors = dict(lay.get("sensors") or {})
         for name, sel in sensors.items():
             if sel == selector:
@@ -637,7 +857,7 @@ class Api:
         while name in sensors:
             name, i = f"{base}_{i}", i + 1
         sensors[name] = selector
-        layout.save(fam, {"size": lay.get("size"), "sensors": sensors, "groups": groups or lay.get("groups")})
+        layout.save(fam, {"size": lay.get("size"), "sensors": sensors, "groups": groups or lay.get("groups")}, theme)
         self._engine.command("reload")
         return name
 
@@ -660,7 +880,7 @@ class Api:
 
     def _renderer_fields(self):
         from hardware import fields
-        return fields(self._engine.hw.info)
+        return fields(self._engine.hw.info, self._cfg())
 
     @staticmethod
     def _logo_dirs():
@@ -727,7 +947,7 @@ class Api:
                  f"WebView2: {winsys.webview2_version() or 'not found'} · window: {self._app.window_kind}",
                  f"Folders: program {HERE} · data {config.DATA}"]
         scr = e.screen
-        state = "paused" if st["paused"] else ("connected" if st["connected"] else f"not connected ({st.get('screen_error') or 'connecting'})")
+        state = "released" if st.get("released") else "paused" if st["paused"] else ("connected" if st["connected"] else f"not connected ({st.get('screen_error') or 'connecting'})")
         lines.append(f"Screen: {state} · port {st.get('port') or (cfg.get('display') or {}).get('port')} · "
                      f"{getattr(scr, 'orientation', '?')} · brightness {getattr(scr, 'brightness', '?')}%"
                      + (f" · off: {', '.join(st['sleeping'])}" if st["sleeping"] else ""))
@@ -742,6 +962,14 @@ class Api:
         lines.append(f"FPS: {f.get('source') or 'none'} · PresentMon {_read_version('presentmon') or 'not installed'}"
                      + (f" · {f['fps']:.0f} FPS in {f.get('app')}" if f.get("fps") else "")
                      + (f" · error: {f['error']}" if f.get("error") else ""))
+        if c and getattr(c, "sessions", None):
+            from sensors import pids_with_windows
+            wins = pids_with_windows()
+            now = time.monotonic()
+            lines.append("Game sessions: " + "; ".join(
+                f"{sv.name} (pid {pid}, {len(sv.fps_samples)} s with FPS, last {now - sv.last_fps:.0f} s ago, "
+                f"window {'?' if wins is None else ('yes' if pid in wins else 'no')})" for pid, sv in c.sessions.items())
+                + f" · counts as game now: {'yes' if c.game_open() else 'no'}")
         if c and c.media is not None:
             lines.append(f"Media: {'error: ' + c.media.error if c.media.error else 'ok'}"
                          + (f" · playing {c.media.info.get('app')}" if c.media.info else ""))

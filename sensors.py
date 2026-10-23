@@ -52,6 +52,32 @@ def foreground_pid():
     return pid.value or None
 
 
+def pids_with_windows():
+    """Processes that own a visible top-level window (a minimized game still has one; a launcher hidden in the
+    tray or a process left behind after the game closed does not). None outside Windows."""
+    if not WINDOWS:
+        return None
+    import ctypes
+    from ctypes import wintypes
+    u = ctypes.WinDLL("user32")
+    out = set()
+    proc_t = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+    def each(hwnd, _):
+        if u.IsWindowVisible(hwnd) and u.GetWindowTextLengthW(hwnd) > 0:
+            pid = wintypes.DWORD(0)
+            u.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+            out.add(pid.value)
+        return True
+    u.EnumWindows.argtypes = [proc_t, wintypes.LPARAM]
+    u.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
+    try:
+        u.EnumWindows(proc_t(each), 0)
+    except Exception:  # noqa: BLE001
+        return None
+    return out
+
+
 def idle_seconds():
     """Seconds since the last keyboard/mouse input (0 outside Windows)."""
     if not WINDOWS:
@@ -652,6 +678,7 @@ class Session:
         self.n = 0
         self.sum_ms = 0.0
         self.fps_samples = []   # one per second with the game in the foreground
+        self.last_fps = time.monotonic()   # when it last had FPS in the foreground
         self.fps_max = None
         self.maxima = {}        # sensor -> highest value
         self.last_arrival = 0.0
@@ -1067,6 +1094,24 @@ class Collector:
             else:
                 self.media = Media(mcfg.get("ignore", ""))
                 self.media.start()
+        self.weather = None
+        wcfg = cfg.get("weather") or {}
+        if wcfg.get("enabled", True) and (str(wcfg.get("city") or "").strip() or demo):
+            import weather
+            lang = str((cfg.get("ui") or {}).get("language") or "en")
+            lang = lang if lang in ("pt", "en", "es", "zh") else "en"
+            if demo:
+                self.weather = weather.DemoWeather(wcfg.get("unit", "celsius"))
+            else:
+                w = weather.Weather(wcfg.get("city"), wcfg.get("unit", "celsius"), lang,
+                                    log=lambda m: self.events.append(m))
+                old = getattr(prev, "weather", None)
+                if old is not None and old.key() == w.key():
+                    self.weather = old
+                    old.log = w.log
+                    prev._kept.add("weather")
+                else:
+                    self.weather = w.start()
         scfg = cfg.get("session") or {}
         self.summary_enabled = bool(scfg.get("summary", True))
         self.summary_seconds = float(scfg.get("summary_seconds", 15))
@@ -1108,6 +1153,11 @@ class Collector:
             part = getattr(self, name)
             if part is not None and name not in self._kept:
                 part.stop()
+        if self.weather is not None and "weather" not in self._kept:
+            self.weather.close()
+
+    def weather_info(self):
+        return self.weather.current() if self.weather is not None else None
 
     def media_info(self):
         return self.media.current() if self.media is not None else None
@@ -1138,13 +1188,26 @@ class Collector:
 
     def game_open(self):
         """A game is running even if it is not in front: FPS now, FPS in the last seconds (alt-tab),
-        or a session of a program that showed FPS for at least 30 s and is still open."""
+        or a game still open in the background (see _background_games)."""
         if self.values.get("fps") is not None:
             self._fps_seen_at = time.monotonic()
             return True
         if time.monotonic() - getattr(self, "_fps_seen_at", -1e9) < self.GAME_COOLDOWN:
             return True
-        return any(len(s.fps_samples) >= 30 for s in self.sessions.values())
+        return bool(getattr(self, "_game_in_background", False))
+
+    BACKGROUND_GAME_MINUTES = 30
+
+    def _background_games(self, now):
+        """Sessions that still count as an open game while not in front: they had FPS for 30 s or more, had
+        FPS in the last half hour, and the program still has a window (minimized counts). A process left
+        behind after the game closed, or a launcher hidden in the tray, no longer holds the "game" layout."""
+        cands = [s for s in self.sessions.values() if s.pid != self._front_pid and len(s.fps_samples) >= 30
+                 and now - s.last_fps < self.BACKGROUND_GAME_MINUTES * 60]
+        if not cands:
+            return []
+        windows = pids_with_windows()
+        return [s for s in cands if windows is None or s.pid in windows]
 
     def update(self):
         if self.demo:
@@ -1175,6 +1238,9 @@ class Collector:
             raw = {name: self._resolve(sel) for name, sel in self.aliases.items()}
         updated = self._apply_intervals(raw)
         self._update_sessions()
+        for name in updated:   # every sensor keeps its last values, so a graph shows them as soon as it appears
+            if name not in self._hist and name in self.aliases:
+                self._hist[name] = deque(maxlen=120)
         for name, dq in self._hist.items():
             if name in updated or name not in self.values:
                 dq.append(self.value(name))
@@ -1239,6 +1305,7 @@ class Collector:
                 if self.summary_enabled:
                     self.summary = summary
 
+        self._game_in_background = bool(self._background_games(now))
         for s in self.sessions.values():
             for t in self.session_temps.values():
                 v = self.values.get(t)
@@ -1250,6 +1317,7 @@ class Collector:
             frames, current.last_arrival = pm.frames_since(current.pid, current.last_arrival)
             current.frames(frames)
             current.fps_samples.append(pm.fps)
+            current.last_fps = now
             current.fps_max = pm.fps if current.fps_max is None else max(current.fps_max, pm.fps)
             self.values["fps_1low"] = one_percent_low(pm.recent_times(10))
         elif self.demo and self.demo_game:

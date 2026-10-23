@@ -29,7 +29,7 @@ DATA = _data_folder()
 # sections whose simple values belong to the user; the screen layout always comes from the new version
 USER_SECTIONS = ("display", "colors", "data", "animation", "fps", "session", "network", "ssd", "logos", "media",
                  "ui", "tray", "eco", "background", "custom_colors", "history",
-                 "updates", "performance", "alerts")
+                 "updates", "performance", "alerts", "theme", "weather", "texts")
 
 
 def load(path):
@@ -188,6 +188,9 @@ def merge(default_txt, cfg):
         txt = replace_value(txt, key, yaml_value(v), section)
     if intervals or "intervals" in cfg or "intervalos" in cfg:
         txt = replace_intervals(txt, intervals)
+    if cfg and "theme" not in cfg:   # from 1.4.5 or older: keep the screen as it was and tell about the new themes
+        txt = replace_value(txt, "name", "full", "theme")
+        txt = replace_value(txt, "notice", "true", "theme")
     return txt
 
 

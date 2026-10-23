@@ -1,7 +1,8 @@
 "use strict";
 // Layout editor: blocks on the preview can be selected, moved and resized; their items are edited on the side.
 
-const E = { lay: null, groups: [], sel: null, multi: new Set(), open: null, item: null, boxes: {}, undo: [], W: 480, H: 320, timer: null, loading: false, boxTimer: null };
+const E = { lay: null, groups: [], sel: null, multi: new Set(), open: null, item: null, boxes: {}, undo: [], W: 480, H: 320, timer: null, loading: false, boxTimer: null,
+            clip: null, zoom: 1, grid: false };
 const FONTS = ["", "segoe", "arial", "verdana", "trebuchet", "georgia", "consolas", "impact"];
 const ROTATIONS = [0, 90, 180, 270];
 const SENSOR_TYPES = ["value", "bar", "gauge", "graph"];
@@ -10,7 +11,8 @@ const PROGRESS_MODES = ["bottom", "below_title", "beside_artist", "none"];
 
 function blockName(g) {
   const n = String(g.name || g.id);
-  return n.startsWith("#") ? t("block." + n.slice(1)) : n;
+  if (n.startsWith("#")) return t("block." + n.slice(1));
+  return n.replace("{disks_title}", t("block.disks")).replace(/\{[a-z0-9_]+\}/g, "").trim() || n;
 }
 function sensorLabel(name) {
   const k = "sensor." + name;
@@ -25,8 +27,11 @@ async function edLoad() {
   if (E.loading) return;
   E.loading = true;
   try {
+    const before = E.lay && E.lay.theme;
     E.lay = await api.layout_get();
+    try { E.words = (await api.screen_words()).all; } catch (e) { E.words = null; }
     E.groups = E.lay.groups;
+    if (before && before !== E.lay.theme) { E.undo = []; E.sel = null; E.item = null; E.multi.clear(); }
     [E.W, E.H] = E.lay.size;
     if (!selGroup()) { E.sel = null; E.item = null; }
     edRender();
@@ -87,6 +92,7 @@ function edRenderBoxes() {
     });
   }
   $("#ed-family").textContent = t(E.lay && E.lay.family === "portrait" ? "ed.portrait" : "ed.landscape") + ` · ${E.W}×${E.H}` + (E.lay && E.lay.custom ? " · " + t("ed.custom") : "");
+  if (E.lay) $("#ed-theme").innerHTML = `<b>${esc(t("ed.theme", { name: E.lay.theme_name || E.lay.theme || "" }))}</b><span>${t("ed.theme_hint")}</span>`;
 }
 function edPointer(e, g, el) {
   e.preventDefault();
@@ -123,8 +129,16 @@ function edPointer(e, g, el) {
     const dx = (ev.clientX - start.px) / sc, dy = (ev.clientY - start.py) / sc;
     if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
     if (!handle) {
-      g.x = Math.max(0, Math.min(E.W - g.w, snap(start.x + dx)));
-      g.y = Math.max(0, Math.min(E.H - g.h, snap(start.y + dy)));
+      const free = ev.shiftKey;   // Shift while dragging: no grid and no guides
+      let nx = free ? Math.round(start.x + dx) : snap(start.x + dx), ny = free ? Math.round(start.y + dy) : snap(start.y + dy);
+      if (!free) {
+        const skip = new Set([g.id, ...others.map(s => s.o.id)]);
+        const r = alignGuides({ x: nx, y: ny, w: g.w, h: g.h }, blockTargets(skip));
+        nx += r.dx; ny += r.dy;
+        showGuides(r.lines);
+      } else showGuides([]);
+      g.x = Math.max(0, Math.min(E.W - g.w, nx));
+      g.y = Math.max(0, Math.min(E.H - g.h, ny));
       for (const s of others) {   // the other selected blocks move together
         s.o.x = Math.max(0, Math.min(E.W - s.o.w, s.x + (g.x - start.x)));
         s.o.y = Math.max(0, Math.min(E.H - s.o.h, s.y + (g.y - start.y)));
@@ -157,6 +171,7 @@ function edPointer(e, g, el) {
     el.removeEventListener("pointerup", up);
     el.removeEventListener("pointercancel", up);
     el.classList.remove("drag");
+    showGuides([]);
     if (moved) {
       E.undo.push(snapshot);
       edSave();
@@ -177,6 +192,7 @@ function edRender() {
   if (E.paletteLang !== S.lang) { E.paletteLang = S.lang; renderPalette(); }   // follows the window language
   const img = $("#stage-img");
   img.style.aspectRatio = `${E.W} / ${E.H}`;
+  applyZoom(true);
   edRenderBoxes();
   // block list
   const list = $("#ed-blocks");
@@ -209,8 +225,9 @@ function edRender() {
 function itemLabel(it) {
   const typeName = t("item." + it.type);
   if (SENSOR_TYPES.includes(it.type)) return `${typeName} <small>${esc(sensorLabel(it.sensor || ""))}</small>`;
-  if (it.type === "text") return `${typeName} <small>${esc(String(it.text || "").replace(/^#/, ""))}</small>`;
-  if (it.type === "panel") return `${typeName} <small>${esc(String(it.title || "").replace(/^#/, ""))}</small>`;
+  const word = v => { v = String(v || ""); return v.startsWith("#") && E.words && E.words[v.slice(1)] != null ? E.words[v.slice(1)] : v; };
+  if (it.type === "text") return `${typeName} <small>${esc(word(it.text))}</small>`;
+  if (it.type === "panel") return `${typeName} <small>${esc(word(it.title))}</small>`;
   const when = [].concat(it.when || []);
   if (it.type === "media") return `${typeName} <small>${t(when.includes("media_in_game") ? "idesc.media_game" : "idesc.media_idle")}</small>`;
   if (it.type === "clock") {
@@ -261,8 +278,16 @@ function field(labelKey, input) {
 function textInput(it, key) {
   const inp = document.createElement("input");
   inp.className = "txt";
-  inp.value = it[key] == null ? "" : String(it[key]);
-  inp.addEventListener("change", () => edChange(() => { it[key] = inp.value; }));
+  const raw = it[key] == null ? "" : String(it[key]);
+  // "#load" and the like are the screen's own words (they follow the language): shown as the word itself
+  const word = raw.startsWith("#") && E.words ? E.words[raw.slice(1)] : null;
+  inp.value = word != null ? word : raw;
+  if (word != null) inp.title = t("ed.word_hint");
+  inp.addEventListener("change", () => edChange(() => {
+    const v = inp.value;
+    if (word != null && (v.trim() === "" || v === word)) it[key] = raw;   // unchanged: keeps following the language
+    else it[key] = v;
+  }));
   return inp;
 }
 function numInput(it, key, step = 1) {
@@ -347,10 +372,11 @@ function edRenderItems(g) {
   (g.items || []).forEach((it, i) => {
     const el = document.createElement("div");
     el.className = "item-ed" + (it.enabled === false ? " off" : "") + (E.item === i ? " on" : "");
-    el.innerHTML = `<div class="row"><span class="lbl">${itemLabel(it)}</span><span class="inline"><button class="sw" role="switch" aria-checked="${it.enabled !== false}"></button><button class="icon-btn" title="${t("ed.remove")}">✕</button></span></div>`;
+    el.innerHTML = `<div class="row"><span class="lbl">${itemLabel(it)}</span><span class="inline"><button class="sw" role="switch" aria-checked="${it.enabled !== false}"></button><button class="icon-btn dup" title="${t("ed.duplicate")} (Ctrl+D)">⧉</button><button class="icon-btn" title="${t("ed.remove")}">✕</button></span></div>`;
     $(".lbl", el).addEventListener("click", () => { if (E.open === i) { E.open = null; E.item = null; edRender(); edRenderBoxes(); } else selectItem(i); });
     $(".sw", el).addEventListener("click", () => edChange(() => { it.enabled = it.enabled === false; }));
-    $(".icon-btn", el).addEventListener("click", () => edChange(() => { g.items.splice(i, 1); E.open = null; E.item = null; }));
+    $(".dup", el).addEventListener("click", () => duplicateItem(g, i));
+    $(".icon-btn:not(.dup)", el).addEventListener("click", () => edChange(() => { deleteItem(g, i); E.open = null; E.item = null; }));
     if (E.open === i) el.appendChild(edItemFields(it));
     box.appendChild(el);
   });
@@ -395,6 +421,13 @@ function bindEditor() {
   });
   document.addEventListener("click", e => { if (!menu.contains(e.target)) menu.hidden = true; });
   $("#ed-del").addEventListener("click", deleteSelectedBlocks);
+  $("#ed-dup").addEventListener("click", edDuplicate);
+  $("#ed-zoom-in").addEventListener("click", () => setZoom(E.zoom * 1.5));
+  $("#ed-zoom-out").addEventListener("click", () => setZoom(E.zoom / 1.5));
+  $("#ed-zoom").addEventListener("click", () => setZoom(1));
+  $("#ed-grid").addEventListener("click", () => { E.grid = !E.grid; try { localStorage.setItem("tela.grid", E.grid ? "1" : ""); } catch (e) { /* ignore */ } applyZoom(); });
+  $("#stage-scroll").addEventListener("wheel", e => { if (!e.ctrlKey) return; e.preventDefault(); setZoom(E.zoom * (e.deltaY < 0 ? 1.25 : 0.8)); }, { passive: false });
+  try { E.grid = localStorage.getItem("tela.grid") === "1"; } catch (e) { E.grid = false; }
   renderPalette();
   bindStageDrop();
   $("#ed-name").addEventListener("change", () => { const g = selGroup(); if (g) edChange(() => { g.name = $("#ed-name").value.trim() || g.name; }); });
@@ -420,8 +453,14 @@ function bindEditor() {
     edChange(() => { g.items.push({ type: "value", sensor: s, x: Math.round(bw / 2), y: Math.round(bh / 2), size: 14 }); E.open = g.items.length - 1; });
   });
   document.addEventListener("keydown", e => {
-    if (S.tab !== "layout" || (!E.sel && !E.multi.size) || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
-    if (!$("#overlay").hidden) return;
+    if (S.tab !== "layout" || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) || !$("#overlay").hidden) return;
+    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+      const k = e.key.toLowerCase();
+      if (k === "c") { if (edCopy()) e.preventDefault(); return; }
+      if (k === "v") { if (E.clip) { e.preventDefault(); edPaste(); } return; }
+      if (k === "d") { e.preventDefault(); edDuplicate(); return; }
+    }
+    if (!E.sel && !E.multi.size) return;
     const g = selGroup() || E.groups.find(o => E.multi.has(o.id));
     if (!g) return;
     const d = e.shiftKey ? 10 : 2;
@@ -435,7 +474,7 @@ function bindEditor() {
         edChange(() => { it[px] = (it[px] || 0) + Math.sign(mv[0]) * one; it[py] = (it[py] || 0) + Math.sign(mv[1]) * one; });
       } else if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        edChange(() => { g.items.splice(E.item, 1); E.item = null; E.open = null; });
+        edChange(() => { deleteItem(g, E.item); E.item = null; E.open = null; });
       } else if (e.key === "r" || e.key === "R") {
         edChange(() => { const a = ((Number(it.rotate) || 0) + 90) % 360; if (a) it.rotate = a; else delete it.rotate; });
       } else if (e.key === "Escape") { E.item = null; E.open = null; edRender(); edRenderBoxes(); }
@@ -490,8 +529,14 @@ function itemPointer(e, g, i, el, r) {
     const dx = (ev.clientX - start.cx) / sc, dy = (ev.clientY - start.cy) / sc;   // screen pixels
     if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
     if (!resize) {
-      it[px] = Math.round(start.x + dx / sx); it[py] = Math.round(start.y + dy / sy);
-      Object.assign(el.style, { left: (start.rect[0] + dx) * sc + "px", top: (start.rect[1] + dy) * sc + "px" });
+      let mx = dx, my = dy;
+      if (!ev.shiftKey) {   // guides: edges and centers of the other elements and of the block
+        const r = alignGuides({ x: start.rect[0] + dx, y: start.rect[1] + dy, w: start.rect[2], h: start.rect[3] }, itemTargets(g, i));
+        mx += r.dx; my += r.dy;
+        showGuides(r.lines);
+      } else showGuides([]);
+      it[px] = Math.round(start.x + mx / sx); it[py] = Math.round(start.y + my / sy);
+      Object.assign(el.style, { left: (start.rect[0] + mx) * sc + "px", top: (start.rect[1] + my) * sc + "px" });
     } else {
       const nw = Math.max(6, start.rect[2] + dx), nh = Math.max(6, start.rect[3] + dy);
       if (start.w != null && start.h != null) { it.w = Math.max(4, Math.round(start.w + dx / sx)); it.h = Math.max(2, Math.round(start.h + dy / sy)); }
@@ -507,7 +552,15 @@ function itemPointer(e, g, i, el, r) {
   };
   const up = () => {
     el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);
-    if (moved) { E.undo.push(snapshot); edSave(); edRender(); edBoxes(); }
+    showGuides([]);
+    if (moved) {
+      E.undo.push(snapshot);
+      if (resize) {   // the others on the same row move right, the ones below move down (automatic adjustment)
+        const nw = el.getBoundingClientRect().width / sc, nh = el.getBoundingClientRect().height / sc;
+        reflowItemResize(g, i, start.rect, [start.rect[0], start.rect[1], nw, nh]);
+      }
+      edSave(); edRender(); edBoxes();
+    }
   };
   el.addEventListener("pointermove", move); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
 }
@@ -670,5 +723,186 @@ function deleteSelectedBlocks() {
     for (const g of E.groups.filter(x => ids.has(x.id))) reflowDelete(g);
     E.groups = E.groups.filter(x => !ids.has(x.id));
     E.sel = null; E.item = null; E.open = null; E.multi.clear();
+  });
+}
+
+// ------------------------------------------------------------------ copy, paste and duplicate (Ctrl+C / Ctrl+V / Ctrl+D)
+const clone = o => JSON.parse(JSON.stringify(o));
+function uniqueId(base) {
+  base = String(base || "block").replace(/_\d+$/, "");
+  let n = 2, id = `${base}_${n}`;
+  while (E.groups.some(g => g.id === id)) id = `${base}_${++n}`;
+  return id;
+}
+function edCopy(quiet) {
+  const g = selGroup();
+  if (g && E.item != null && g.items[E.item]) {
+    E.clip = { kind: "item", data: clone(g.items[E.item]), from: g.id };
+  } else {
+    const ids = E.multi.size ? [...E.multi] : (E.sel ? [E.sel] : []);
+    if (!ids.length) return false;
+    E.clip = { kind: "blocks", data: E.groups.filter(x => ids.includes(x.id)).map(clone) };
+  }
+  if (!quiet) toast(t("ed.copied"));
+  return true;
+}
+function edPaste() {
+  const c = E.clip;
+  if (!c) return;
+  if (c.kind === "item") {
+    const g = selGroup() || E.groups.find(x => x.id === c.from);
+    if (!g) return;
+    const it = clone(c.data);
+    const px = "x" in it ? "x" : "cx", py = "y" in it ? "y" : "cy";
+    it[px] = (it[px] || 0) + 6; it[py] = (it[py] || 0) + 6;
+    c.data = clone(it);   // the next paste lands a bit further
+    edChange(() => { g.items.push(it); E.sel = g.id; E.item = g.items.length - 1; E.open = E.item; });
+    return;
+  }
+  const made = c.data.map(src => {
+    const b = clone(src);
+    b.id = uniqueId(src.id);
+    b.x = Math.max(0, Math.min(E.W - b.w, src.x + 10));
+    b.y = Math.max(0, Math.min(E.H - b.h, src.y + 10));
+    return b;
+  });
+  c.data = made.map(clone);
+  edChange(() => {
+    E.groups.push(...made);
+    E.multi = new Set(made.length > 1 ? made.map(b => b.id) : []);
+    E.sel = made[0].id; E.item = null; E.open = null;
+  });
+}
+function edDuplicate() {
+  const keep = E.clip;
+  if (edCopy(true)) edPaste();
+  E.clip = keep;
+}
+function duplicateItem(g, i) {
+  const keep = E.clip;
+  E.clip = { kind: "item", data: clone(g.items[i]), from: g.id };
+  E.sel = g.id;
+  edPaste();
+  E.clip = keep;
+}
+
+// ------------------------------------------------------------------ alignment guides
+const SNAP = 4;   // screen pixels
+function blockTargets(skip) {
+  const xs = [0, E.W / 2, E.W], ys = [0, E.H / 2, E.H];
+  for (const o of E.groups) {
+    if (skip.has(o.id) || o.enabled === false) continue;
+    xs.push(o.x, o.x + o.w / 2, o.x + o.w);
+    ys.push(o.y, o.y + o.h / 2, o.y + o.h);
+  }
+  return { xs, ys };
+}
+function itemTargets(g, skip) {
+  const xs = [g.x, g.x + g.w / 2, g.x + g.w], ys = [g.y, g.y + g.h / 2, g.y + g.h];
+  (E.boxes[g.id] || []).forEach((r, j) => {
+    const it = (g.items || [])[j];
+    if (!r || j === skip || !it || it.enabled === false || it.type === "panel") return;
+    xs.push(r[0], r[0] + r[2] / 2, r[0] + r[2]);
+    ys.push(r[1], r[1] + r[3] / 2, r[1] + r[3]);
+  });
+  return { xs, ys };
+}
+// the moving rectangle's edges and center snap to the nearest target within SNAP pixels
+function alignGuides(rect, targets) {
+  const best = (vals, cands) => {
+    let hit = null;
+    for (const v of vals) for (const c of cands) {
+      const d = c - v;
+      if (Math.abs(d) <= SNAP && (!hit || Math.abs(d) < Math.abs(hit.d))) hit = { d, at: c };
+    }
+    return hit;
+  };
+  const hx = best([rect.x, rect.x + rect.w / 2, rect.x + rect.w], targets.xs);
+  const hy = best([rect.y, rect.y + rect.h / 2, rect.y + rect.h], targets.ys);
+  const lines = [];
+  if (hx) lines.push({ v: true, at: hx.at });
+  if (hy) lines.push({ v: false, at: hy.at });
+  return { dx: hx ? hx.d : 0, dy: hy ? hy.d : 0, lines };
+}
+function showGuides(lines) {
+  const box = $("#stage-boxes");
+  $$(".guide", box).forEach(el => el.remove());
+  const sc = stageScale();
+  for (const l of lines) {
+    const el = document.createElement("div");
+    el.className = "guide " + (l.v ? "v" : "h");
+    if (l.v) el.style.left = Math.round(l.at * sc) + "px"; else el.style.top = Math.round(l.at * sc) + "px";
+    box.appendChild(el);
+  }
+}
+
+// ------------------------------------------------------------------ zoom and grid
+function setZoom(z) {
+  E.zoom = Math.max(1, Math.min(4, Math.round(z * 100) / 100));
+  if (Math.abs(E.zoom - 1) < 0.05) E.zoom = 1;
+  applyZoom();
+  edRenderBoxes();
+}
+function applyZoom(quiet) {
+  const st = $("#stage");
+  if (!st) return;
+  st.style.width = E.zoom === 1 ? "" : `${E.zoom * 100}%`;
+  st.style.maxWidth = E.zoom === 1 ? "" : (E.lay && E.lay.family === "portrait" ? `${380 * E.zoom}px` : "none");
+  $("#ed-zoom").textContent = Math.round(E.zoom * 100) + "%";
+  st.classList.toggle("grid", !!E.grid);
+  $("#ed-grid").setAttribute("aria-pressed", String(!!E.grid));
+  if (E.grid) {   // a line every 10 screen pixels, stronger every 50
+    const sc = stageScale(), a = 10 * sc, b = 50 * sc;
+    Object.assign($("#stage-grid").style, {
+      backgroundImage: "linear-gradient(rgba(124,196,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(124,196,255,.10) 1px,transparent 1px)," +
+        "linear-gradient(rgba(124,196,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(124,196,255,.22) 1px,transparent 1px)",
+      backgroundSize: `${a}px ${a}px,${a}px ${a}px,${b}px ${b}px,${b}px ${b}px`,
+    });
+  }
+  if (!quiet) edRenderBoxes();
+}
+
+// ------------------------------------------------------------------ automatic adjustment of the elements inside a block
+function itemBoxes(g) { return E.boxes[g.id] || []; }
+function moveItem(g, it, dx, dy) {   // dx, dy in screen pixels
+  const { sx, sy } = groupScale(g);
+  const px = "x" in it ? "x" : "cx", py = "y" in it ? "y" : "cy";
+  if (dx) it[px] = Math.round((it[px] || 0) + dx / sx);
+  if (dy) it[py] = Math.round((it[py] || 0) + dy / sy);
+}
+// deleting an element: when nothing else is left on its row, the rows below move up into the gap.
+// Tall elements beside the rows (a gauge, a graph) and whatever sits in their column stay where they are.
+function deleteItem(g, i) {
+  const boxes = itemBoxes(g), gone = boxes[i];
+  const items = g.items;
+  const it = items[i];
+  items.splice(i, 1);
+  if (!reflowOn() || !gone || !it || it.type === "panel") return;
+  const mid = gone[1] + gone[3] / 2;
+  const hOv = (a, b) => Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]) > 1;
+  const vOv = (a, b) => Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]) > 2;
+  let rest = items.map((o, j) => ({ o, r: boxes[j < i ? j : j + 1] })).filter(x => x.r && x.o.enabled !== false && x.o.type !== "panel");
+  const tall = rest.filter(x => x.r[1] < mid - 2 && x.r[1] + x.r[3] > mid + 2 && x.r[3] > gone[3] * 2.5 + 4);
+  rest = rest.filter(x => !tall.includes(x) && !tall.some(tl => hOv(tl.r, x.r) && !hOv(tl.r, gone)));
+  if (rest.some(x => vOv(x.r, gone))) return;   // something is still on this row
+  const below = rest.filter(x => x.r[1] >= gone[1] + gone[3] - 2);
+  const rows = below.filter(x => x.r[3] >= 3);   // separator lines do not set the step
+  if (!rows.length) return;
+  const pitch = Math.min(...rows.map(x => x.r[1])) - gone[1];
+  if (pitch <= 0) return;
+  below.forEach(x => moveItem(g, x.o, 0, -pitch));
+}
+// resizing an element: the ones beside it on its row move right, the ones below it move down
+function reflowItemResize(g, i, before, after) {
+  if (!reflowOn()) return;
+  const dx = (after[0] + after[2]) - (before[0] + before[2]), dy = (after[1] + after[3]) - (before[1] + before[3]);
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+  itemBoxes(g).forEach((r, j) => {
+    const o = g.items[j];
+    if (!r || j === i || !o || o.enabled === false || o.type === "panel") return;
+    const sameRow = Math.min(r[1] + r[3], before[1] + before[3]) - Math.max(r[1], before[1]) > 2;
+    const sameCol = Math.min(r[0] + r[2], before[0] + before[2]) - Math.max(r[0], before[0]) > 2;
+    if (Math.abs(dx) >= 1 && sameRow && r[0] >= before[0] + before[2] - 2) moveItem(g, o, dx, 0);
+    else if (Math.abs(dy) >= 1 && sameCol && r[1] >= before[1] + before[3] - 2) moveItem(g, o, 0, dy);
   });
 }

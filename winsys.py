@@ -49,6 +49,31 @@ def ask_running_instance_to_quit(timeout=12):
     return True
 
 
+def wait_for_exit(pid, timeout=30):
+    """Restart: the new copy waits until the old one has ended (it holds the screen and the instance port)."""
+    try:
+        import psutil
+    except ImportError:
+        time.sleep(3)
+        return
+    end = time.monotonic() + timeout
+    while time.monotonic() < end and psutil.pid_exists(pid):
+        time.sleep(0.25)
+
+
+def start_again(extra=()):
+    """Starts a new copy of Tela! that waits for this process to end."""
+    if FROZEN:
+        cmd = [sys.executable]
+    else:
+        cmd = [sys.executable, str(HERE / "app.py")]
+    cmd += ["--wait-pid", str(os.getpid()), *extra]
+    flags = 0
+    if WINDOWS:
+        flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    subprocess.Popen(cmd, cwd=str(HERE), creationflags=flags, close_fds=True)
+
+
 def installed_by_setup():
     return FROZEN and (HERE / "unins000.exe").exists()
 
