@@ -1149,6 +1149,44 @@ def summary_shows_what_the_user_chose():
             assert r.draw(col).size == (W, H)
 
 
+@test
+def guard_reopens_a_hung_tela():
+    import watchdog
+    saved = {k: getattr(watchdog, k) for k in ("alive", "answers", "kill_tree", "start_main", "windows_of", "ui_hung",
+                                                "EVERY", "GRACE", "HUNG_PING", "HUNG_UI", "log")}
+    done = []
+    try:
+        watchdog.EVERY, watchdog.GRACE, watchdog.HUNG_PING, watchdog.HUNG_UI = 0.01, 0, 0.05, 0.05
+        watchdog.log = lambda line: done.append(("log", line))
+        watchdog.alive = lambda pid: not any(d[0] == "kill" for d in done)
+        watchdog.kill_tree = lambda pid: done.append(("kill", pid))
+        watchdog.start_main = lambda hidden: done.append(("start", hidden))
+        watchdog.windows_of = lambda pid: [(1, True)]
+        watchdog.answers = lambda: True
+        watchdog.ui_hung = lambda wins: True                 # window "Not responding"
+        watchdog.watch(123)
+        assert ("kill", 123) in done and ("start", False) in done and "window" in done[0][1]
+        done.clear()
+        watchdog.ui_hung = lambda wins: False
+        watchdog.answers = lambda: False                     # everything frozen, window hidden in the tray
+        watchdog.windows_of = lambda pid: [(1, False)]
+        watchdog.watch(123)
+        assert ("start", True) in done
+        done.clear()
+        calls = [0]
+
+        def gone(pid):
+            calls[0] += 1
+            return calls[0] < 5
+        watchdog.alive = gone                                 # Tela! closed normally: the guard just ends
+        watchdog.answers = lambda: True
+        watchdog.watch(123)
+        assert not done
+    finally:
+        for k, v in saved.items():
+            setattr(watchdog, k, v)
+
+
 def main():
     failed = 0
     t0 = time.monotonic()

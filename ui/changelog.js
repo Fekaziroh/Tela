@@ -6,6 +6,34 @@
 // pre-release, only for "Receive test versions"); removing "beta" later promotes it to the stable release.
 const CHANGELOG = [
 {
+ "v": "1.4.7",
+ "beta": true,
+ "pt": {
+  "fix": [
+   "Se a janela travar (“Não está respondendo”) por 20 segundos, ou a Tela! inteira parar de responder, ela é fechada e reaberta sozinha, com um aviso na bandeja. Um pequeno processo de guarda acompanha a Tela! para isso.",
+   "Quando a janela trava, a Tela! anota no registro (tela.log) o que cada parte estava fazendo, para achar a causa."
+  ]
+ },
+ "en": {
+  "fix": [
+   "If the window freezes (“Not responding”) for 20 seconds, or the whole of Tela! stops responding, it is closed and opened again by itself, with a notice in the tray. A small guard process runs alongside Tela! for this.",
+   "When the window freezes, Tela! writes to its log (tela.log) what each part was doing, to find the cause."
+  ]
+ },
+ "es": {
+  "fix": [
+   "Si la ventana se congela (“No responde”) durante 20 segundos, o todo Tela! deja de responder, se cierra y se vuelve a abrir sola, con un aviso en la bandeja. Un pequeño proceso de guardia acompaña a Tela! para esto.",
+   "Cuando la ventana se congela, Tela! anota en su registro (tela.log) lo que hacía cada parte, para encontrar la causa."
+  ]
+ },
+ "zh": {
+  "fix": [
+   "如果窗口卡住（“未响应”）达 20 秒，或整个 Tela! 停止响应，它会自动关闭并重新打开，并在托盘中提示。为此会有一个小的守护进程与 Tela! 一起运行。",
+   "窗口卡住时，Tela! 会在日志（tela.log）中记录各部分当时在做什么，便于查找原因。"
+  ]
+ }
+},
+{
  "v": "1.4.6",
  "beta": true,
  "pt": {

@@ -92,7 +92,9 @@ def instance_server(on_show, on_quit=None):
                 c, _ = srv.accept()
                 with c:
                     msg = c.recv(16)
-                    if msg == b"mostrar":
+                    if msg == b"ping":   # the guard process checks that Tela! is alive
+                        c.sendall(b"pong")
+                    elif msg == b"mostrar":
                         on_show()
                     elif msg == b"quit" and on_quit is not None:
                         on_quit()

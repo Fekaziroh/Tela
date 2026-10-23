@@ -4,12 +4,19 @@
   Tela.exe            opens the window
   Tela.exe --tray     starts hidden in the tray (used at Windows logon)
 """
-import argparse
-import re
-import threading
-import time
+import sys
 
-import config
+if __name__ == "__main__" and "--watchdog" in sys.argv:   # the small guard process: no window, light imports
+    import watchdog
+    watchdog.main(sys.argv)
+    sys.exit(0)
+
+import argparse  # noqa: E402
+import re  # noqa: E402
+import threading  # noqa: E402
+import time  # noqa: E402
+
+import config  # noqa: E402
 import winsys
 from api import Api
 from engine import HERE, VERSION, Engine, Log, effective_language
@@ -21,24 +28,24 @@ TEXT = {
     "pt": {"hot": "{part} a {t} °C (limite {limit} °C).", "busy": "A tela está sendo usada por: {apps}. Use o menu deste ícone para fechar e a Tela! assumir.", "take": "Fechar {apps} e usar a tela",
            "usage": "Tela! usando {cpu}% de CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
            "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
-           "pause": "Pausar (congelar a tela)", "release": "Liberar a tela para outro programa", "reconnect": "Reconectar a tela", "restart": "Reiniciar a Tela!", "unload": "Liberar memória da janela na bandeja", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
+           "pause": "Pausar (congelar a tela)", "release": "Liberar a tela para outro programa", "reconnect": "Reconectar a tela", "restart": "Reiniciar a Tela!", "unload": "Liberar memória da janela na bandeja", "recovered": "A Tela! parou de responder e foi reaberta sozinha.", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
     "es": {"hot": "{part} a {t} °C (límite {limit} °C).", "busy": "La pantalla está en uso por: {apps}. Usa el menú de este icono para cerrarlo y que Tela! la use.", "take": "Cerrar {apps} y usar la pantalla",
            "usage": "Tela! usa {cpu}% de CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
            "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
-           "pause": "Pausar (congelar la pantalla)", "release": "Liberar la pantalla para otro programa", "reconnect": "Reconectar la pantalla", "restart": "Reiniciar Tela!", "unload": "Liberar la memoria de la ventana en la bandeja", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
+           "pause": "Pausar (congelar la pantalla)", "release": "Liberar la pantalla para otro programa", "reconnect": "Reconectar la pantalla", "restart": "Reiniciar Tela!", "unload": "Liberar la memoria de la ventana en la bandeja", "recovered": "Tela! dejó de responder y se volvió a abrir sola.", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
     "zh": {"hot": "{part} 温度 {t} °C（上限 {limit} °C）。", "busy": "屏幕正被以下程序使用：{apps}。可通过此图标菜单关闭它，让 Tela! 接管。", "take": "关闭 {apps} 并使用屏幕",
            "usage": "Tela! 占用 {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
            "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
-           "pause": "暂停（冻结屏幕）", "release": "释放屏幕给其他程序", "reconnect": "重新连接屏幕", "restart": "重启 Tela!", "unload": "在托盘中释放窗口内存", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
+           "pause": "暂停（冻结屏幕）", "release": "释放屏幕给其他程序", "reconnect": "重新连接屏幕", "restart": "重启 Tela!", "unload": "在托盘中释放窗口内存", "recovered": "Tela! 停止响应，已自动重新打开。", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
     "en": {"hot": "{part} at {t} °C (limit {limit} °C).", "busy": "The screen is being used by: {apps}. Use the menu of this icon to close it and let Tela! take over.", "take": "Close {apps} and use the screen",
            "usage": "Tela! using {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
            "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
-           "pause": "Pause (freeze the screen)", "release": "Release the screen for another program", "reconnect": "Reconnect the screen", "restart": "Restart Tela!", "unload": "Free the window's memory in the tray", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
+           "pause": "Pause (freeze the screen)", "release": "Release the screen for another program", "reconnect": "Reconnect the screen", "restart": "Restart Tela!", "unload": "Free the window's memory in the tray", "recovered": "Tela! stopped responding and was reopened by itself.", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
                          "Close it and open this one?"},
 }
@@ -60,7 +67,10 @@ class App:
     WATCHDOG_SECONDS = 60
     WATCHDOG_CHECK = 10
 
-    def __init__(self, start_hidden=False, demo=False, simulate=False, force_browser=False):
+    def __init__(self, start_hidden=False, demo=False, simulate=False, force_browser=False, recovered=False):
+        self.recovered = recovered
+        self._guard = None
+        self._hung_since = None
         self.cfg_path = config.DATA / config.CONFIG
         self.log = Log(config.DATA / "tela.log", echo=False)
         self.demo, self.simulate = demo, simulate
@@ -93,8 +103,13 @@ class App:
 
     # ------------------------------------------------------------ start
     def run(self):
-        self.log(f"Tela! {VERSION} started" + (" (demo)" if self.demo else ""))
+        self.log(f"Tela! {VERSION} started" + (" (demo)" if self.demo else "")
+                 + (" again after it stopped responding" if self.recovered else ""))
         self.engine.start()
+        if winsys.WINDOWS and not self.demo:
+            import os
+            import watchdog
+            self._guard = watchdog.launch(os.getpid())   # reopens Tela! if it ever hangs
         if not self.demo:
             self.updater.start()
         winsys.instance_server(self.show_window, lambda: threading.Thread(target=self.quit, daemon=True).start())
@@ -103,6 +118,8 @@ class App:
         threading.Thread(target=winsys.refresh_start_with_windows, args=(self.log,), daemon=True).start()
         threading.Thread(target=self._watchdog, daemon=True, name="watchdog").start()
         self.tray = self._make_tray()
+        if self.recovered and self.tray is not None:
+            threading.Timer(4, lambda: self._notify(self.T["recovered"])).start()
         threading.Thread(target=self._tray_loop, daemon=True, name="tray-icon").start()
         if self.force_browser or not self._run_webview():
             self._run_browser()
@@ -450,6 +467,7 @@ class App:
     def _watchdog(self):
         """Restarts the engine if it stops responding (e.g. a driver call that never returns)."""
         while not self._quit.wait(self.WATCHDOG_CHECK):
+            self._check_window_hung()
             e = self.engine
             stuck = (not e.sleeping and time.monotonic() - e.beat > self.WATCHDOG_SECONDS)
             if self._quit.is_set() or not (stuck or not e.is_alive()):
@@ -469,6 +487,38 @@ class App:
             new.last_summary = e.last_summary
             self.engine = new
             new.start()
+
+    def _notify(self, text):
+        try:
+            self.tray.notify(text, "Tela!")
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _check_window_hung(self):
+        """The window "Not responding": writes what every thread is doing to tela.log once (to find the cause).
+        The guard process (watchdog.py) reopens Tela! if it does not recover."""
+        if not winsys.WINDOWS or self.window is None:
+            return
+        try:
+            import os
+
+            import watchdog
+            hung = watchdog.ui_hung(watchdog.windows_of(os.getpid()))
+        except Exception:  # noqa: BLE001
+            return
+        if not hung:
+            self._hung_since = None
+            return
+        if self._hung_since is None:
+            self._hung_since = time.monotonic()
+            import traceback
+            names = {t.ident: t.name for t in threading.enumerate()}
+            lines = ["The window is not responding. What each part was doing:"]
+            for ident, frame in sys._current_frames().items():
+                stack = "".join(traceback.format_stack(frame)[-6:]).rstrip().replace("\n", " | ")
+                lines.append(f"  [{names.get(ident, ident)}] {stack}")
+            for ln in lines:
+                self.log(ln[:1500])
 
     # ------------------------------------------------------------ exit
     def quit(self):
@@ -510,6 +560,7 @@ def main():
     ap.add_argument("--autostart", choices=("on", "off"), help="(setup) turn start with Windows on or off and exit")
     ap.add_argument("--quit", action="store_true", help="(setup) close a running Tela! properly and exit")
     ap.add_argument("--wait-pid", type=int, help=argparse.SUPPRESS)   # restart: wait for the old copy to end
+    ap.add_argument("--recovered", action="store_true", help=argparse.SUPPRESS)   # reopened by the guard process
     a = ap.parse_args()
     if a.wait_pid:
         winsys.wait_for_exit(a.wait_pid, 30)
@@ -552,7 +603,7 @@ def main():
     elif winsys.ask_running_instance_to_show():
         return
     _preload_dotnet()
-    app = App(start_hidden=a.tray, demo=a.demo, simulate=a.simulate, force_browser=a.browser)
+    app = App(start_hidden=a.tray, demo=a.demo, simulate=a.simulate, force_browser=a.browser, recovered=a.recovered)
     app.run()
     if getattr(app, "restart_after", False):
         extra = [f for f, on in (("--demo", a.demo), ("--browser", a.browser)) if on]

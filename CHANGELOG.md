@@ -2,6 +2,13 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.7
+
+### Fixes
+
+- If the window freezes (“Not responding”) for 20 seconds, or the whole of Tela! stops responding, it is closed and opened again by itself, with a notice in the tray. A small guard process runs alongside Tela! for this.
+- When the window freezes, Tela! writes to its log (tela.log) what each part was doing, to find the cause.
+
 ## Tela! 1.4.6
 
 ### New
