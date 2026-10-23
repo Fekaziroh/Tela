@@ -1,0 +1,156 @@
+# Tela! default layout (portrait 320x480). The layout editor saves your own copy separately;
+# this file is replaced by every update. Items use coordinates relative to their block.
+
+size: [320, 480]
+
+sensors:
+  fps: fps.value
+  cpu_temp: [cpu|temperature|Core (Tctl/Tdie), cpu|temperature|*|max]
+  cpu_load: [cpu|load|CPU Total, sys.cpu_pct]
+  cpu_clock: ['cpu|clock|Core #*|avg']
+  cpu_power: [cpu|power|Package, cpu|power|CPU Package]
+  cpu_fan: [lpc|fan|CPU*, 'lpc|fan|Fan #1']
+  gpu_temp: [gpu|temperature|GPU Core]
+  gpu_hotspot: [gpu|temperature|GPU Hot Spot]
+  gpu_load: [gpu|load|GPU Core]
+  gpu_clock: [gpu|clock|GPU Core]
+  gpu_mem_clock: [gpu|clock|GPU Memory]
+  gpu_power: [gpu|power|GPU Package, gpu|power|GPU Core, gpu|power|*|max]
+  gpu_fan: [gpu|fan|GPU Fan, gpu|fan|*|max]
+  vram_mb: [gpu|smalldata|GPU Memory Used, gpu|smalldata|D3D Dedicated Memory Used]
+  ssd1_temp: ['{disk1_model}|temperature|Composite Temperature', '{disk1_model}|temperature|Temperature', '{disk1_model}|temperature|Temperature #1']
+  ssd2_temp: ['{disk2_model}|temperature|Composite Temperature', '{disk2_model}|temperature|Temperature', '{disk2_model}|temperature|Temperature #1']
+  ram_pct: sys.ram_pct
+  ram_used_gb: sys.ram_used_gb
+  disk1: sys.disk_pct:{disk1_letter}
+  disk2: sys.disk_pct:{disk2_letter}
+  disk1_act: ['{disk1_model}|load|Total Activity']
+  disk2_act: ['{disk2_model}|load|Total Activity']
+  volume: sys.volume
+  net_down: sys.net_down_mbps
+  net_up: sys.net_up_mbps
+  app_cpu: sys.app_cpu
+  app_ram: sys.app_ram_mb
+
+groups:
+  - id: top
+    name: '#top'
+    x: 0
+    y: 0
+    w: 320
+    h: 60
+    items:
+      - {type: clock, format: '%H:%M', x: 10, y: 17, size: 26, bold: true}
+      - {type: clock, format: '{weekday} %d/%m', x: 310, y: 17, align: right, size: 13, color: secondary}
+      - {type: value, sensor: fps, x: 10, y: 46, size: 20, bold: true, unit: ' FPS', unit_size: 10, empty: ''}
+      - {type: frametime, x: 92, y: 46, w: 60, h: 11, seconds: 2}
+      - {type: media, x: 10, y: 33, w: 300, h: 25, when: [no_game, media], fade: true}
+      - {type: media, x: 162, y: 33, w: 150, h: 25, when: media_in_game, fade: true}
+      - {type: image, files: logos, when: logos, x: 10, y: 38, w: 90, h: 15}
+  - id: cpu
+    name: CPU
+    x: 4
+    y: 62
+    w: 312
+    h: 120
+    items:
+      - {type: panel, x: 0, y: 0, w: 312, h: 120, title: CPU, subtitle: '{cpu_name}'}
+      - {type: gauge, sensor: cpu_temp, cx: 56, cy: 68, radius: 40, thickness: 6, min: 20, max: 95, unit: °C, size: 24, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+      - {type: text, text: '#temp', x: 56, y: 112, align: center, size: 9, color: secondary}
+      - {type: text, text: '#load', x: 116, y: 30, size: 10, color: secondary}
+      - {type: value, sensor: cpu_load, x: 302, y: 30, align: right, size: 14, unit: ' %'}
+      - {type: bar, sensor: cpu_load, x: 116, y: 38, w: 186, h: 3, min: 0, max: 100}
+      - {type: text, text: '#clock', x: 116, y: 52, size: 10, color: secondary}
+      - {type: value, sensor: cpu_clock, x: 302, y: 52, align: right, size: 14, scale: 0.001, format: '{:.2f}', unit: ' GHz'}
+      - {type: bar, sensor: cpu_clock, x: 116, y: 60, w: 186, h: 3, min: 0, max: 4600}
+      - {type: text, text: '#power', x: 116, y: 74, size: 10, color: secondary}
+      - {type: value, sensor: cpu_power, x: 302, y: 74, align: right, size: 14, unit: ' W'}
+      - {type: bar, sensor: cpu_power, x: 116, y: 82, w: 186, h: 3, min: 0, max: 142}
+      - {type: text, text: '#fan', x: 116, y: 96, size: 10, color: secondary}
+      - {type: value, sensor: cpu_fan, x: 302, y: 96, align: right, size: 14, unit: ' RPM'}
+      - {type: bar, sensor: cpu_fan, x: 116, y: 104, w: 186, h: 3, min: 0, max: 2000}
+  - id: gpu
+    name: GPU
+    x: 4
+    y: 184
+    w: 312
+    h: 120
+    items:
+      - {type: panel, x: 0, y: 0, w: 312, h: 120, title: GPU, subtitle: '{gpu_name}'}
+      - {type: gauge, sensor: gpu_temp, cx: 56, cy: 68, radius: 40, thickness: 6, min: 20, max: 95, unit: °C, size: 24, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+      - {type: value, sensor: gpu_hotspot, prefix: '#hotspot', x: 56, y: 112, align: center, size: 9, unit: °C, unit_size: 8, alerts: [{above: 90, color: warn}, {above: 100, color: crit}]}
+      - {type: text, text: '#load', x: 116, y: 30, size: 10, color: secondary}
+      - {type: value, sensor: gpu_load, x: 302, y: 30, align: right, size: 14, unit: ' %'}
+      - {type: bar, sensor: gpu_load, x: 116, y: 38, w: 186, h: 3, min: 0, max: 100}
+      - {type: text, text: '#clock', x: 116, y: 52, size: 10, color: secondary}
+      - {type: value, sensor: gpu_clock, x: 302, y: 52, align: right, size: 14, unit: ' MHz'}
+      - {type: bar, sensor: gpu_clock, x: 116, y: 60, w: 186, h: 3, min: 0, max: 2700}
+      - {type: text, text: '#power', x: 116, y: 74, size: 10, color: secondary}
+      - {type: value, sensor: gpu_power, x: 302, y: 74, align: right, size: 14, unit: ' W'}
+      - {type: bar, sensor: gpu_power, x: 116, y: 82, w: 186, h: 3, min: 0, max: 250}
+      - {type: text, text: '#fan', x: 116, y: 96, size: 10, color: secondary}
+      - {type: value, sensor: gpu_fan, x: 302, y: 96, align: right, size: 14, unit: ' RPM'}
+      - {type: bar, sensor: gpu_fan, x: 116, y: 104, w: 186, h: 3, min: 0, max: 3000}
+  - id: ram
+    name: RAM
+    x: 4
+    y: 306
+    w: 102
+    h: 116
+    base: [115, 116]
+    items:
+      - {type: panel, x: 0, y: 0, w: 115, h: 116, title: RAM, subtitle: '{ram_desc}'}
+      - {type: value, sensor: ram_pct, x: 10, y: 46, size: 30, bold: true, unit: '%', unit_size: 14}
+      - {type: bar, sensor: ram_pct, x: 10, y: 68, w: 95, h: 5, min: 0, max: 100, alerts: [{above: 85, color: warn}, {above: 95, color: crit}]}
+      - {type: value, sensor: ram_used_gb, x: 10, y: 88, size: 13, format: '{:.1f}', unit: '#gb_used', unit_size: 10}
+      - {type: text, text: '{ram_speed}', requires: ram_speed, x: 10, y: 104, size: 9, color: secondary}
+  - id: disks
+    name: '#disks'
+    x: 109
+    y: 306
+    w: 102
+    h: 116
+    base: [115, 116]
+    items:
+      - {type: panel, x: 0, y: 0, w: 115, h: 116, title: '{disks_title}'}
+      - {type: text, text: '{disk1_name}', requires: disk1_name, x: 10, y: 30, size: 9, color: secondary}
+      - {type: value, sensor: ssd1_temp, requires: disk1_name, x: 105, y: 30, align: right, size: 10, unit: °C, unit_size: 8, alerts: [{above: 60, color: warn}, {above: 70, color: crit}]}
+      - {type: value, ssd: true, sensor: disk1_act, requires: disk1_name, prefix: '{disk1_letter} ', x: 10, y: 46, size: 17, bold: true, unit: '%', unit_size: 10}
+      - {type: bar, ssd: true, sensor: disk1, requires: disk1_name, x: 10, y: 57, w: 95, h: 4, min: 0, max: 100, alerts: [{above: 90, color: warn}]}
+      - {type: text, text: '{disk2_name}', requires: disk2_name, x: 10, y: 75, size: 9, color: secondary}
+      - {type: value, sensor: ssd2_temp, requires: disk2_name, x: 105, y: 75, align: right, size: 10, unit: °C, unit_size: 8, alerts: [{above: 60, color: warn}, {above: 70, color: crit}]}
+      - {type: value, ssd: true, sensor: disk2_act, requires: disk2_name, prefix: '{disk2_letter} ', x: 10, y: 91, size: 17, bold: true, unit: '%', unit_size: 10}
+      - {type: bar, ssd: true, sensor: disk2, requires: disk2_name, x: 10, y: 102, w: 95, h: 4, min: 0, max: 100, alerts: [{above: 90, color: warn}]}
+  - id: vram
+    name: VRAM
+    x: 214
+    y: 306
+    w: 102
+    h: 116
+    base: [115, 116]
+    items:
+      - {type: panel, x: 0, y: 0, w: 115, h: 116, title: VRAM, subtitle: '{vram_desc}'}
+      - {type: value, sensor: vram_mb, x: 10, y: 46, size: 30, bold: true, scale: 0.0009765625, format: '{:.1f}', unit: ' GB', unit_size: 14}
+      - {type: bar, sensor: vram_mb, x: 10, y: 68, w: 95, h: 5, min: 0, max: '{vram_mb}'}
+      - {type: text, text: '#mem', x: 10, y: 94, size: 10, color: secondary}
+      - {type: value, sensor: gpu_mem_clock, x: 105, y: 94, align: right, size: 13, unit: ' MHz'}
+  - id: network
+    name: '#network'
+    x: 4
+    y: 426
+    w: 154
+    h: 52
+    base: [115, 56]
+    items:
+      - {type: network, x: 0, y: 0, w: 115, h: 56, title: '#network'}
+  - id: volume
+    name: '#volume'
+    x: 162
+    y: 426
+    w: 154
+    h: 52
+    base: [115, 56]
+    items:
+      - {type: panel, x: 0, y: 0, w: 115, h: 56, title: '#volume'}
+      - {type: value, sensor: volume, x: 105, y: 30, align: right, size: 20, bold: true, unit: '%', unit_size: 11, empty: '#muted'}
+      - {type: bar, sensor: volume, x: 10, y: 44, w: 95, h: 5, min: 0, max: 100}

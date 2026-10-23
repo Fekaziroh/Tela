@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela!</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <nav role="tablist" aria-orientation="vertical">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="3.5" y="7.5" width="57" height="49" rx="11" fill="#18181B" stroke="#4A4A52" stroke-width="3"/><circle cx="32" cy="32" r="14" fill="none" stroke="#4A4A52" stroke-width="6" stroke-dasharray="65.97 87.96" transform="rotate(135 32 32)"/><circle class="arc" cx="32" cy="32" r="14" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="45.2 87.96" transform="rotate(135 32 32)"/></svg>
+      <h1>Tela!</h1><button class="upd" id="upd" type="button"><span id="version"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6.5 10.5 12 16l5.5-5.5M5 20h14"/></svg></button>
+    </div>
+    <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8"/></svg><span data-i18n="tab.home"></span></button>
+    <button role="tab" data-tab="layout" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg><span data-i18n="tab.layout"></span></button>
+    <button role="tab" data-tab="look" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3" fill="currentColor"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="10" r="1.3" fill="currentColor"/><path d="M12 21a3 3 0 0 1 0-6h1.5a2 2 0 0 0 0-4"/></svg><span data-i18n="tab.look"></span></button>
+    <button role="tab" data-tab="settings" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-i18n="tab.settings"></span></button>
+    <button role="tab" data-tab="advanced" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg><span data-i18n="tab.advanced"></span></button>
+    <div class="foot"><span data-i18n="nav.tray_hint"></span><button class="btn" id="quit" data-i18n="nav.quit"></button></div>
+  </nav>
+
+  <main id="main">
+    <div class="head">
+      <h2 id="title"></h2>
+      <div class="device" id="device"><i></i>Turing Smart Screen 3.5" <small id="device-port">—</small></div>
+      <div class="lang">
+        <button id="lang-btn" aria-haspopup="true" aria-expanded="false"><span id="lang-flag"></span><svg class="arrow" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5l3 3 3-3"/></svg></button>
+        <div class="lang-menu" id="lang-menu" role="menu" hidden>
+          <button role="menuitemradio" data-l="auto"><span class="auto-ic">A</span><span><span data-i18n="lang.auto"></span><br><small id="lang-auto-desc"></small></span></button>
+          <hr>
+          <button role="menuitemradio" data-l="pt"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#009b3a"/><path d="M15 2.5 27 10 15 17.5 3 10z" fill="#fedf00"/><circle cx="15" cy="10" r="4.2" fill="#002776"/></svg><span>Português (Brasil)</span></button>
+          <button role="menuitemradio" data-l="en"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><g fill="#b22234"><rect width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.15" width="30" height="1.54"/><rect y="9.23" width="30" height="1.54"/><rect y="12.3" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="13" height="10.8" fill="#3c3b6e"/></svg><span>English</span></button>
+          <button role="menuitemradio" data-l="es"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/></svg><span>Español</span></button>
+          <button role="menuitemradio" data-l="zh"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5 3.2l.9 2.7h2.8L6.4 7.6l.9 2.7L5 8.6 2.7 10.3l.9-2.7L1.3 5.9h2.8z" fill="#ffde00"/></svg><span>中文</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <section data-panel="home" style="display:grid;gap:18px">
+      <div class="pills" id="pills"></div>
+      <div class="home">
+        <div class="screen"><canvas id="preview" width="480" height="320" aria-label="preview"></canvas><div class="legend"><span><span data-i18n="home.preview"></span> <span id="preview-size"></span></span><b id="preview-note"></b></div></div>
+        <div class="col">
+          <div class="card">
+            <h3 data-i18n="home.screen"></h3>
+            <div class="row"><label for="brightness" data-i18n="home.brightness"></label><span class="val" id="brightness-v"></span></div>
+            <input type="range" id="brightness" min="0" max="100" step="1">
+            <div class="hint" data-i18n="home.brightness_hint"></div>
+            <div class="row"><span class="lbl" data-i18n="home.rotate"></span><button class="sw" role="switch" id="rotate" data-label="home.rotate"></button></div>
+            <div class="row"><span class="lbl"><span data-i18n="home.night"></span><small id="night-desc"></small></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="home.night"></button></div>
+            <div class="btns"><button class="btn" id="pause"></button></div>
+          </div>
+          <div class="card" id="last-game">
+            <div class="row"><h3 data-i18n="home.last"></h3><small class="hint" id="last-when"></small></div>
+            <div id="last-body"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYOUT EDITOR -->
+    <section data-panel="layout" hidden style="display:grid;gap:14px">
+      <div class="row"><p class="hint" style="margin:0" data-i18n="ed.hint"></p>
+        <div class="btns"><button class="btn" id="ed-undo" data-i18n="ed.undo"></button><button class="btn" id="ed-reset" data-i18n="ed.reset"></button></div></div>
+      <div class="editor">
+        <div class="stage-wrap"><div class="stage" id="stage"><canvas id="stage-img" width="480" height="320"></canvas><div id="stage-boxes"></div></div>
+          <div class="legend-ed"><span id="ed-family"></span><span id="ed-pos"></span></div></div>
+        <div class="col">
+          <div class="card">
+            <div class="row"><h3 data-i18n="ed.blocks"></h3>
+              <div class="add-wrap"><button class="btn" id="ed-add" data-i18n="ed.add"></button><div class="add-menu" id="ed-add-menu" hidden></div></div></div>
+            <div class="blocks" id="ed-blocks"></div>
+          </div>
+          <div class="card" id="ed-block" hidden>
+            <div class="row"><h3 data-i18n="ed.selected"></h3><button class="btn danger" id="ed-del" data-i18n="ed.delete"></button></div>
+            <div class="field"><label for="ed-name" data-i18n="ed.name"></label><input class="txt" id="ed-name"></div>
+            <div class="nums">
+              <label>X <input class="num" type="number" id="ed-x"></label><label>Y <input class="num" type="number" id="ed-y"></label>
+              <label data-i18n-title="ed.width"><span data-i18n="ed.w"></span> <input class="num" type="number" id="ed-w" min="10"></label>
+              <label><span data-i18n="ed.h"></span> <input class="num" type="number" id="ed-h" min="10"></label>
+            </div>
+            <div class="btns"><button class="btn" id="ed-natural" data-i18n="ed.natural"></button><button class="btn" id="ed-add-item" data-i18n="ed.add_item"></button></div>
+            <h3 data-i18n="ed.items" style="margin-top:4px"></h3>
+            <div class="items-ed" id="ed-items"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPEARANCE -->
+    <section data-panel="look" hidden style="display:grid;gap:16px">
+      <div class="card">
+        <div class="row"><h3 data-i18n="theme.title"></h3><button class="btn" id="theme-new" data-i18n="theme.customize"></button></div>
+        <div class="themes" id="themes"></div>
+        <div class="theme-editor" id="theme-editor" hidden>
+          <div class="colors" id="theme-colors"></div>
+          <div class="search"><input class="txt" id="theme-name" data-placeholder="theme.name_ph" maxlength="30">
+            <button class="btn pri" id="theme-save" data-i18n="theme.save"></button><button class="btn" id="theme-cancel" data-i18n="modal.cancel"></button>
+            <button class="btn danger" id="theme-delete" data-i18n="theme.delete"></button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><h3 data-i18n="look.colors"></h3><button class="btn" id="reset-colors" data-i18n="look.reset"></button></div>
+        <div class="themes" id="screen-themes"></div>
+        <div class="colors" id="colors"></div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="bg.title"></h3>
+        <div class="row"><span class="lbl"><span data-i18n="bg.image"></span><small id="bg-name"></small></span>
+          <span class="btns"><button class="btn" id="bg-pick" data-i18n="bg.pick"></button><button class="btn" id="bg-remove" data-i18n="bg.remove"></button></span></div>
+        <div class="row"><label for="bg-dim" data-i18n="bg.dim"></label><span class="val" id="bg-dim-v"></span></div>
+        <input type="range" id="bg-dim" min="0" max="90" step="5" data-set="background.dim">
+        <div class="row"><label for="bg-op" data-i18n="bg.opacity"></label><span class="val" id="bg-op-v"></span></div>
+        <input type="range" id="bg-op" min="20" max="100" step="5" data-set="background.panel_opacity">
+      </div>
+      <div class="card">
+        <div class="row"><h3><span data-i18n="look.logos"></span></h3><small class="hint" id="logos-count"></small></div>
+        <p data-i18n="look.logos_desc"></p>
+        <div class="row"><span class="lbl"><span data-i18n="look.logos_auto"></span><small id="logos-auto-now"></small></span><button class="sw" role="switch" id="logos-auto" data-label="look.logos_auto"></button></div>
+        <div class="row"><span class="lbl" data-i18n="look.logos_white"></span><button class="sw" role="switch" data-set="logos.color" data-on="white" data-off="original" data-label="look.logos_white"></button></div>
+        <div class="row"><span class="lbl" data-i18n="look.logos_every"></span><span class="inline"><input class="num" type="number" min="3" max="600" step="1" data-set="logos.switch_every"><span data-i18n="s"></span></span></div>
+        <div class="search"><input class="txt" id="logo-search" type="search"><button class="btn" id="add-logos" data-i18n="look.add"></button><button class="btn" id="logos-folder" data-i18n="look.folder"></button></div>
+        <div class="logos" id="logos"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section data-panel="settings" hidden>
+      <div class="grid">
+        <div class="card"><h3 data-i18n="set.general"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.autostart"></span><button class="sw" role="switch" id="autostart" data-label="set.autostart"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_exit"></span><button class="sw" role="switch" data-set="display.off_on_exit" data-label="set.off_exit"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_lock"></span><button class="sw" role="switch" data-set="display.off_on_lock" data-label="set.off_lock"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_monitor"></span><button class="sw" role="switch" data-set="display.off_with_monitor" data-label="set.off_monitor"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.tray_icon"></span><small data-i18n="set.tray_icon_desc"></small></span>
+            <div class="seg" data-set="tray.temp_icon"><button data-v="none" data-i18n="tray.none"></button><button data-v="cpu" data-i18n="tray.cpu"></button><button data-v="gpu" data-i18n="tray.gpu"></button></div></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.night"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.night_on"></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="set.night_on"></button></div>
+          <div class="sub" id="night-sub">
+            <div class="row"><label for="night-b" data-i18n="set.night_level"></label><span class="val" id="night-b-v"></span></div>
+            <input type="range" id="night-b" min="0" max="100" step="1" data-set="display.night_brightness">
+            <div class="inline"><span data-i18n="set.from"></span><input type="time" data-set="display.night_start"><span data-i18n="set.to"></span><input type="time" data-set="display.night_end"></div>
+          </div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.update"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.read_every"></span><span class="inline"><input class="num" type="number" min="0.5" max="10" step="0.5" data-set=".interval" id="base-interval"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl" data-i18n="set.fps_every"></span><span class="inline"><input class="num" type="number" min="0.1" max="2" step="0.05" data-set="fps.update"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.fps_avg"></span><small data-i18n="set.fps_avg_desc"></small></span><span class="inline"><input class="num" type="number" min="0.2" max="2" step="0.1" data-set="fps.average"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.anim"></span><small data-i18n="set.anim_desc"></small></span><button class="sw" role="switch" data-set="animation.enabled" data-label="set.anim"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.eco"></span><small data-i18n="set.eco_desc"></small></span><button class="sw" role="switch" data-set="eco.enabled" data-label="set.eco"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.eco_after"></span><span class="inline"><input class="num" type="number" min="1" max="120" step="1" data-set="eco.idle_minutes"><span data-i18n="min"></span></span></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.per_item"></h3>
+          <p data-i18n="set.per_item_desc"></p>
+          <div class="item-list" id="intervals"></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.summary"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.summary_on"></span><button class="sw" role="switch" data-set="session.summary" data-label="set.summary_on"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.summary_time"></span><span class="inline"><input class="num" type="number" min="3" max="120" step="1" data-set="session.summary_seconds"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl" data-i18n="set.summary_min"></span><span class="inline"><input class="num" type="number" min="0" max="120" step="1" data-set="session.min_minutes"><span data-i18n="min"></span></span></div>
+          <div class="btns"><button class="btn" data-cmd="summary_example" data-i18n="set.summary_try"></button></div>
+          <hr class="sep">
+          <div class="row"><span class="lbl" data-i18n="hist.save"></span><button class="sw" role="switch" data-set="history.save" data-label="hist.save"></button></div>
+          <div class="sub" id="hist-sub">
+            <div class="row"><span class="lbl"><span data-i18n="hist.keep"></span><small data-i18n="hist.keep_hint"></small></span><span class="inline"><input class="num" type="number" min="0" max="5000" step="10" data-set="history.keep"><span data-i18n="hist.games"></span></span></div>
+            <div class="row"><span class="lbl"><span data-i18n="hist.folder"></span><small id="hist-folder" class="selectable"></small></span><button class="btn" id="hist-choose" data-i18n="hist.choose"></button></div>
+          </div>
+          <div class="btns"><button class="btn" id="hist-open" data-i18n="hist.open"></button></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.music"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.music_on"></span><button class="sw" role="switch" data-set="media.enabled" data-label="set.music_on"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.during_game"></span><small data-i18n="set.during_game_desc"></small></span>
+            <div class="seg" data-set="media.during_game"><button data-v="date" data-i18n="music.date"></button><button data-v="hide" data-i18n="music.hide"></button></div></div>
+          <div class="row"><span class="lbl" data-i18n="set.progress"></span><button class="sw" role="switch" data-set="media.progress" data-label="set.progress"></button></div>
+          <div class="field"><label for="media-ignore" data-i18n="set.ignore"></label><input class="txt" id="media-ignore" data-set="media.ignore" data-placeholder="set.ignore_ph"></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.network"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.ping"></span><button class="sw" role="switch" data-set="network.ping" data-label="set.ping"></button></div>
+          <div class="field"><label for="servers" data-i18n="set.servers"></label><input class="txt" id="servers" data-set="network.servers"></div>
+          <div class="inline"><span data-i18n="set.warn_above"></span><input class="num" type="number" min="1" max="2000" data-set="network.warn_ms"><span data-i18n="ms"></span><span data-i18n="set.or"></span><input class="num" type="number" min="0" max="100" data-set="network.warn_loss"><span data-i18n="set.loss"></span></div>
+          <div class="inline"><span data-i18n="set.crit_above"></span><input class="num" type="number" min="1" max="5000" data-set="network.crit_ms"><span data-i18n="ms"></span><span data-i18n="set.or"></span><input class="num" type="number" min="0" max="100" data-set="network.crit_loss"><span data-i18n="set.loss"></span></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.disks"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.disk_number"></span>
+            <div class="seg" data-set="ssd.number"><button data-v="activity" data-i18n="disk.activity"></button><button data-v="space" data-i18n="disk.space"></button></div></div>
+          <div class="row"><span class="lbl" data-i18n="set.detected"></span><span class="hint" id="disks"></span></div>
+        </div>
+
+        <div class="card"><h3 data-i18n="set.connection"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.orientation"></span>
+            <div class="seg" data-set="display.orientation"><button data-v="landscape" data-i18n="orient.landscape"></button><button data-v="landscape_flipped" data-i18n="orient.landscape_flipped"></button><button data-v="portrait" data-i18n="orient.portrait"></button><button data-v="portrait_flipped" data-i18n="orient.portrait_flipped"></button></div></div>
+          <div class="field"><label for="port" data-i18n="set.port"></label><select id="port" data-set="display.port"></select></div>
+          <div class="row"><small class="hint" id="port-now"></small><button class="btn" id="rescan" data-i18n="set.rescan"></button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADVANCED -->
+    <section data-panel="advanced" hidden>
+      <div class="grid">
+        <div class="card" style="grid-column:1/-1"><h3 data-i18n="adv.activity"></h3><div class="log" id="log"></div></div>
+        <div class="card"><h3 data-i18n="adv.usage"></h3><div class="usage" id="usage"></div><small class="hint" id="usage-total"></small></div>
+        <div class="card"><h3 data-i18n="adv.tools"></h3>
+          <div class="btns">
+            <button class="btn" data-cmd="test" data-i18n="adv.test"></button>
+            <button class="btn" id="sensors-btn" data-i18n="adv.sensors"></button>
+            <button class="btn" id="diag-btn" data-i18n="adv.diag"></button>
+            <button class="btn" id="wizard-btn" data-i18n="adv.wizard"></button>
+            <button class="btn" id="folder-btn" data-i18n="adv.folder"></button>
+            <button class="btn" id="edit-btn" data-i18n="adv.edit"></button>
+          </div>
+        </div>
+        <div class="card"><h3 data-i18n="upd.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="upd.auto"></span><small data-i18n="upd.auto_hint"></small></span><button class="sw" role="switch" data-set="updates.check" data-label="upd.auto"></button></div>
+          <p class="hint" id="upd-status"></p>
+          <div class="btns"><button class="btn" id="upd-check" data-i18n="upd.check"></button><button class="btn" id="cl-btn" data-i18n="cl.title"></button></div>
+        </div>
+        <div class="card danger-card"><h3 data-i18n="adv.remove"></h3><p data-i18n="adv.remove_desc"></p><div class="btns"><button class="btn danger" id="uninstall-btn" data-i18n="adv.uninstall"></button></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <header><h3 id="modal-title"></h3><p id="modal-desc"></p></header>
+    <div class="body" id="modal-body"></div>
+    <footer id="modal-foot"></footer>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="i18n.js"></script>
+<script src="themes.js"></script>
+<script src="editor.js"></script>
+<script src="wizard.js"></script>
+<script src="history.js"></script>
+<script src="changelog.js"></script>
+<script src="update.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
