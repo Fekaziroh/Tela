@@ -43,8 +43,8 @@ groups:
       - {type: clock, format: '%H:%M', x: 10, y: 16, size: 26, bold: true}
       - {type: clock, format: '{weekday} %d/%m', x: 310, y: 16, align: right, size: 13, color: secondary, when: no_media_in_game, fade: true}
       - {type: media, x: 128, y: 3, w: 184, h: 27, when: media_in_game, fade: true}
-      - {type: value, sensor: fps, x: 10, y: 39, size: 18, bold: true, unit: ' FPS', unit_size: 9, empty: ''}
-      - {type: frametime, x: 10, y: 49, w: 150, h: 8, seconds: 2, labels: right, label_size: 8}
+      - {type: value, sensor: fps, x: 10, y: 43, size: 24, bold: true, unit: ' FPS', unit_size: 11, empty: ''}
+      - {type: frametime, x: 128, y: 44, w: 184, h: 12, seconds: 2, label_size: 9}
       - {type: media, x: 10, y: 33, w: 300, h: 25, when: [no_game, media], fade: true}
       - {type: image, files: logos, when: logos, x: 10, y: 38, w: 90, h: 15}
   - id: cpu

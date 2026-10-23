@@ -73,6 +73,31 @@ SCREEN_TEXT = {
         "fps_session": "本局 FPS", "example_game": "示例游戏",
     },
 }
+# fonts for titles in other scripts (Windows fonts first, Linux fallbacks after)
+SCRIPT_FONTS = {
+    "ko": (["malgun.ttf", "NotoSansCJK-Regular.ttc"], ["malgunbd.ttf", "NotoSansCJK-Bold.ttc"]),
+    "ja": (["YuGothM.ttc", "meiryo.ttc", "msgothic.ttc", "msyh.ttc", "NotoSansCJK-Regular.ttc"],
+           ["YuGothB.ttc", "meiryob.ttc", "msgothic.ttc", "msyhbd.ttc", "NotoSansCJK-Bold.ttc"]),
+    "zh": (["msyh.ttc", "simhei.ttf", "NotoSansCJK-Regular.ttc"], ["msyhbd.ttc", "simhei.ttf", "NotoSansCJK-Bold.ttc"]),
+}
+_KANA = re.compile(r"[\u3040-\u30ff\u31f0-\u31ff\uff66-\uff9f]")
+_HANGUL = re.compile(r"[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]")
+_HAN = re.compile(r"[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff01-\uff60]")
+
+
+def text_script(text):
+    """'ja', 'ko', 'zh' when the text needs a CJK font, else None (kana decides Japanese over Chinese)."""
+    if not text or text.isascii():
+        return None
+    if _KANA.search(text):
+        return "ja"
+    if _HANGUL.search(text):
+        return "ko"
+    if _HAN.search(text):
+        return "zh"
+    return None
+
+
 CJK_FONTS = {
     "regular": ["msyh.ttc", "simhei.ttf", "NotoSansCJK-Regular.ttc", "NotoSansSC-Regular.otf"],
     "bold": ["msyhbd.ttc", "simhei.ttf", "NotoSansCJK-Bold.ttc", "NotoSansSC-Bold.otf"],
@@ -116,6 +141,7 @@ class Renderer:
             self.font_lists = {k: CJK_FONTS[k] + v for k, v in self.font_lists.items()}
         self._fonts = {}
         self._family = None      # font family of the element being drawn (layout editor choice)
+        self._font_meta = {}     # id(font) -> (size, bold), to find the same size in another script
         self._glyphs = {}
         self._measure = {}
         self.cache_static = cache_static
@@ -182,6 +208,27 @@ class Renderer:
                         pass
                 break
             self._fonts[key] = ft or ImageFont.load_default(px)
+            self._font_meta[id(self._fonts[key])] = (size, bold)
+        return self._fonts[key]
+
+    def _script_font(self, text, ft):
+        """The same size in a font that has the characters (Japanese, Korean, Chinese titles)."""
+        script = text_script(text)
+        meta = self._font_meta.get(id(ft))
+        if not script or not meta:
+            return ft
+        size, bold = meta
+        key = ("script", script, size, bold)
+        if key not in self._fonts:
+            px = max(1, int(round(size * self.S)))
+            found = None
+            for name in SCRIPT_FONTS[script][1 if bold else 0]:
+                try:
+                    found = ImageFont.truetype(name, px)
+                    break
+                except OSError:
+                    continue
+            self._fonts[key] = found or ft
         return self._fonts[key]
 
     def _baseline(self, parts, y):
@@ -217,7 +264,7 @@ class Renderer:
 
     def _line(self, d, x, y, parts, align="left"):
         """Draws several (text, font, color) runs on the same baseline, vertically centered on y."""
-        parts = [p for p in parts if p[0]]
+        parts = [(t, self._script_font(t, ft), c) for t, ft, c in parts if t]
         if not parts:
             return
         lengths = [self._length(t, ft) for t, ft, _ in parts]
@@ -408,6 +455,7 @@ class Renderer:
         (or gets '…' when animations are off)."""
         S = self.S
         avail = width * S
+        ft = self._script_font(text, ft)
         tw = ft.getlength(text)
         d = ImageDraw.Draw(self._frame)
         if tw <= avail:

@@ -44,7 +44,15 @@ function wizRender() {
     body.innerHTML = `<p class="hint">${t("wiz.screen")}</p><div class="pills">${pill(kind, t("pill.screen"), text)}</div>
       <div class="field" style="margin-top:12px"><label>${t("set.port")}</label><select class="wiz-port"></select></div>
       <div class="btns" style="margin-top:12px"><button class="btn wiz-test">${t("home.test")}</button><button class="btn wiz-rescan">${t("set.rescan")}</button></div>
-      <p class="hint" style="margin-top:12px">${t("wiz.screen_hint")}</p>`;
+      <p class="hint" style="margin-top:12px">${t("wiz.screen_hint")}</p>
+      <div class="wiz-conflict note warn" hidden><span></span><button class="btn">${t("conf.take")}</button></div>`;
+    api.screen_apps().then(apps => {   // another screen program would keep the port busy
+      const box = $(".wiz-conflict", body);
+      if (!apps || !apps.length) return;
+      $("span", box).textContent = t("conf.msg", { apps: apps.join(", ") });
+      box.hidden = false;
+      $("button", box).addEventListener("click", async () => { await api.close_conflict(); toast(t("conf.closed")); box.hidden = true; });
+    }).catch(() => {});
     const sel = $(".wiz-port", body);
     const cur = getSetting("display.port") || "auto";
     for (const [v, label] of [["auto", t("port.auto")], ...S.init.ports.map(p => [p.device, `${p.device} · ${p.label}`])]) {

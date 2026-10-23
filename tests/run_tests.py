@@ -984,6 +984,22 @@ def temperature_alerts_wait_then_stay_quiet():
     assert a.check({"alerts": {"enabled": False}}, {"cpu": 120}, now=5000) == []
 
 
+@test
+def cjk_titles_and_old_portrait_layouts():
+    assert render.text_script("東京事変") == "zh" and render.text_script("さくら") == "ja"
+    assert render.text_script("방탄") == "ko" and render.text_script("Österreich") is None
+    r = render.Renderer(dict(default_cfg(), widgets=[]), 480, 320, base=ROOT)
+    ft = r.font(12, True)
+    assert r._script_font("Hello", ft) is ft and r._script_font("さくら", ft) is not None
+    r._line(__import__("PIL.ImageDraw", fromlist=["x"]).Draw(__import__("PIL.Image", fromlist=["x"]).new("RGB", (100, 40))),
+            0, 20, [("さくら 東京", ft, (255, 255, 255))])
+    groups = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][1][1], enabled=False)]}]
+    assert layout.upgrade("portrait", groups) and groups[0]["items"][0]["x"] == 128
+    assert groups[0]["items"][0]["enabled"] is False
+    moved = [{"id": "top", "items": [dict(layout.UPGRADES["portrait"][1][1], x=20)]}]
+    assert not layout.upgrade("portrait", moved)                         # the user moved it: kept as is
+
+
 def main():
     failed = 0
     t0 = time.monotonic()

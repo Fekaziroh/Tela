@@ -5,7 +5,59 @@
 // "draft": true = still being worked on (no release). "beta": true = published as a test version (GitHub
 // pre-release, only for "Receive test versions"); removing "beta" later promotes it to the stable release.
 const CHANGELOG = [
-{"v": "1.4.4", "beta": true,
+{
+ "v": "1.4.5",
+ "beta": true,
+ "pt": {
+  "new": [
+   "Primeira abertura: se outro programa da tela estiver aberto (como o app original), o assistente avisa e oferece fechá-lo."
+  ],
+  "fix": [
+   "Títulos de música em japonês, chinês ou coreano apareciam como quadradinhos na tela.",
+   "No editor, o nome e a posição do elemento aparecem embaixo da tela também ao clicar nele, não só ao mover."
+  ],
+  "look": [
+   "Na vertical, o frame time fica embaixo da música e o FPS ganha mais espaço. Layouts antigos sem mudança nesses itens são atualizados sozinhos."
+  ]
+ },
+ "en": {
+  "new": [
+   "First run: if another screen program is open (such as the original app), the assistant tells you and offers to close it."
+  ],
+  "fix": [
+   "Music titles in Japanese, Chinese or Korean showed as boxes on the screen.",
+   "In the editor, the element's name and position show under the screen when you click it too, not only while moving it."
+  ],
+  "look": [
+   "In portrait, the frame time sits under the music and the FPS gets more room. Older layouts that kept these items unchanged are updated by themselves."
+  ]
+ },
+ "es": {
+  "new": [
+   "Primer inicio: si otro programa de la pantalla está abierto (como la app original), el asistente avisa y ofrece cerrarlo."
+  ],
+  "fix": [
+   "Los títulos de música en japonés, chino o coreano aparecían como cuadritos en la pantalla.",
+   "En el editor, el nombre y la posición del elemento aparecen bajo la pantalla también al hacer clic, no solo al moverlo."
+  ],
+  "look": [
+   "En vertical, el frame time queda bajo la música y los FPS tienen más espacio. Los diseños antiguos sin cambios en esos elementos se actualizan solos."
+  ]
+ },
+ "zh": {
+  "new": [
+   "首次运行：如果屏幕的其他程序（例如原厂应用）正在运行，向导会提示并提供关闭选项。"
+  ],
+  "fix": [
+   "日文、中文或韩文的音乐标题在屏幕上显示为方框。",
+   "在编辑器中，点击元素时屏幕下方也会显示其名称和位置，而不仅是在移动时。"
+  ],
+  "look": [
+   "竖屏时，帧时间显示在音乐下方，FPS 有更多空间。未改动这些项目的旧布局会自动更新。"
+  ]
+ }
+},
+{"v": "1.4.4",
  "pt": {
   "new": [
    "Alertas de temperatura: um aviso discreto do Windows quando o CPU ou a GPU passa do limite que você escolher por um tempo, sem repetir toda hora.",

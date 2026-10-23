@@ -74,6 +74,24 @@ jobs:
           name: Tela-Setup-${{ steps.version.outputs.version }}
           path: build/Tela-Setup-*.exe
 
+      - name: Promote approved test versions
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # a test version whose "beta" was removed in ui/changelog.js becomes a normal (stable) release,
+          # even when a newer test version already exists; oldest first, so "latest" ends on the newest stable
+          foreach ($v in (python installer/changelog.py --stable)) {
+            $v = $v.Trim(); if (-not $v) { continue }
+            $r = gh release view "v$v" --json isPrerelease 2>$null | ConvertFrom-Json
+            if ($LASTEXITCODE -eq 0 -and $r -and $r.isPrerelease) {
+              gh release edit "v$v" --prerelease=false --latest --title "Tela! $v"
+              Write-Host "v$v promoted from test to stable"
+            }
+          }
+          exit 0
+
       - name: Release
         if: github.ref == 'refs/heads/main'
         shell: pwsh

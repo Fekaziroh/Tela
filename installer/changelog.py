@@ -63,7 +63,11 @@ if __name__ == "__main__":
     ap.add_argument("--notes")
     ap.add_argument("--ready")
     ap.add_argument("--channel")
+    ap.add_argument("--stable", action="store_true", help="every stable version, oldest first")
     a = ap.parse_args()
+    if a.stable:
+        print("\n".join(e["v"] for e in reversed(load()) if not e.get("draft") and not e.get("beta")))
+        sys.exit(0)
     if a.channel:
         e = next((x for x in load() if x["v"] == a.channel), None)
         print("draft" if not e or e.get("draft") else "test" if e.get("beta") else "stable")
