@@ -1,0 +1,117 @@
+# Tela! settings. Everything here can be changed in the app window.
+# Screen: 480x320 landscape. Coordinates in pixels from the top-left corner;
+# for texts and values "y" is the vertical CENTER.
+
+display:
+  port: auto                   # or "COM5"
+  orientation: landscape_flipped   # landscape | landscape_flipped
+  brightness: 40               # 0-100 (very high values can make the screen unstable)
+  off_on_exit: true            # black screen when the app closes or the PC shuts down
+  off_on_lock: true            # off while the PC is locked (Win+L)
+  off_with_monitor: true       # off while the monitor sleeps
+  night_enabled: false
+  night_brightness: 15
+  night_start: "22:00"
+  night_end: "07:00"
+
+ui:
+  theme: auto                  # auto (follows Windows) | light | dark | preset:<name> | custom:<name>
+  language: auto               # auto (follows Windows) | pt | en | es | zh
+  wizard_done: false           # the first-run assistant was finished
+
+tray:
+  temp_icon: none              # none | cpu | gpu  (temperature drawn in the tray icon)
+
+eco:
+  enabled: true                # when you are away and no game is running: slower reads, no animations
+  idle_minutes: 5
+  interval: 3
+
+interval: 1.0                  # seconds between sensor reads
+
+fps:
+  update: 0.2                  # seconds between FPS/volume updates on the screen
+  average: 0.5                 # seconds averaged for the FPS
+  source: auto                 # auto (PresentMon, or RTSS if it is open) | presentmon | rtss
+  ignore: [dwm.exe, explorer.exe, tela.exe, chrome.exe, msedge.exe, msedgewebview2.exe, firefox.exe, opera.exe,
+           brave.exe, discord.exe, steamwebhelper.exe, spotify.exe, searchhost.exe, startmenuexperiencehost.exe,
+           shellexperiencehost.exe, textinputhost.exe, applicationframehost.exe]
+
+network:
+  ping: true
+  servers: "1.1.1.1, 8.8.8.8"
+  ping_interval: 2
+  fails_for_outage: 3
+  warn_ms: 60
+  crit_ms: 150
+  warn_loss: 2                 # % of the last 30 pings
+  crit_loss: 10
+
+logos:
+  mode: auto                   # auto (hardware brands) | list
+  files: ""
+  color: white                 # white | original
+  switch_every: 20
+  fade: 1.2
+
+media:
+  enabled: true
+  during_game: date            # date (shows the music where the date is) | hide
+  progress: true
+  ignore: ""
+
+background:
+  image: ""                    # picture behind the panels (Appearance tab)
+  dim: 40                      # % darker, so the numbers stay readable
+  panel_opacity: 85            # % panel opacity over the picture
+
+ssd:
+  number: activity             # activity (number = activity, bar = used space) | space
+
+session:
+  summary: true
+  summary_seconds: 15
+  min_minutes: 5
+  temperatures: {cpu: cpu_temp, gpu: gpu_temp, hotspot: gpu_hotspot}
+
+history:
+  save: true                   # keep every game summary
+  keep: 200                    # how many games to keep (0 = all)
+  folder: ""                   # empty = the "games" folder next to the settings
+
+updates:
+  check: true                  # look for a new Tela! on GitHub (at start and every 6 hours)
+
+intervals:                     # slower items (seconds); they show the average of the period
+  net_down: 3
+  net_up: 3
+  disk1: 30
+  disk2: 30
+
+animation:
+  enabled: true
+  duration: 0.6
+  fps: 8
+
+data:
+  source: auto                 # auto | embedded | web (LibreHardwareMonitor web server)
+  lhm_url: http://localhost:8085/data.json
+  disk_interval: 2
+  controllers: false           # also read fan/AIO controllers (Corsair, NZXT...)
+  net_interface:               # empty = all adapters
+
+fonts:
+  regular: ["bahnschrift.ttf", "segoeui.ttf", "DejaVuSans.ttf"]
+  bold: ["bahnschrift.ttf:Bold", "segoeuib.ttf", "DejaVuSans-Bold.ttf"]
+
+colors:
+  background: "#000000"
+  panel: "#141414"
+  text: "#FFFFFF"
+  secondary: "#8C8C8C"
+  track: "#333333"
+  accent: "#FFFFFF"
+  warn: "#FF9F0A"
+  crit: "#FF453A"
+
+custom_colors:                 # the "Custom" screen theme (filled when you edit a color)

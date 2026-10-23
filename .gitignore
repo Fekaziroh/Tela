@@ -1,0 +1,23 @@
+__pycache__/
+.ruff_cache/
+build/
+dist/
+*.spec.bak
+config.yaml
+config.previous.yaml
+layout*.yaml
+!layouts/*.yaml
+hardware.json
+last_game.json
+preview.png
+tela.log*
+lhm/
+presentmon/
+# logo packs belong to their owners: never commit them
+logos/*
+!logos/README.md
+backgrounds/
+games/
+version.txt
+updated_from.txt
+themes.json
