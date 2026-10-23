@@ -2,6 +2,21 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.5
+
+### New
+
+- First run: if another screen program is open (such as the original app), the assistant tells you and offers to close it.
+
+### Fixes
+
+- Music titles in Japanese, Chinese or Korean showed as boxes on the screen.
+- In the editor, the element's name and position show under the screen when you click it too, not only while moving it.
+
+### Appearance and personalization
+
+- In portrait, the frame time sits under the music and the FPS gets more room. Older layouts that kept these items unchanged are updated by themselves.
+
 ## Tela! 1.4.4
 
 ### New

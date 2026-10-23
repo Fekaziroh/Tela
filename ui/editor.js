@@ -115,6 +115,8 @@ function edPointer(e, g, el) {
     el.style.backgroundPosition = `${-start.x * sc * fx}px ${-start.y * sc * fy}px`;
     Object.assign(el.style, { left: g.x * sc + "px", top: g.y * sc + "px", width: g.w * sc + "px", height: g.h * sc + "px" });
     $("#ed-pos").textContent = `x ${Math.round(g.x)} · y ${Math.round(g.y)} · ${Math.round(g.w)}×${Math.round(g.h)}`;
+  const sit = E.item != null ? (g.items || [])[E.item] : null;
+  if (sit) $("#ed-pos").textContent = itemLegend(sit);   // the clicked element's name and position
   };
   paint();
   const move = ev => {
@@ -460,6 +462,11 @@ function groupScale(g) {
   const [bw, bh] = g.base || [g.w, g.h];
   return { sx: g.w / bw, sy: g.h / bh, k: Math.min(g.w / bw, g.h / bh) };
 }
+function itemLegend(it) {
+  const px = "x" in it ? "x" : "cx", py = "y" in it ? "y" : "cy";
+  const name = itemLabel(it).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return `${name} · x ${Math.round(it[px] || 0)} · y ${Math.round(it[py] || 0)}`;
+}
 function selectItem(i) {
   E.item = i; E.open = i;
   edRender(); edRenderBoxes();
@@ -496,7 +503,7 @@ function itemPointer(e, g, i, el, r) {
       }
       Object.assign(el.style, { width: nw * sc + "px", height: nh * sc + "px" });
     }
-    $("#ed-pos").textContent = `${itemLabel(it).replace(/<[^>]+>/g, " ")} · x ${Math.round(it[px])} · y ${Math.round(it[py])}`;
+    $("#ed-pos").textContent = itemLegend(it);
   };
   const up = () => {
     el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);

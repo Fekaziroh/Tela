@@ -404,6 +404,7 @@ class App:
 
     def close_conflict(self):
         n = winsys.close_screen_apps()
+        self.engine.command("reload")   # try the screen again right away
         self.log(f"Closed {n} program(s) that were using the screen")
         self.conflict = []
         return n

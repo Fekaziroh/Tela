@@ -363,3 +363,5 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .s-hide{display:none!important}
 .conflict{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:12px 14px;border-radius:10px;
   background:color-mix(in srgb,var(--warn) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}
+.wiz-conflict{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--warn) 14%,transparent);font-size:13px}
+.wiz-conflict span{flex:1}

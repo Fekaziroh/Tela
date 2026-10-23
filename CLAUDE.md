@@ -102,7 +102,7 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
   option to fully close the window (destroy the WebView) when going to the tray to free its RAM; FIX patch notes
   in Spanish/Chinese (ui/changelog.js only has pt/en: add es and zh); cleaner updates: [InstallDelete] also {app}\lhm and
   {app}\presentmon, and Tela! deletes old Tela-Setup-*.exe/.part from %TEMP% at start (updater downloads them)
-- 1.4.5 Themes and personalization (moved up from 1.5.0, owner's focus): at least 5 themes with different
+- 1.4.6 (was 1.4.5) Themes and personalization (moved up from 1.5.0, owner's focus): at least 5 themes with different
   shapes and arrangements (bars, gauges, graphs, drawings), not only colors, each in landscape and portrait,
   built on the 1.4.3 element system; NEW DEFAULT THEME = the "first version" look (owner's picture of the old
   TelaV2 screen): top bar with brand logo left, big clock center, second brand logo right (brand names as
@@ -113,7 +113,7 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
   weather (city, temperature on by default, condition; Open-Meteo, only the city goes online) next to the
   date in the themes; export/import a theme as a file (with the 1.4.2 profiles); automatic re-flow also for
   the elements inside a block (deleting/resizing one rearranges the others)
-- 1.4.6 History: average per game, compare two games, game icon before the name in the summary
+- 1.4.7 (was 1.4.6) History: average per game, compare two games, game icon before the name in the summary
 - 1.5.0 New window interface: visual identity (mockups first), deeper performance mode, sharper preview tied
   to the preset, review of settings/files/data
 - Undecided, later: Lite build (decide after measuring the Performance preset); "Landscape" screen mode
@@ -145,7 +145,12 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
       settings search, portrait top (media in date's place, frametime below FPS), frametime labels/fields,
       temperature alerts (alerts.py), other-app notice (winsys.screen_apps), README pictures on the
       "screenshots" branch (tests/screenshots.py, CI job)
-- [ ] Owner approves → remove "beta" from 1.4.4 and push (workflow promotes it to stable)
+- [x] Superseded by the 1.4.5 test (fixes found while testing 1.4.4); 1.4.4 stays a pre-release
+
+## 1.4.5 — fixes of the 1.4.4 test, published as TEST version
+- [x] CJK titles (render.text_script/SCRIPT_FONTS), element name in the legend on click, portrait frametime
+      under the media (+ layout.UPGRADES for untouched user copies), assistant warns about other screen apps
+- [ ] Owner approves → remove "beta" from 1.4.5 and push (stable). Themes are now 1.4.6, history 1.4.7
 
 ## Compatibility notes (applied to README in 1.4.2)
 Compatibility section (also in release notes):

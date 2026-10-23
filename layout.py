@@ -30,6 +30,35 @@ def user_path(fam):
     return config.DATA / f"layout_{fam}.yaml"
 
 
+# default items that changed in a version: a user's copy that still has the old item untouched gets the new one
+UPGRADES = {
+    "portrait": [  # 1.4.5: frame time under the media, bigger FPS (the FPS was squeezed)
+        ("top", {"type": "value", "sensor": "fps", "x": 10, "y": 39, "size": 18, "bold": True, "unit": " FPS",
+                 "unit_size": 9, "empty": ""},
+         {"type": "value", "sensor": "fps", "x": 10, "y": 43, "size": 24, "bold": True, "unit": " FPS",
+          "unit_size": 11, "empty": ""}),
+        ("top", {"type": "frametime", "x": 10, "y": 49, "w": 150, "h": 8, "seconds": 2, "labels": "right",
+                 "label_size": 8},
+         {"type": "frametime", "x": 128, "y": 44, "w": 184, "h": 12, "seconds": 2, "label_size": 9}),
+    ],
+}
+
+
+def upgrade(fam, groups):
+    """Applies UPGRADES to a user's layout (only items still equal to the old default)."""
+    changed = False
+    for gid, old, new in UPGRADES.get(fam, []):
+        for g in groups or []:
+            if g.get("id") != gid:
+                continue
+            for i, it in enumerate(g.get("items") or []):
+                extra = {k: v for k, v in it.items() if k == "enabled"}
+                if {k: v for k, v in it.items() if k != "enabled"} == old:
+                    g["items"][i] = dict(new, **extra)
+                    changed = True
+    return changed
+
+
 def load(fam, user=True):
     """{"size", "sensors", "groups", "custom"}. The user's copy gets sensors added in newer versions."""
     base = yaml.safe_load(default_path(fam).read_text(encoding="utf-8")) or {}
@@ -40,6 +69,7 @@ def load(fam, user=True):
             if mine.get("groups"):
                 sensors = dict(base.get("sensors") or {})
                 sensors.update(mine.get("sensors") or {})
+                upgrade(fam, mine["groups"])
                 return {"size": base.get("size"), "sensors": sensors, "groups": mine["groups"], "custom": True}
         except Exception:  # noqa: BLE001 — a damaged copy falls back to the default
             pass

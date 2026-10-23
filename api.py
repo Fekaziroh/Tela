@@ -106,6 +106,10 @@ class Api:
         up = getattr(self._app, "updater", None)
         return up.check() if up else None
 
+    def screen_apps(self):
+        """Known programs for these screens running now (the first-run assistant warns about them)."""
+        return sorted({n for _, n in winsys.screen_apps()}) if winsys.WINDOWS else []
+
     def close_conflict(self):
         """Closes the known program that holds the screen so Tela! can use it."""
         fn = getattr(self._app, "close_conflict", None)
