@@ -52,6 +52,7 @@ function applyTheme() {
   paintTheme(themeDraft || themeColors((S.settings.ui || {}).theme));
   const c = themeDraft || currentThemeColors();
   if (api && api.set_tray_accent) api.set_tray_accent(hexLum(c.accent) > 0.25 ? c.accent : "#ffffff").catch(() => {});
+  if (api && api.set_title_bar) api.set_title_bar(c.win, c.fg, hexLum(c.bg) < 0.4).catch(() => {});
 }
 
 function miniPreview(c) {

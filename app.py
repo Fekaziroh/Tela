@@ -16,18 +16,22 @@ from icon import app_icon, temp_icon
 from updater import Updater
 
 TEXT = {
-    "pt": {"open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
+    "pt": {"update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
+           "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
            "pause": "Pausar", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
-    "es": {"open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
+    "es": {"update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
+           "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
            "pause": "Pausar", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
-    "zh": {"open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
+    "zh": {"update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
+           "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
            "pause": "暂停", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
-    "en": {"open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
+    "en": {"update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
+           "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
            "pause": "Pause", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
                          "Close it and open this one?"},
@@ -67,6 +71,7 @@ class App:
         self.tray = None
         self._quit = threading.Event()
         self._told_tray = False
+        self._told_update = None
         self._tray_image = None
         self._tray_dirty = False
         self._accent = str((self.engine.cfg.get("ui") or {}).get("accent") or "#FFFFFF")
@@ -104,7 +109,7 @@ class App:
         try:
             self.window = webview.create_window(
                 "Tela!", url=str(HERE / "ui" / "index.html"), js_api=self.api, width=1180, height=780,
-                min_size=(480, 560), hidden=self.start_hidden, background_color="#111419" if dark else "#F7F8FA",
+                min_size=(480, 560), hidden=self.start_hidden, background_color="#050506" if dark else "#F7F8FA",
                 text_select=True)
             self.window.events.closing += self._on_closing
             self.window_kind = "webview2"
@@ -181,6 +186,19 @@ class App:
         except Exception:  # noqa: BLE001
             pass
 
+    def set_title_bar(self, caption, text, dark):
+        """The window title bar follows the window theme."""
+        self._title_colors = (caption, text, dark)
+        if self.window is None:
+            return
+        try:
+            form = self.window.native
+            hwnd = int(form.Handle.ToInt64())
+            from System import Action  # type: ignore
+            form.Invoke(Action(lambda: winsys.color_title_bar(hwnd, caption, text, dark)))
+        except Exception:  # noqa: BLE001
+            pass
+
     def _dialog(self, kind_name, ps_code, **kw):
         if self.window is not None:
             import webview
@@ -195,10 +213,16 @@ class App:
             return out or None
         return None
 
-    def pick_save_path(self, name):
+    def pick_save_path(self, name, label="CSV", ext="csv"):
         return self._dialog("SAVE", "$d=New-Object System.Windows.Forms.SaveFileDialog; "
-                            f"$d.FileName='{name}'; $d.Filter='CSV|*.csv'; if($d.ShowDialog() -eq 'OK'){{ $d.FileName }}",
-                            save_filename=name, file_types=("CSV (*.csv)",))
+                            f"$d.FileName='{name}'; $d.Filter='{label}|*.{ext}'; "
+                            "if($d.ShowDialog() -eq 'OK'){ $d.FileName }",
+                            save_filename=name, file_types=(f"{label} (*.{ext})",))
+
+    def pick_open_path(self, label, ext):
+        return self._dialog("OPEN", "$d=New-Object System.Windows.Forms.OpenFileDialog; "
+                            f"$d.Filter='{label}|*.{ext}'; if($d.ShowDialog() -eq 'OK'){{ $d.FileName }}",
+                            file_types=(f"{label} (*.{ext})",))
 
     def pick_folder(self):
         return self._dialog("FOLDER", "$d=New-Object System.Windows.Forms.FolderBrowserDialog; "
@@ -235,6 +259,8 @@ class App:
             self._tray_dirty = True
 
     def settings_changed(self, section, key, value):
+        if (section, key) == ("tray", "temp_icon"):
+            self._tray_dirty = True
         if (section, key) == ("ui", "language"):
             self.lang = effective_language(value)
             self.T = TEXT.get(self.lang, TEXT["en"])
@@ -259,6 +285,8 @@ class App:
             pystray.MenuItem(T["last_summary"], lambda *_: self.engine.command("summary_last"),
                              enabled=lambda _i: bool(self.engine.last_summary)),
             pystray.MenuItem(T["pause"], lambda *_: self.api.command("pause"), checked=lambda _i: self.engine.paused),
+            pystray.MenuItem(lambda _i: T["update"].format(v=(self.updater.info or {}).get("version", "")),
+                             lambda *_: self.api.update_install(), visible=lambda _i: self.updater.state == "available"),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(T["quit"], lambda *_: self.quit()),
         )
@@ -288,6 +316,16 @@ class App:
             ct, gt = e.value("cpu_temp"), e.value("gpu_temp")
             parts = [f"CPU {ct:.0f}°C" if ct is not None else None, f"GPU {gt:.0f}°C" if gt is not None else None]
             tip = f"Tela! {VERSION}" + ("  ·  " + "  ·  ".join(p for p in parts if p) if any(parts) else "")
+            up = self.updater.info.get("version") if self.updater.state == "available" and self.updater.info else None
+            if up:
+                tip += f"  ·  ↑ {up}"
+            if up and up != self._told_update:   # tell once per version, in the tray
+                self._told_update = up
+                try:
+                    self.tray.update_menu()
+                    self.tray.notify(self.T["update_ready"].format(v=up), "Tela!")
+                except Exception:  # noqa: BLE001
+                    pass
             mode = str((e.cfg.get("tray") or {}).get("temp_icon", "none")).lower()
             want = None
             if mode in ("cpu", "gpu"):

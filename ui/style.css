@@ -1,4 +1,5 @@
-/* Tela! window. Light/dark follow Windows unless the user picks one (data-theme on <html>). */
+/* Tela! window. Light/dark follow Windows unless the user picks one (data-theme on <html>).
+   The dark values are the Black preset of themes.js (the default dark theme). */
 :root{
   --bg:#eef1f4; --win:#f7f8fa; --panel:#ffffff; --panel2:#f0f2f5; --line:#dce1e7;
   --fg:#141920; --muted:#566170; --dim:#7d8898; --log:#f3f5f8; --shadow:rgba(20,30,45,.16);
@@ -9,13 +10,13 @@
   --r:10px; color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0c0e11; --win:#111419; --panel:#171b21; --panel2:#1d222a; --line:#262c35;
-  --fg:#e8edf3; --muted:#8b95a3; --dim:#646d7a; --log:#0b0d10; --shadow:#000;
-  --accent:#eef1f5; --ok:#3ccf7a; --warn:#ffb340; --crit:#ff5a52; color-scheme:dark}}
+  --bg:#000000; --win:#050506; --panel:#0e0e10; --panel2:#17171a; --line:#232327;
+  --fg:#f2f2f3; --muted:#8c8c93; --dim:#626267; --log:#000000; --shadow:#000;
+  --accent:#ffffff; --ok:#3ccf7a; --warn:#ffb340; --crit:#ff5a52; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0c0e11; --win:#111419; --panel:#171b21; --panel2:#1d222a; --line:#262c35;
-  --fg:#e8edf3; --muted:#8b95a3; --dim:#646d7a; --log:#0b0d10; --shadow:#000;
-  --accent:#eef1f5; --ok:#3ccf7a; --warn:#ffb340; --crit:#ff5a52; color-scheme:dark}
+  --bg:#000000; --win:#050506; --panel:#0e0e10; --panel2:#17171a; --line:#232327;
+  --fg:#f2f2f3; --muted:#8c8c93; --dim:#626267; --log:#000000; --shadow:#000;
+  --accent:#ffffff; --ok:#3ccf7a; --warn:#ffb340; --crit:#ff5a52; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--win);color:var(--fg);font:14px/1.5 var(--f-body);overflow:hidden;user-select:none;-webkit-user-select:none}
@@ -283,3 +284,29 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .cl-wrap{max-height:56vh;overflow:auto;display:grid;gap:14px;padding-right:4px}
 .cl h4{margin:0 0 6px;font:600 12px var(--f-mono);letter-spacing:.06em;color:var(--accent)}
 .cl ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:13px;line-height:1.45}
+
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row .val{min-width:3.2em;font:600 13px var(--f-mono)}
+.range-row input[type=range]{flex:1}
+
+.presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.presets button{all:unset;cursor:pointer;display:grid;align-content:start;gap:4px;padding:12px 14px;border-radius:10px;background:var(--panel2);border:1px solid transparent}
+.presets button:hover,.presets button:focus-visible{border-color:var(--line)}
+.presets button[aria-pressed=true]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--panel2))}
+.presets button[data-p=custom]{cursor:default}
+.presets button[data-p=custom]:not([aria-pressed=true]){opacity:.55}
+.presets b{font-weight:600}
+.presets small{color:var(--muted);font-size:12px;line-height:1.4}
+.profiles{display:grid;gap:6px}
+.profiles:empty{display:none}
+.prof{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--panel2)}
+.prof b{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof small{color:var(--dim);font-size:11px;white-space:nowrap}
+.prof .btn{padding:4px 10px;font-size:12px}
+.screen{position:relative}
+.paused{position:absolute;inset:0;display:grid;place-content:center;gap:10px;text-align:center;color:var(--muted);
+  background:color-mix(in srgb,var(--panel) 92%,transparent);border-radius:inherit;padding:20px}
+.paused p{margin:0;max-width:300px}
+.paused .btn{justify-self:center}
+@media (max-width:760px){.presets{grid-template-columns:1fr}}
+.cl h5{margin:10px 0 4px;font:600 11px var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}

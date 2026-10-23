@@ -68,9 +68,14 @@ class DevApp:
     def pick_images(self):
         return []
 
-    def pick_save_path(self, name):
+    def pick_save_path(self, name, label="CSV", ext="csv"):
         import tempfile
         return str(Path(tempfile.gettempdir()) / name)
+
+    def pick_open_path(self, label, ext):
+        import tempfile
+        p = Path(tempfile.gettempdir()) / f"import.{ext}"
+        return str(p) if p.exists() else None
 
     def pick_folder(self):
         return None

@@ -12,6 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "ui" / "changelog.js"
 MARKDOWN = ROOT / "CHANGELOG.md"
+CATEGORIES = ("new", "fix", "perf", "look")
+TITLES = {"en": {"new": "New", "fix": "Fixes", "perf": "Performance", "look": "Appearance and personalization"},
+          "pt": {"new": "Novidades", "fix": "Correções", "perf": "Desempenho", "look": "Aparência e personalização"}}
 
 
 def load():
@@ -21,11 +24,19 @@ def load():
     return json.loads(text[start:end])
 
 
+def _section(notes, lang, level="###"):
+    out = []
+    for c in CATEGORIES:
+        if notes.get(c):
+            out += [f"{level} {TITLES[lang][c]}", ""] + [f"- {n}" for n in notes[c]] + [""]
+    return out
+
+
 def markdown(entries=None):
     out = ["# Changelog", "", "Every version of Tela!, newest first. Portuguese notes are in the app "
            "(Advanced › Patch notes).", ""]
     for e in entries or load():
-        out += [f"## Tela! {e['v']}", ""] + [f"- {n}" for n in e["en"]] + [""]
+        out += [f"## Tela! {e['v']}", ""] + _section(e["en"], "en")
     return "\n".join(out)
 
 
@@ -33,11 +44,13 @@ def release_notes(version):
     e = next((x for x in load() if x["v"] == version), None)
     if e is None:
         raise SystemExit(f"ui/changelog.js has no entry for {version}")
-    lines = ["## What's new", ""] + [f"- {n}" for n in e["en"]]
-    lines += ["", "<details><summary>Novidades (português)</summary>", ""] + [f"- {n}" for n in e["pt"]]
-    lines += ["", "</details>", "", "## Install", "",
+    lines = _section(e["en"], "en")
+    lines += ["<details><summary>Novidades em português</summary>", ""] + _section(e["pt"], "pt", "####")
+    lines += ["</details>", "", "## Install", "",
               "Download **Tela-Setup.exe** below and run it. Updating keeps your settings; "
               "Tela! 1.4.1 and newer update themselves from the window.", "",
+              "Requirements: Windows 10 or 11 (64-bit) and a Turing Smart Screen 3.5\" revision A. "
+              "See [Compatibility](https://github.com/Fekaziroh/Tela#compatibility).", "",
               "Windows SmartScreen may warn because the setup is not code-signed: "
               "**More info › Run anyway**."]
     return "\n".join(lines) + "\n"

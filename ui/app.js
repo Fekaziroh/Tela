@@ -59,6 +59,7 @@ async function setSetting(path, value, quiet) {
   if (path === "ui.language") { S.lang = effectiveLang(); applyTexts(); }
   if (path.startsWith("display.night") || path.startsWith("history.")) renderNight();
   syncControls();
+  refreshPreset();
 }
 function effectiveLang() {
   const l = (S.settings.ui || {}).language || "auto";
@@ -363,6 +364,7 @@ function screenState(st) {
   if (st.connected) return ["ok", t("st.connected", { port: st.port || "" })];
   const e = st.screen_error || "";
   if (/PermissionError|denied|negado|Access/i.test(e)) return ["err", t("st.busy")];
+  if (/unsupported screen: (.*)/i.test(e)) return ["err", t("st.unsupported", { m: e.match(/unsupported screen: (.*)/i)[1] })];
   if (/not found/i.test(e)) return ["err", t("st.not_found")];
   if (e) return ["err", e.slice(0, 80)];
   return ["warn", t("st.connecting")];
@@ -406,6 +408,7 @@ function renderState(s, quick) {
   $("#pause").textContent = st.paused ? t("home.resume") : t("home.pause");
   $("#port-now").textContent = t("set.port_now", { port: st.connected ? st.port : t("set.port_none") });
   if (s.frame) showFrame(s.frame);
+  $("#preview-paused").hidden = s.preview !== false;
   if (s.disks && JSON.stringify(s.disks) !== JSON.stringify(S.init.disks)) { S.init.disks = s.disks; renderDisks(); }
   renderLastGame(s.last_game);
   if (!quick || S.tab === "advanced") renderLog();
@@ -600,6 +603,7 @@ async function start() {
   bindHistory();
   renderHistoryFolder();
   bindUpdate();
+  bindPresets();
   if (wizNeeded()) setTimeout(wizStart, 800);
   else if (S.init.updated_from) setTimeout(() => { showWhatsNew(S.init.updated_from); api.news_seen(); }, 600);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "advanced") pollUsage(); });

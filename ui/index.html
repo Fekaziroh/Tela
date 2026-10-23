@@ -42,7 +42,7 @@
     <section data-panel="home" style="display:grid;gap:18px">
       <div class="pills" id="pills"></div>
       <div class="home">
-        <div class="screen"><canvas id="preview" width="480" height="320" aria-label="preview"></canvas><div class="legend"><span><span data-i18n="home.preview"></span> <span id="preview-size"></span></span><b id="preview-note"></b></div></div>
+        <div class="screen"><canvas id="preview" width="480" height="320" aria-label="preview"></canvas><div class="paused" id="preview-paused" hidden><p data-i18n="pre.paused"></p><button class="btn" id="peek-btn" data-i18n="pre.peek"></button></div><div class="legend"><span><span data-i18n="home.preview"></span> <span id="preview-size"></span></span><b id="preview-note"></b></div></div>
         <div class="col">
           <div class="card">
             <h3 data-i18n="home.screen"></h3>
@@ -130,6 +130,17 @@
     <!-- SETTINGS -->
     <section data-panel="settings" hidden>
       <div class="grid">
+        <div class="card" style="grid-column:1/-1"><h3 data-i18n="pre.title"></h3>
+          <div class="presets" id="presets">
+            <button data-p="performance"><b data-i18n="pre.performance"></b><small data-i18n="pre.performance_d"></small></button>
+            <button data-p="default"><b data-i18n="pre.default"></b><small data-i18n="pre.default_d"></small></button>
+            <button data-p="custom" tabindex="-1"><b data-i18n="pre.custom"></b><small data-i18n="pre.custom_d"></small></button>
+          </div>
+          <hr class="sep">
+          <div class="row"><span class="lbl"><span data-i18n="prof.title"></span><small data-i18n="prof.hint"></small></span>
+            <span class="inline"><button class="btn" id="prof-import" data-i18n="prof.import"></button><button class="btn pri" id="prof-new" data-i18n="prof.save"></button></span></div>
+          <div class="profiles" id="profiles"></div>
+        </div>
         <div class="card"><h3 data-i18n="set.general"></h3>
           <div class="row"><span class="lbl" data-i18n="set.autostart"></span><button class="sw" role="switch" id="autostart" data-label="set.autostart"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.off_exit"></span><button class="sw" role="switch" data-set="display.off_on_exit" data-label="set.off_exit"></button></div>
@@ -142,8 +153,7 @@
         <div class="card"><h3 data-i18n="set.night"></h3>
           <div class="row"><span class="lbl" data-i18n="set.night_on"></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="set.night_on"></button></div>
           <div class="sub" id="night-sub">
-            <div class="row"><label for="night-b" data-i18n="set.night_level"></label><span class="val" id="night-b-v"></span></div>
-            <input type="range" id="night-b" min="0" max="100" step="1" data-set="display.night_brightness">
+            <div class="range-row"><span class="val" id="night-b-v"></span><input type="range" id="night-b" min="0" max="100" step="1" data-set="display.night_brightness" data-label="set.night_level"></div>
             <div class="inline"><span data-i18n="set.from"></span><input type="time" data-set="display.night_start"><span data-i18n="set.to"></span><input type="time" data-set="display.night_end"></div>
           </div>
         </div>
@@ -152,6 +162,8 @@
           <div class="row"><span class="lbl" data-i18n="set.read_every"></span><span class="inline"><input class="num" type="number" min="0.5" max="10" step="0.5" data-set=".interval" id="base-interval"><span data-i18n="s"></span></span></div>
           <div class="row"><span class="lbl" data-i18n="set.fps_every"></span><span class="inline"><input class="num" type="number" min="0.1" max="2" step="0.05" data-set="fps.update"><span data-i18n="s"></span></span></div>
           <div class="row"><span class="lbl"><span data-i18n="set.fps_avg"></span><small data-i18n="set.fps_avg_desc"></small></span><span class="inline"><input class="num" type="number" min="0.2" max="2" step="0.1" data-set="fps.average"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="pre.quality"></span><small data-i18n="pre.quality_d"></small></span><div class="seg" data-set="performance.quality"><button data-v="high" data-i18n="pre.q_high"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
+          <div class="row"><span class="lbl" data-i18n="pre.preview"></span><button class="sw" role="switch" data-set="performance.preview" data-label="pre.preview"></button></div>
           <div class="row"><span class="lbl"><span data-i18n="set.anim"></span><small data-i18n="set.anim_desc"></small></span><button class="sw" role="switch" data-set="animation.enabled" data-label="set.anim"></button></div>
           <div class="row"><span class="lbl"><span data-i18n="set.eco"></span><small data-i18n="set.eco_desc"></small></span><button class="sw" role="switch" data-set="eco.enabled" data-label="set.eco"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.eco_after"></span><span class="inline"><input class="num" type="number" min="1" max="120" step="1" data-set="eco.idle_minutes"><span data-i18n="min"></span></span></div>
@@ -170,7 +182,7 @@
           <hr class="sep">
           <div class="row"><span class="lbl" data-i18n="hist.save"></span><button class="sw" role="switch" data-set="history.save" data-label="hist.save"></button></div>
           <div class="sub" id="hist-sub">
-            <div class="row"><span class="lbl"><span data-i18n="hist.keep"></span><small data-i18n="hist.keep_hint"></small></span><span class="inline"><input class="num" type="number" min="0" max="5000" step="10" data-set="history.keep"><span data-i18n="hist.games"></span></span></div>
+            <div class="row"><span class="lbl"><span data-i18n="hist.keep"></span><small data-i18n="hist.keep_hint"></small></span><span class="inline"><input class="num" type="number" min="0" max="5000" step="5" id="hist-keep"><span data-i18n="hist.games"></span></span></div>
             <div class="row"><span class="lbl"><span data-i18n="hist.folder"></span><small id="hist-folder" class="selectable"></small></span><button class="btn" id="hist-choose" data-i18n="hist.choose"></button></div>
           </div>
           <div class="btns"><button class="btn" id="hist-open" data-i18n="hist.open"></button></div>
@@ -248,6 +260,7 @@
 <script src="history.js"></script>
 <script src="changelog.js"></script>
 <script src="update.js"></script>
+<script src="presets.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

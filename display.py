@@ -28,8 +28,32 @@ def size_for(orientation):
     return NATIVE_H, NATIVE_W
 
 
+# other smart screens that use a different protocol (not supported yet): how to recognize them
+OTHER_SCREENS = (
+    (lambda p: p.serial_number == "2017-2-25", '3.5" revision B (XuanFang)'),
+    (lambda p: (p.vid, p.pid) in ((0x1D6B, 0x0121), (0x1D6B, 0x0106)), 'Turing 2.1" / 5" / 8.8" (revision C)'),
+    (lambda p: (p.vid, p.pid) == (0x454D, 0x4E41), "Kipye (revision D)"),
+)
+
+
+def other_screen(port):
+    """Name of a known but unsupported screen model, or None."""
+    return next((name for match, name in OTHER_SCREENS if match(port)), None)
+
+
 def is_turing(port):
+    if other_screen(port):
+        return False
     return port.serial_number == "USB35INCHIPSV2" or (port.vid, port.pid) == (0x1A86, 0x5722)
+
+
+def unsupported_found():
+    """Names of connected screens that Tela! cannot drive (for a clear message instead of "not found")."""
+    try:
+        from serial.tools.list_ports import comports
+        return sorted({n for n in (other_screen(p) for p in comports()) if n})
+    except Exception:  # noqa: BLE001
+        return []
 
 
 def find_port():
@@ -83,6 +107,9 @@ class TuringScreen:
         if port in (None, "", "auto"):
             port = find_port()
             if not port:
+                other = unsupported_found()
+                if other:
+                    raise RuntimeError("unsupported screen: " + ", ".join(other))
                 raise RuntimeError("screen not found")
         self.ser = serial.Serial(port, 115200, timeout=1, write_timeout=10, rtscts=True)
         self.port_in_use = port

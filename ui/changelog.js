@@ -1,146 +1,277 @@
 "use strict";
 // Patch notes, newest first. Source for the window, CHANGELOG.md and the release notes
 // (installer/changelog.py). Keep it valid JSON between "= " and the final ";".
+// Each language has categories: new, fix, perf (performance), look (appearance and personalization).
 // "draft": true = still being worked on; the workflow only publishes the release once it is removed.
 const CHANGELOG = [
-{"v": "1.4.1", "pt": [
-  "Histórico de partidas: cada resumo de jogo fica salvo. Dá para buscar, ver o gráfico de FPS, mostrar de novo na tela, apagar e exportar em CSV. Você escolhe quantas guardar e a pasta.",
-  "Atualizações pelo app: a Tela! avisa quando sai uma versão nova e instala com um clique.",
-  "Notas de versão de todas as versões em Avançado, e um resumo do que mudou depois de cada atualização.",
-  "Mídia: some 5 s depois de pausar, com fade. Com o jogo aberto (mesmo minimizado) ela continua à direita.",
-  "Transição suave também ao sair do resumo de jogo.",
-  "Tema de cores da tela personalizado, separado dos prontos.",
-  "Correção: a imagem de fundo às vezes não saía ao remover.",
-  "Correção: a tela podia perder a conexão durante uma transição.",
-  "O medidor de FPS se recupera sozinho quando para de responder, e mostra o motivo se não iniciar.",
-  "A janela usa bem menos memória.",
-  "Instalador: corrigido o erro 740 ao abrir a Tela! no final."
-], "en": [
-  "Game history: every game summary is saved. Search it, see the FPS graph, show a game on the screen again, delete or export to CSV. You choose how many to keep and the folder.",
-  "Updates from the app: Tela! tells you when a new version is out and installs it with one click.",
-  "Patch notes for every version in Advanced, and a summary of what changed after each update.",
-  "Media: hides 5 s after pausing, with a fade. While a game is open (even minimized) it stays on the right.",
-  "Smooth transition when leaving the game summary too.",
-  "Custom screen color theme, separate from the ready-made ones.",
-  "Fix: the background picture sometimes stayed after removing it.",
-  "Fix: the screen could lose its connection during a transition.",
-  "The FPS meter recovers by itself when it stops responding, and shows why when it cannot start.",
-  "The window uses much less memory.",
-  "Setup: fixed error 740 when opening Tela! at the end."
-]},
-{"v": "1.4.0", "pt": [
-  "Janela nova: temas (automático, prontos ou com as suas cores) e idiomas português, inglês, espanhol e chinês.",
-  "Editor de layout: arrastar, redimensionar, ligar e desligar blocos, renomear e escolher sensores numa lista ao vivo.",
-  "Tela na vertical, além da horizontal (e as duas invertidas).",
-  "Temas de cores da tela e imagem de fundo.",
-  "Instalador de verdade: não precisa de Python, baixa o PawnIO e o WebView2 só se faltarem e guarda as configurações em %APPDATA%\\Tela.",
-  "Assistente na primeira abertura, que traz as configurações das versões antigas."
-], "en": [
-  "New window: themes (automatic, ready-made or your own colors) and Portuguese, English, Spanish and Chinese.",
-  "Layout editor: drag, resize, turn blocks on and off, rename and pick sensors from a live list.",
-  "Portrait screen as well as landscape (and both flipped).",
-  "Screen color themes and background picture.",
-  "A real installer: no Python needed, downloads PawnIO and WebView2 only when missing and keeps the settings in %APPDATA%\\Tela.",
-  "First-run assistant that brings the settings from older versions."
-]},
-{"v": "1.3.9", "pt": [
-  "Revisão geral: desenho mais leve, recuperação automática de erros e log que gira sozinho.",
-  "Primeiro Setup.exe gerado no GitHub."
-], "en": [
-  "General review: lighter drawing, automatic error recovery and a log that rotates by itself.",
-  "First Setup.exe built on GitHub."
-]},
-{"v": "1.3.8", "pt": [
-  "Detecção automática do hardware: nomes de CPU, GPU, RAM, VRAM e discos com letras.",
-  "Música e vídeo tocando no topo (Spotify, YouTube…).",
-  "Escolha da porta da tela e reconexão ao voltar da suspensão.",
-  "Brilho e último resumo no ícone da bandeja. O instalador confere Windows, .NET e PawnIO."
-], "en": [
-  "Automatic hardware detection: CPU, GPU, RAM, VRAM and disk names with letters.",
-  "Music and video playing at the top (Spotify, YouTube…).",
-  "Choice of the screen port and reconnection after sleep.",
-  "Brightness and last summary in the tray icon. The installer checks Windows, .NET and PawnIO."
-]},
-{"v": "1.3.7", "pt": [
-  "Transição em cascata entre o painel e o resumo.",
-  "Rede com ping, perda de pacotes e aviso de queda (dizendo se o roteador responde).",
-  "Brilho à noite. A tela apaga ao bloquear o PC ou o monitor desligar. Cor de fundo da tela.",
-  "O instalador mantém as suas configurações.",
-  "Depois: trocar de programa com o jogo aberto não perde mais a sessão; cada jogo tem a sua."
-], "en": [
-  "Cascade transition between the panel and the summary.",
-  "Network with ping, packet loss and outage warning (saying whether the router answers).",
-  "Night brightness. The screen turns off when the PC locks or the monitor sleeps. Screen background color.",
-  "The installer keeps your settings.",
-  "Later: switching apps with a game open no longer loses the session; each game has its own."
-]},
-{"v": "1.3.6", "pt": [
-  "1% low ao lado do frametime e temperatura máxima da partida nos gauges.",
-  "Resumo da partida quando o jogo fecha, com tempo ajustável e botão \"Ver como fica\"."
-], "en": [
-  "1% low next to the frame time and the game's max temperature in the gauges.",
-  "Game summary when the game closes, with adjustable time and a \"Preview\" button."
-]},
-{"v": "1.3.5", "pt": [
-  "Só uma Tela! aberta por vez: pergunta se fecha a outra cópia.",
-  "FPS a cada 0,2 s, com tempo e média ajustáveis por item."
-], "en": [
-  "Only one Tela! open at a time: asks before closing the other copy.",
-  "FPS every 0.2 s, with time and average adjustable per item."
-]},
-{"v": "1.3.4", "pt": [
-  "Frametime ao lado do FPS e volume do Windows em bloco próprio.",
-  "Discos mostram a atividade em tempo real, com a barra do espaço ocupado. Cores editáveis pela janela."
-], "en": [
-  "Frame time next to the FPS and Windows volume in its own block.",
-  "Disks show live activity, with the bar showing used space. Colors editable in the window."
-]},
-{"v": "1.3.3", "pt": [
-  "FPS pelo PresentMon, sem precisar de RTSS ou Afterburner.",
-  "Programa em pasta, sem sobras na pasta temporária. Botão Desinstalar."
-], "en": [
-  "FPS through PresentMon, no RTSS or Afterburner needed.",
-  "Program in a folder, nothing left in the temp folder. Uninstall button."
-]},
-{"v": "1.3.2", "pt": [
-  "A tela fica preta ao sair do app e ao desligar ou reiniciar o PC.",
-  "Intervalo de atualização por item, com média do período. Liga/desliga das animações."
-], "en": [
-  "The screen goes black when the app closes and when the PC shuts down or restarts.",
-  "Update interval per item, averaging the period. Animations on/off."
-]},
-{"v": "1.3.1", "pt": [
-  "Corrigido o download do monitor de hardware. Versão no título da janela."
-], "en": [
-  "Fixed the hardware monitor download. Version in the window title."
-]},
-{"v": "1.3.0", "pt": [
-  "Animações suaves: barras e gauges deslizam.",
-  "Monitor de hardware embutido, instalador único, início pelo Agendador de Tarefas."
-], "en": [
-  "Smooth animations: bars and gauges glide.",
-  "Embedded hardware monitor, single installer, start through the Task Scheduler."
-]},
-{"v": "1.2.0", "pt": [
-  "Janela com prévia ao vivo, ícone na bandeja e início com o Windows.",
-  "Sensores lidos direto do PC, sem abrir o LibreHardwareMonitor. Executável próprio."
-], "en": [
-  "Window with a live preview, tray icon and start with Windows.",
-  "Sensors read directly, without opening LibreHardwareMonitor. Its own executable."
-]},
-{"v": "1.1.0", "pt": [
-  "Primeira versão: painel de sensores no estilo do AIDA64, rodando pelo console."
-], "en": [
-  "First version: AIDA64-style sensor panel, running from the console."
-]}
+{"v": "1.4.2",
+ "pt": {
+  "new": [
+   "Predefinições em Configurações: Performance (menos CPU e memória), Padrão e Personalizado, que fica marcado sozinho quando você muda uma dessas opções.",
+   "Perfis: salve as configurações e os layouts com um nome, troque entre eles e exporte ou importe para levar a outro PC.",
+   "Aviso de nova versão também no ícone da bandeja, com a opção de atualizar pelo menu dele.",
+   "A Tela! avisa quando a tela conectada é de um modelo que ainda não é suportado."
+  ],
+  "fix": [
+   "O tema automático usava o grafite no lugar do preto com o Windows no modo escuro.",
+   "O ícone da bandeja (logo, CPU ou GPU) só mudava depois de reiniciar o app."
+  ],
+  "perf": [
+   "Qualidade do desenho (alta ou normal) e prévia ao vivo na janela podem ser desligadas para economizar CPU."
+  ],
+  "look": [
+   "A barra de título da janela segue o tema (com a cor do tema no Windows 11; clara ou escura no Windows 10).",
+   "Brilho à noite com a porcentagem ao lado da barra.",
+   "O histórico guarda as últimas 15 partidas por padrão e avisa antes de apagar quando você diminui o número.",
+   "Notas de versão separadas por categoria."
+  ]
+ },
+ "en": {
+  "new": [
+   "Presets in Settings: Performance (less CPU and memory), Default and Custom, which is selected by itself when you change one of these options.",
+   "Profiles: save the settings and layouts under a name, switch between them and export or import them to take to another PC.",
+   "New version notice in the tray icon too, with an option to update from its menu.",
+   "Tela! tells you when the connected screen is a model that is not supported yet."
+  ],
+  "fix": [
+   "The automatic theme used graphite instead of black with Windows in dark mode.",
+   "The tray icon (logo, CPU or GPU) only changed after restarting the app."
+  ],
+  "perf": [
+   "Drawing quality (high or normal) and the live preview in the window can be turned down to save CPU."
+  ],
+  "look": [
+   "The window title bar follows the theme (theme color on Windows 11; light or dark on Windows 10).",
+   "Night brightness with the percentage next to the slider.",
+   "The history keeps the last 15 games by default and asks before deleting when you lower the number.",
+   "Patch notes split into categories."
+  ]
+ }},
+{"v": "1.4.1",
+ "pt": {
+  "new": [
+   "Histórico de partidas: cada resumo de jogo fica salvo, com busca, gráfico de FPS, opção de mostrar de novo na tela, apagar e exportar em CSV. Você escolhe quantas guardar e a pasta.",
+   "Atualizações pelo app: a Tela! avisa quando sai uma versão nova e instala com um clique.",
+   "Notas de todas as versões em Avançado e um resumo do que mudou depois de cada atualização.",
+   "Tema de cores da tela personalizado, separado dos prontos."
+  ],
+  "fix": [
+   "A imagem de fundo às vezes continuava na tela depois de removida.",
+   "A tela podia perder a conexão durante uma transição.",
+   "O medidor de FPS volta sozinho quando para de responder e mostra o motivo quando não inicia.",
+   "O instalador dava erro 740 ao abrir a Tela! no final."
+  ],
+  "perf": [
+   "A janela usa bem menos memória."
+  ],
+  "look": [
+   "A mídia some 5 s depois de pausar, com transição. Com o jogo aberto, mesmo minimizado, ela continua à direita.",
+   "Transição em blocos também ao sair do resumo de jogo.",
+   "Tema escuro padrão da janela agora é o Preto. Ajustes de organização em Início e Configurações."
+  ]
+ },
+ "en": {
+  "new": [
+   "Game history: every game summary is saved, with search, FPS graph, an option to show it on the screen again, delete and export to CSV. You choose how many to keep and the folder.",
+   "Updates from the app: Tela! tells you when a new version is out and installs it with one click.",
+   "Notes for every version in Advanced and a summary of what changed after each update.",
+   "Custom screen color theme, separate from the ready-made ones."
+  ],
+  "fix": [
+   "The background picture sometimes stayed on the screen after removing it.",
+   "The screen could lose its connection during a transition.",
+   "The FPS meter recovers by itself when it stops responding and shows why when it cannot start.",
+   "The setup showed error 740 when opening Tela! at the end."
+  ],
+  "perf": [
+   "The window uses much less memory."
+  ],
+  "look": [
+   "Media hides 5 s after pausing, with a transition. While a game is open, even minimized, it stays on the right.",
+   "Block transition also when leaving the game summary.",
+   "The default dark window theme is now Black. Tidier Home and Settings."
+  ]
+ }},
+{"v": "1.4.0",
+ "pt": {
+  "new": [
+   "Janela nova, em português, inglês, espanhol e chinês.",
+   "Editor de layout: arrastar, redimensionar, ligar e desligar blocos, renomear e escolher sensores numa lista ao vivo.",
+   "Tela na vertical, além da horizontal, e as duas invertidas.",
+   "Instalador de verdade: não precisa de Python, baixa o PawnIO e o WebView2 só se faltarem e guarda as configurações em %APPDATA%\\Tela.",
+   "Assistente na primeira abertura, que traz as configurações das versões antigas."
+  ],
+  "look": [
+   "Temas da janela (automático, prontos ou com as suas cores), temas de cores da tela e imagem de fundo."
+  ]
+ },
+ "en": {
+  "new": [
+   "New window, in Portuguese, English, Spanish and Chinese.",
+   "Layout editor: drag, resize, turn blocks on and off, rename and pick sensors from a live list.",
+   "Portrait screen as well as landscape, and both flipped.",
+   "A real installer: no Python needed, downloads PawnIO and WebView2 only when missing and keeps the settings in %APPDATA%\\Tela.",
+   "First-run assistant that brings the settings from older versions."
+  ],
+  "look": [
+   "Window themes (automatic, ready-made or your own colors), screen color themes and background picture."
+  ]
+ }},
+{"v": "1.3.9",
+ "pt": {
+  "new": ["Primeiro instalador (Setup.exe) gerado no GitHub."],
+  "fix": ["Recuperação automática de erros e registro de atividade que se organiza sozinho."],
+  "perf": ["Desenho da tela mais leve."]
+ },
+ "en": {
+  "new": ["First setup (Setup.exe) built on GitHub."],
+  "fix": ["Automatic error recovery and an activity log that keeps itself tidy."],
+  "perf": ["Lighter screen drawing."]
+ }},
+{"v": "1.3.8",
+ "pt": {
+  "new": [
+   "Detecção automática do hardware: nomes de CPU, GPU, RAM, VRAM e discos com letras.",
+   "Música e vídeo tocando no topo da tela (Spotify, YouTube e outros).",
+   "Escolha da porta da tela, brilho e último resumo pelo ícone da bandeja."
+  ],
+  "fix": ["A tela reconecta sozinha ao voltar da suspensão. O instalador confere o Windows, o .NET e o PawnIO."]
+ },
+ "en": {
+  "new": [
+   "Automatic hardware detection: CPU, GPU, RAM, VRAM and disk names with letters.",
+   "Music and video playing at the top of the screen (Spotify, YouTube and others).",
+   "Screen port choice, brightness and last summary from the tray icon."
+  ],
+  "fix": ["The screen reconnects by itself after sleep. The installer checks Windows, .NET and PawnIO."]
+ }},
+{"v": "1.3.7",
+ "pt": {
+  "new": [
+   "Rede com ping, perda de pacotes e aviso de queda, dizendo se o roteador responde.",
+   "Brilho à noite. A tela apaga quando o PC é bloqueado ou o monitor desliga."
+  ],
+  "fix": [
+   "O instalador mantém as suas configurações.",
+   "Trocar de programa com o jogo aberto não perde mais a sessão; cada jogo tem a sua."
+  ],
+  "look": ["Transição em cascata entre o painel e o resumo. Cor de fundo da tela."]
+ },
+ "en": {
+  "new": [
+   "Network with ping, packet loss and outage warning, saying whether the router answers.",
+   "Night brightness. The screen turns off when the PC locks or the monitor sleeps."
+  ],
+  "fix": [
+   "The installer keeps your settings.",
+   "Switching apps with a game open no longer loses the session; each game has its own."
+  ],
+  "look": ["Cascade transition between the panel and the summary. Screen background color."]
+ }},
+{"v": "1.3.6",
+ "pt": {
+  "new": [
+   "Resumo da partida quando o jogo fecha, com tempo ajustável e botão \"Ver como fica\".",
+   "1% low ao lado do frame time e temperatura máxima da partida nos gauges."
+  ]
+ },
+ "en": {
+  "new": [
+   "Game summary when the game closes, with adjustable time and a \"Preview\" button.",
+   "1% low next to the frame time and the game's max temperature in the gauges."
+  ]
+ }},
+{"v": "1.3.5",
+ "pt": {
+  "new": ["Intervalo e média do FPS ajustáveis, atualizando a cada 0,2 s."],
+  "fix": ["Só uma Tela! aberta por vez: ela pergunta antes de fechar a outra cópia."]
+ },
+ "en": {
+  "new": ["Adjustable FPS interval and average, updating every 0.2 s."],
+  "fix": ["Only one Tela! open at a time: it asks before closing the other copy."]
+ }},
+{"v": "1.3.4",
+ "pt": {
+  "new": [
+   "Frame time ao lado do FPS e volume do Windows em um bloco próprio.",
+   "Discos mostram a atividade em tempo real, com a barra do espaço ocupado."
+  ],
+  "look": ["Cores da tela editáveis pela janela."]
+ },
+ "en": {
+  "new": [
+   "Frame time next to the FPS and Windows volume in its own block.",
+   "Disks show live activity, with the bar showing used space."
+  ],
+  "look": ["Screen colors editable in the window."]
+ }},
+{"v": "1.3.3",
+ "pt": {
+  "new": ["FPS pelo PresentMon, sem precisar do RTSS ou do Afterburner.", "Botão Desinstalar."],
+  "perf": ["Programa em pasta, sem sobras na pasta temporária."]
+ },
+ "en": {
+  "new": ["FPS through PresentMon, no RTSS or Afterburner needed.", "Uninstall button."],
+  "perf": ["Program in a folder, nothing left in the temp folder."]
+ }},
+{"v": "1.3.2",
+ "pt": {
+  "new": ["Intervalo de atualização por item, mostrando a média do período.", "Opção de ligar e desligar as animações."],
+  "fix": ["A tela fica preta ao fechar o app e ao desligar ou reiniciar o PC."]
+ },
+ "en": {
+  "new": ["Update interval per item, showing the average of the period.", "Option to turn animations on and off."],
+  "fix": ["The screen goes black when the app closes and when the PC shuts down or restarts."]
+ }},
+{"v": "1.3.1",
+ "pt": {
+  "fix": ["O download do monitor de hardware voltou a funcionar."],
+  "look": ["Versão no título da janela."]
+ },
+ "en": {
+  "fix": ["The hardware monitor download works again."],
+  "look": ["Version in the window title."]
+ }},
+{"v": "1.3.0",
+ "pt": {
+  "new": ["Monitor de hardware embutido, instalador único e início pelo Agendador de Tarefas."],
+  "look": ["Animações suaves: barras e gauges deslizam."]
+ },
+ "en": {
+  "new": ["Embedded hardware monitor, single installer and start through the Task Scheduler."],
+  "look": ["Smooth animations: bars and gauges glide."]
+ }},
+{"v": "1.2.0",
+ "pt": {
+  "new": [
+   "Janela com prévia ao vivo, ícone na bandeja e início com o Windows.",
+   "Sensores lidos direto do PC, sem abrir o LibreHardwareMonitor, e executável próprio."
+  ]
+ },
+ "en": {
+  "new": [
+   "Window with a live preview, tray icon and start with Windows.",
+   "Sensors read directly, without opening LibreHardwareMonitor, and its own executable."
+  ]
+ }},
+{"v": "1.1.0",
+ "pt": {"new": ["Primeira versão: painel de sensores no estilo do AIDA64, rodando pelo console."]},
+ "en": {"new": ["First version: AIDA64-style sensor panel, running from the console."]}}
 ];
+
+const CL_CATEGORIES = ["new", "fix", "perf", "look"];
 
 function changelogNotes(entry) {
   return entry[S.lang] || (S.lang === "pt" ? entry.pt : entry.en) || entry.en;
 }
 
 function changelogHtml(entries) {
-  return entries.map(e => `<section class="cl"><h4>Tela! ${e.v}</h4><ul>${changelogNotes(e).map(n => `<li>${esc(n)}</li>`).join("")}</ul></section>`).join("");
+  return entries.map(e => {
+    const notes = changelogNotes(e);
+    const groups = CL_CATEGORIES.filter(c => (notes[c] || []).length).map(c =>
+      `<h5>${t("cl.cat_" + c)}</h5><ul>${notes[c].map(n => `<li>${esc(n)}</li>`).join("")}</ul>`).join("");
+    return `<section class="cl"><h4>Tela! ${e.v}</h4>${groups}</section>`;
+  }).join("");
 }
 
 function showChangelog() {

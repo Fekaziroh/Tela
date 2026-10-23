@@ -3,7 +3,7 @@
 ; Expects build\dist\Tela (PyInstaller), build\components\lhm and build\components\presentmon, build\tela.ico.
 
 #ifndef AppVersion
-  #define AppVersion "1.4.1"
+  #define AppVersion "1.4.2"
 #endif
 #ifndef PawnIOUrl
   #define PawnIOUrl ""

@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -180,7 +180,8 @@ class Engine(threading.Thread):
             old.close()
         if self.collector.last_summary is None:
             self.collector.last_summary = self.last_summary
-        self.renderer = Renderer(cfg, self.screen.width, self.screen.height, base=DATA, fields=fields, lang=self.lang,
+        ss = 1 if str((cfg.get("performance") or {}).get("quality", "high")).lower() == "normal" else 2
+        self.renderer = Renderer(cfg, self.screen.width, self.screen.height, ss=ss, base=DATA, fields=fields, lang=self.lang,
                                  logo_dirs=[DATA / "logos", HERE / "logos"],
                                  cache_static=not (cfg.get("layout") or {}).get("overlap"))
         self.interval = float(cfg.get("interval", 1.0))

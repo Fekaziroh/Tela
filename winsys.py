@@ -405,3 +405,28 @@ def uninstall(log, delete_data=False):
     bat = Path(tempfile.gettempdir()) / "uninstall_tela.bat"
     bat.write_text("\r\n".join(lines) + "\r\n", encoding="utf-8")
     subprocess.Popen(["cmd", "/c", str(bat)], cwd=tempfile.gettempdir(), creationflags=NO_WINDOW | 0x00000008)
+
+
+def color_title_bar(hwnd, caption, text, dark):
+    """Paints the window title bar. Windows 11 takes any color (DWMWA_CAPTION_COLOR); Windows 10 only
+    switches between the light and the dark bar (DWMWA_USE_IMMERSIVE_DARK_MODE). Best effort."""
+    if not WINDOWS or not hwnd:
+        return False
+    import ctypes
+    from ctypes import wintypes
+    dwm = ctypes.WinDLL("dwmapi")
+    dwm.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD, ctypes.c_void_p, wintypes.DWORD]
+
+    def put(attr, value):
+        v = ctypes.c_int(value)
+        return dwm.DwmSetWindowAttribute(wintypes.HWND(hwnd), attr, ctypes.byref(v), ctypes.sizeof(v)) == 0
+
+    def colorref(hex_color):
+        n = int(str(hex_color).lstrip("#")[:6], 16)
+        return ((n & 0xFF) << 16) | (n & 0xFF00) | ((n >> 16) & 0xFF)   # 0x00BBGGRR
+
+    put(20, 1 if dark else 0) or put(19, 1 if dark else 0)   # 19 = Windows 10 before 20H1
+    ok = put(35, colorref(caption))                          # Windows 11 only
+    if ok:
+        put(36, colorref(text))
+    return ok
