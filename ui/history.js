@@ -90,12 +90,31 @@ function drawSeries(cv, series) {
 
 function bindHistory() {
   $("#hist-open").addEventListener("click", showHistory);
+  $("#hist-keep").addEventListener("change", e => changeKeep(e.target));
   $("#hist-choose").addEventListener("click", async () => {
     const f = await api.history_choose_folder();
     if (f) { (S.settings.history = S.settings.history || {}).folder = f; renderHistoryFolder(); toast(t("toast.saved")); }
   });
 }
+async function changeKeep(el) {
+  const old = (S.settings.history || {}).keep ?? 15;
+  let n = Math.round(Number(el.value));
+  if (!isFinite(n) || n < 0) { el.value = old; return; }
+  const apply = async () => {
+    await api.history_set_keep(n);
+    (S.settings.history = S.settings.history || {}).keep = n;
+    el.value = n; toast(t("toast.saved"));
+  };
+  const count = await api.history_count();
+  if (n > 0 && count > n) {
+    openModal({ title: t("hist.title"), body: `<p>${t("hist.keep_confirm", { d: count - n, n })}</p>`, buttons: [
+      { label: t("modal.cancel"), onClick: () => { el.value = old; } },
+      { label: t("hist.keep_ok"), danger: true, onClick: apply }] });
+  } else await apply();
+}
 function renderHistoryFolder() {
+  const k = $("#hist-keep");
+  if (k && document.activeElement !== k) k.value = (S.settings.history || {}).keep ?? 15;
   const f = (S.settings.history || {}).folder;
   $("#hist-folder").textContent = f || t("hist.default_folder");
 }

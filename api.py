@@ -134,7 +134,9 @@ class Api:
         st = e.status()
         c = e.collector
         out = {"status": st, "frame_no": e.frame_no, "log": list(e.log.lines)[-120:], "log_count": e.log.count}
-        if e.frame_no != since and e.last_frame is not None:
+        preview = bool((e.cfg.get("performance") or {}).get("preview", True)) or getattr(self, "_peek", 0) > time.time()
+        out["preview"] = preview
+        if preview and e.frame_no != since and e.last_frame is not None:
             out["frame"] = _png_data_url(e.last_frame)
         net = c.network_info() if c else {"state": None}
         out["network"] = {k: net.get(k) for k in ("state", "ms", "loss", "since", "gateway_ok", "level")}
@@ -196,6 +198,12 @@ class Api:
             self._app.set_tray_accent(color)
         return True
 
+    def set_title_bar(self, caption, text, dark):
+        hexes = all(re.fullmatch(r"#[0-9a-fA-F]{6}", str(c)) for c in (caption, text))
+        if hexes and hasattr(self._app, "set_title_bar"):
+            self._app.set_title_bar(caption, text, bool(dark))
+        return True
+
     def usage(self):
         """CPU/RAM used by Tela itself, its window (WebView2) and PresentMon."""
         groups = {"app": [0.0, 0], "window": [0.0, 0], "presentmon": [0.0, 0]}
@@ -231,6 +239,8 @@ class Api:
             self._engine.command("orientation", value)
         elif (section, key) not in UI_ONLY:
             self._schedule_reload()
+        else:   # no reload for these, but the tray and the window read them from the running settings
+            self._engine.cfg.setdefault(section, {})[key] = value
         self._app.settings_changed(section, key, value)
         return True
 
@@ -380,6 +390,82 @@ class Api:
         if g:
             self._engine.command("summary_show", g)
         return bool(g)
+
+    # ------------------------------------------------------------ presets and profiles
+    def preset(self):
+        import presets
+        return presets.detect(self._cfg())
+
+    def preset_apply(self, name):
+        import presets
+        if name not in presets.PRESETS:
+            return False
+        self._settings.set_many(presets.items(name))
+        self._schedule_reload()
+        self._engine.log(f"Preset: {name}")
+        return self._user_settings(self._cfg())
+
+    def preview_peek(self, seconds=60):
+        """Shows the live preview for a while even when the preset turned it off."""
+        self._peek = time.time() + float(seconds)
+        return True
+
+    def profiles(self):
+        import profiles
+        return profiles.entries()
+
+    def profile_save(self, name):
+        import profiles
+        n = profiles.save(self._cfg(), name, VERSION)
+        self._engine.log(f"Profile saved: {n}")
+        return n
+
+    def profile_load(self, name):
+        import profiles
+        profiles.apply(self._app.cfg_path, profiles.read(name))
+        self._engine.log(f"Profile loaded: {name}")
+        self._engine.command("reload")
+        cfg = self._cfg()
+        return {"settings": self._user_settings(cfg)}
+
+    def profile_delete(self, name):
+        import profiles
+        return profiles.delete(name)
+
+    def profile_export(self, name):
+        import profiles
+        path = self._app.pick_save_path(f"{name}{profiles.EXT}", "Tela! profile", profiles.EXT.lstrip("."))
+        if not path:
+            return None
+        profiles.export(name, path)
+        return path
+
+    def profile_import(self):
+        import profiles
+        path = self._app.pick_open_path("Tela! profile", profiles.EXT.lstrip("."))
+        if not path:
+            return None
+        try:
+            return {"name": profiles.import_file(path)}
+        except (OSError, ValueError) as e:
+            return {"error": str(e)}
+
+    def history_count(self):
+        import history
+        return len(history.entries(self._cfg()))
+
+    def history_set_keep(self, n):
+        """Changes how many games are kept and deletes the older ones now."""
+        import history
+        n = max(0, int(n))
+        self._settings.set("history", "keep", n)
+        cfg = self._cfg()
+        cfg.setdefault("history", {})["keep"] = n
+        removed = history.prune(cfg)
+        if removed:
+            self._engine.log(f"{removed} old game(s) deleted from the history")
+        self._engine.cfg.setdefault("history", {})["keep"] = n
+        return removed
 
     def history_export(self):
         import history

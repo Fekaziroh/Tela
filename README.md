@@ -27,6 +27,7 @@ yourself, all set up from a clean window instead of config files.
 - Landscape and portrait (and both flipped), screen color themes, background picture
 - Window themes (automatic, ready-made or your own colors), Portuguese, English, Spanish and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
+- **Presets** (Performance, Default, Custom) and **profiles** you can save, switch, export and import
 - Eco mode when you are away, automatic recovery, diagnostics report
 - Updates itself: a button lights up when a new version is out
 
@@ -35,6 +36,8 @@ yourself, all set up from a clean window instead of config files.
 | Layout editor | Game history |
 |---|---|
 | ![Layout editor](docs/editor.png) | ![Game history](docs/history.png) |
+
+![Presets and profiles](docs/settings.png)
 
 ## Install
 
@@ -54,8 +57,22 @@ in `%APPDATA%\Tela`.
 > Windows SmartScreen may warn the first time because the setup has no paid code-signing certificate:
 > click **More info › Run anyway**.
 
-Requirements: Windows 10 or 11 (64-bit), a Turing Smart Screen 3.5" (revision A, USB serial
-`USB35INCHIPSV2`). Other Turing sizes are not supported yet.
+See [Compatibility](#compatibility) before buying a screen for Tela!.
+
+## Compatibility
+
+| | Supported |
+|---|---|
+| **Windows** | Windows 10 and 11, 64-bit. Windows 7 and 8 are not supported; Windows on ARM is untested. |
+| **Screen** | Turing Smart Screen 3.5" **revision A** (USB serial `USB35INCHIPSV2`). The 2.1", 5" and 8.8" models and the 3.5" revision B (XuanFang) use other protocols and are not supported yet; Tela! tells you when it finds one. |
+| **Components** | .NET Framework 4.7.2 or newer (included in an updated Windows 10). WebView2 and PawnIO are installed by the setup when missing. |
+| **Hardware** | AMD, NVIDIA and Intel CPUs and GPUs (through LibreHardwareMonitor). |
+| **FPS** | DirectX 9 to 12 and Vulkan games through PresentMon. OpenGL games may not show FPS. RTSS is optional. |
+| **Permissions** | Administrator, to read the sensors. The setup takes care of it. |
+| **Languages** | Portuguese, English, Spanish and Chinese. |
+
+Versions are numbered 1.x.y: a new middle number (1.5.0) is a big change, each 1.x.y is an update with
+features and fixes. Only the latest version receives fixes, and Tela! updates itself from the window.
 
 ## Privacy
 

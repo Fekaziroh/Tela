@@ -81,7 +81,7 @@ def delete(cfg, ids):
 
 
 def prune(cfg):
-    keep = int((cfg.get("history") or {}).get("keep", 200) or 0)
+    keep = int((cfg.get("history") or {}).get("keep", 15) or 0)
     if keep <= 0:
         return 0
     old = _files(cfg)[keep:]

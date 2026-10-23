@@ -76,8 +76,12 @@ session:
 
 history:
   save: true                   # keep every game summary
-  keep: 200                    # how many games to keep (0 = all)
+  keep: 15                     # how many games to keep (0 = all)
   folder: ""                   # empty = the "games" folder next to the settings
+
+performance:                   # the presets in Settings change these together with a few intervals
+  quality: high                # high (2x supersampled, smoother edges) | normal (less CPU)
+  preview: true                # live preview in the window (off = less CPU while the window is open)
 
 updates:
   check: true                  # look for a new Tela! on GitHub (at start and every 6 hours)

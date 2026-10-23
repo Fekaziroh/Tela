@@ -817,12 +817,83 @@ def changelog_covers_the_version_and_matches_markdown():
     keys = [tuple(int(x) for x in v.split(".")) for v in versions]
     assert keys == sorted(keys, reverse=True) and len(set(keys)) == len(keys)
     for e in entries:
-        assert e["pt"] and len(e["pt"]) == len(e["en"]), e["v"]
-        for n in e["pt"] + e["en"]:
-            assert not any(w in n for w in ("TelaV", "Telinha", "telinha")), n
+        assert set(e["pt"]) == set(e["en"]) and set(e["en"]) <= set(changelog.CATEGORIES), e["v"]
+        for c in e["en"]:
+            assert len(e["pt"][c]) == len(e["en"][c]) > 0, (e["v"], c)
+            for n in e["pt"][c] + e["en"][c]:
+                assert not any(w in n for w in ("TelaV", "Telinha", "telinha", "Later:", "Depois:")), n
     assert (ROOT / "CHANGELOG.md").read_text(encoding="utf-8") == changelog.markdown(), \
         "CHANGELOG.md is outdated: python installer/changelog.py --markdown"
-    assert "## What's new" in changelog.release_notes(VERSION)
+    assert "### New" in changelog.release_notes(VERSION) or "### Fixes" in changelog.release_notes(VERSION)
+
+
+@test
+def presets_detect_apply_and_custom():
+    import presets
+    cfg = config.load(ROOT / config.DEFAULT)
+    assert presets.detect(cfg) == "default", "config_default.yaml must match the Default preset"
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "config.yaml"
+        p.write_text((ROOT / config.DEFAULT).read_text(encoding="utf-8"), encoding="utf-8")
+        config.Settings(p).set_many(presets.items("performance"))
+        c = config.load(p)
+        assert presets.detect(c) == "performance", [(s, k, presets.value(c, s, k)) for s, k, _ in presets.items("performance")]
+        config.Settings(p).set("fps", "update", 0.3)
+        assert presets.detect(config.load(p)) == "custom"
+    r = render.Renderer(default_cfg(), 480, 320, ss=1, base=ROOT)       # "normal" quality draws at 1x
+    assert r.draw(FakeCollector()).size == (480, 320)
+
+
+@test
+def profiles_save_apply_import():
+    import profiles
+    old = config.DATA
+    with tempfile.TemporaryDirectory() as d:
+        try:
+            config.DATA = Path(d)
+            cfg_path = Path(d) / "config.yaml"
+            cfg_path.write_text((ROOT / config.DEFAULT).read_text(encoding="utf-8"), encoding="utf-8")
+            config.Settings(cfg_path).set_many([("display", "brightness", 70), ("ui", "theme", "preset:red"),
+                                                ("display", "port", "COM9")])
+            layout.user_path("landscape").write_text("groups: []\n", encoding="utf-8")
+            name = profiles.save(config.load(cfg_path), "Noite/Jogo", "1.4.2")
+            assert name == "Noite Jogo" and profiles.entries()[0]["layouts"] == ["landscape"]
+            data = profiles.read(name)
+            assert ["display", "port", "COM9"] not in data["settings"]            # belongs to this PC
+            config.Settings(cfg_path).set_many([("display", "brightness", 20), ("ui", "theme", "light")])
+            layout.user_path("landscape").unlink()
+            layout.user_path("portrait").write_text("groups: []\n", encoding="utf-8")
+            profiles.apply(cfg_path, data)
+            c = config.load(cfg_path)
+            assert c["display"]["brightness"] == 70 and c["ui"]["theme"] == "preset:red"
+            assert layout.user_path("landscape").exists() and not layout.user_path("portrait").exists()
+            out = Path(d) / "x.tela-profile"
+            profiles.export(name, out)
+            assert profiles.import_file(out) == "Noite Jogo (2)"
+            bad = Path(d) / "bad.tela-profile"
+            bad.write_text('{"tela_profile": 1, "settings": [["evil", "k", 1]]}', encoding="utf-8")
+            try:
+                profiles.import_file(bad)
+                raise AssertionError("a profile with unknown sections must be refused")
+            except ValueError:
+                pass
+            assert profiles.delete(name) and len(profiles.entries()) == 1
+        finally:
+            config.DATA = old
+
+
+@test
+def other_screen_models_are_recognized():
+    import display
+
+    class P:
+        def __init__(self, serial=None, vid=None, pid=None):
+            self.serial_number, self.vid, self.pid = serial, vid, pid
+    assert display.is_turing(P("USB35INCHIPSV2", 0x1A86, 0x5722))
+    rev_b = P("2017-2-25", 0x1A86, 0x5722)                     # same USB chip, other protocol
+    assert not display.is_turing(rev_b) and "revision B" in display.other_screen(rev_b)
+    assert "revision C" in display.other_screen(P(None, 0x1D6B, 0x0121))
+    assert display.other_screen(P("USB35INCHIPSV2", 0x1A86, 0x5722)) is None
 
 
 def main():
