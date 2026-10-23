@@ -14,6 +14,7 @@ PRESETS = {
         ("network", "ping_interval"): 2,
         ("data", "disk_interval"): 2,
         ("eco", "enabled"): True,
+        ("ui", "unload_hidden"): False,
     },
     "performance": {
         ("performance", "quality"): "normal",
@@ -24,6 +25,7 @@ PRESETS = {
         ("network", "ping_interval"): 5,
         ("data", "disk_interval"): 5,
         ("eco", "enabled"): True,
+        ("ui", "unload_hidden"): True,
     },
 }
 ORDER = ("performance", "default")

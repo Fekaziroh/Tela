@@ -19,7 +19,8 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
 - `history.py` saved games (one JSON per game in DATA/games or a chosen folder)
 - `winsys.py` Windows integration (single instance on port 47614, scheduled task "Tela", power events)
 - `tests/run_tests.py` dependency-free tests (run before every push; CI runs them on Windows)
-- `tests/ui_server.py` serves the real UI in a browser with the engine in demo mode (for screenshots)
+- `tests/ui_server.py` serves the real UI in a browser with the engine in demo mode; `tests/screenshots.py`
+  makes the README pictures (CI pushes them to the `screenshots` branch when a version goes stable)
 
 ## Rules
 - Versions: `engine.VERSION` (x.y.z). History numbering: 1.1.0 first app, 1.2.x second, 1.3.0–1.3.9, 1.4.x.
@@ -95,7 +96,12 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
 - 1.4.4 Orientation, portrait and organization: orientation in Layout + shortcut on Home (out of Settings ›
   screen connection); portrait layout using the space better, media mini player in the date's place during a
   game; frametime graph bigger, customizable, integrated with the FPS;
-  search in Settings
+  search in Settings; owner's notes 2026-10-23: portrait puts the media in the date's place and the frametime
+  BELOW the FPS (customizable); tray notice when another app holds the screen + button to close known apps
+  (official Turing app USBMonitor.exe/ExtendScreen.exe, TelaV2/V3); update-check interval 2-24 h (default 6);
+  option to fully close the window (destroy the WebView) when going to the tray to free its RAM; FIX patch notes
+  in Spanish/Chinese (ui/changelog.js only has pt/en: add es and zh); cleaner updates: [InstallDelete] also {app}\lhm and
+  {app}\presentmon, and Tela! deletes old Tela-Setup-*.exe/.part from %TEMP% at start (updater downloads them)
 - 1.4.5 Themes and personalization (moved up from 1.5.0, owner's focus): at least 5 themes with different
   shapes and arrangements (bars, gauges, graphs, drawings), not only colors, each in landscape and portrait,
   built on the 1.4.3 element system; NEW DEFAULT THEME = the "first version" look (owner's picture of the old
@@ -132,6 +138,14 @@ the repository are in English. The window is translated (pt, en, es, zh in `ui/i
       font per element (render.FONT_FAMILIES), palette drag (pointer events), block reflow (ui.reflow)
 - [x] Version resource (installer/version_info.py), About card, GitHub issue forms
 - [x] Published as stable v1.4.3 (1.4.2 cannot see test versions, so this one had to be stable)
+
+## 1.4.4 — published as TEST version ("beta": true in ui/changelog.js)
+- [x] Editor UX (Shift multi-select, Esc, Delete/Backspace, card on top, readable boxes), es/zh patch notes,
+      cleaner updates, update interval, unload window in tray (ui.unload_hidden), orientation in Layout + Home,
+      settings search, portrait top (media in date's place, frametime below FPS), frametime labels/fields,
+      temperature alerts (alerts.py), other-app notice (winsys.screen_apps), README pictures on the
+      "screenshots" branch (tests/screenshots.py, CI job)
+- [ ] Owner approves → remove "beta" from 1.4.4 and push (workflow promotes it to stable)
 
 ## Compatibility notes (applied to README in 1.4.2)
 Compatibility section (also in release notes):

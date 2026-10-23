@@ -43,7 +43,7 @@ groups:
       - {type: value, sensor: fps, x: 12, y: 19, size: 26, bold: true, unit: ' FPS', unit_size: 12, empty: ''}
       - {type: media, x: 10, y: 4, w: 170, h: 30, when: [no_game, media], fade: true}
       - {type: image, files: logos, when: logos, x: 12, y: 11, w: 90, h: 16}
-      - {type: frametime, x: 100, y: 17, w: 56, h: 14, seconds: 2}
+      - {type: frametime, x: 100, y: 16, w: 80, h: 15, seconds: 2}
       - {type: clock, format: '%H:%M', x: 240, y: 19, align: center, size: 28, bold: true}
       - {type: clock, format: '{weekday} %d/%m', x: 468, y: 19, align: right, size: 14, color: secondary, when: no_media_in_game, fade: true}
       - {type: media, x: 298, y: 4, w: 170, h: 30, when: media_in_game, fade: true}

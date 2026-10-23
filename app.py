@@ -5,6 +5,7 @@
   Tela.exe --tray     starts hidden in the tray (used at Windows logon)
 """
 import argparse
+import re
 import threading
 import time
 
@@ -13,24 +14,29 @@ import winsys
 from api import Api
 from engine import HERE, VERSION, Engine, Log, effective_language
 from icon import app_icon, temp_icon
+from alerts import TempAlerts
 from updater import Updater
 
 TEXT = {
-    "pt": {"usage": "Tela! usando {cpu}% de CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
+    "pt": {"hot": "{part} a {t} °C (limite {limit} °C).", "busy": "A tela está sendo usada por: {apps}. Use o menu deste ícone para fechar e a Tela! assumir.", "take": "Fechar {apps} e usar a tela",
+           "usage": "Tela! usando {cpu}% de CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
            "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
            "pause": "Pausar", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
-    "es": {"usage": "Tela! usa {cpu}% de CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
+    "es": {"hot": "{part} a {t} °C (límite {limit} °C).", "busy": "La pantalla está en uso por: {apps}. Usa el menú de este icono para cerrarlo y que Tela! la use.", "take": "Cerrar {apps} y usar la pantalla",
+           "usage": "Tela! usa {cpu}% de CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
            "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
            "pause": "Pausar", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
-    "zh": {"usage": "Tela! 占用 {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
+    "zh": {"hot": "{part} 温度 {t} °C（上限 {limit} °C）。", "busy": "屏幕正被以下程序使用：{apps}。可通过此图标菜单关闭它，让 Tela! 接管。", "take": "关闭 {apps} 并使用屏幕",
+           "usage": "Tela! 占用 {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
            "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
            "pause": "暂停", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
-    "en": {"usage": "Tela! using {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
+    "en": {"hot": "{part} at {t} °C (limit {limit} °C).", "busy": "The screen is being used by: {apps}. Use the menu of this icon to close it and let Tela! take over.", "take": "Close {apps} and use the screen",
+           "usage": "Tela! using {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
            "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
            "pause": "Pause", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
@@ -63,6 +69,7 @@ class App:
         self.updater = Updater(VERSION, self.log, enabled=lambda: bool(
             (self.engine.cfg.get("updates") or {}).get("check", True)),
             options=lambda: {"test": bool((self.engine.cfg.get("updates") or {}).get("test")),
+                             "hours": (self.engine.cfg.get("updates") or {}).get("hours", 6),
                              "skip": str((self.engine.cfg.get("updates") or {}).get("skip") or "") or None})
         self.start_hidden = start_hidden
         self.visible = not start_hidden   # while hidden in the tray the window gets no previews (saves CPU)
@@ -74,6 +81,10 @@ class App:
         self._quit = threading.Event()
         self._told_tray = False
         self._told_update = None
+        self._unloaded = False
+        self._alerts = TempAlerts()
+        self.conflict = []           # other programs holding the screen: [(pid, name)]
+        self._told_conflict = None
         self._tray_image = None
         self._tray_dirty = False
         self._accent = str((self.engine.cfg.get("ui") or {}).get("accent") or "#FFFFFF")
@@ -151,6 +162,7 @@ class App:
             except Exception:  # noqa: BLE001
                 pass
             self._webview_memory(low=True)
+            self._unload_window()
         if not self._told_tray and self.tray is not None:
             self._told_tray = True
             try:
@@ -158,8 +170,25 @@ class App:
             except Exception:  # noqa: BLE001
                 pass
 
+    def _unload_window(self):
+        """Option "free the window's memory in the tray": the page is emptied and loaded again when opened."""
+        if not (self.engine.cfg.get("ui") or {}).get("unload_hidden") or self.window is None or self._unloaded:
+            return
+        try:
+            self.window.load_url("about:blank")
+            self._unloaded = True
+            self.log("Window emptied while in the tray")
+        except Exception:  # noqa: BLE001
+            pass
+
     def show_window(self):
         self.visible = True
+        if self.window is not None and self._unloaded:
+            try:
+                self.window.load_url(str(HERE / "ui" / "index.html"))
+            except Exception:  # noqa: BLE001
+                pass
+            self._unloaded = False
         if self.window is not None:
             self._webview_memory(low=False)
             try:
@@ -287,6 +316,8 @@ class App:
             pystray.MenuItem(T["last_summary"], lambda *_: self.engine.command("summary_last"),
                              enabled=lambda _i: bool(self.engine.last_summary)),
             pystray.MenuItem(T["pause"], lambda *_: self.api.command("pause"), checked=lambda _i: self.engine.paused),
+            pystray.MenuItem(lambda _i: T["take"].format(apps=", ".join(sorted({n for _, n in self.conflict}))),
+                             lambda *_: self.close_conflict(), visible=lambda _i: bool(self.conflict)),
             pystray.MenuItem(lambda _i: T["update"].format(v=(self.updater.info or {}).get("version", "")),
                              lambda *_: self.api.update_install(), visible=lambda _i: self.updater.state == "available"),
             pystray.Menu.SEPARATOR,
@@ -334,6 +365,12 @@ class App:
                     self.tray.notify(self.T["update_ready"].format(v=up), "Tela!")
                 except Exception:  # noqa: BLE001
                     pass
+            for part, temp, limit in self._alerts.check(e.cfg, {"cpu": ct, "gpu": gt}):
+                try:
+                    self.tray.notify(self.T["hot"].format(part=part.upper(), t=round(temp), limit=round(limit)), "Tela!")
+                except Exception:  # noqa: BLE001
+                    pass
+            self._check_conflict()
             mode = str((e.cfg.get("tray") or {}).get("temp_icon", "none")).lower()
             want = None
             if mode in ("cpu", "gpu"):
@@ -348,6 +385,28 @@ class App:
                     shown = want
             except Exception:  # noqa: BLE001
                 pass
+
+    def _check_conflict(self):
+        """The screen is busy: if a known program has it, say which one (once) and offer to close it."""
+        err = str(self.engine.status().get("screen_error") or "")
+        busy = bool(re.search(r"PermissionError|denied|Access", err))
+        self.conflict = winsys.screen_apps() if busy and winsys.WINDOWS else []
+        names = ", ".join(sorted({n for _, n in self.conflict}))
+        if names and names != self._told_conflict:
+            self._told_conflict = names
+            try:
+                self.tray.update_menu()
+                self.tray.notify(self.T["busy"].format(apps=names), "Tela!")
+            except Exception:  # noqa: BLE001
+                pass
+        if not names:
+            self._told_conflict = None
+
+    def close_conflict(self):
+        n = winsys.close_screen_apps()
+        self.log(f"Closed {n} program(s) that were using the screen")
+        self.conflict = []
+        return n
 
     # ------------------------------------------------------------ Windows events
     def _locked(self, yes):

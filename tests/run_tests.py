@@ -817,10 +817,11 @@ def changelog_covers_the_version_and_matches_markdown():
     keys = [tuple(int(x) for x in v.split(".")) for v in versions]
     assert keys == sorted(keys, reverse=True) and len(set(keys)) == len(keys)
     for e in entries:
-        assert set(e["pt"]) == set(e["en"]) and set(e["en"]) <= set(changelog.CATEGORIES), e["v"]
+        langs = ("pt", "en", "es", "zh")                        # every language the window has
+        assert all(set(e[lang]) == set(e["en"]) for lang in langs) and set(e["en"]) <= set(changelog.CATEGORIES), e["v"]
         for c in e["en"]:
-            assert len(e["pt"][c]) == len(e["en"][c]) > 0, (e["v"], c)
-            for n in e["pt"][c] + e["en"][c]:
+            assert all(len(e[lang][c]) == len(e["en"][c]) > 0 for lang in langs), (e["v"], c)
+            for n in sum((e[lang][c] for lang in langs), []):
                 assert not any(w in n for w in ("TelaV", "Telinha", "telinha", "Later:", "Depois:")), n
     assert (ROOT / "CHANGELOG.md").read_text(encoding="utf-8") == changelog.markdown(), \
         "CHANGELOG.md is outdated: python installer/changelog.py --markdown"
@@ -952,6 +953,35 @@ def elements_rotate_measure_and_change_font():
     g = {"type": "gauge", "sensor": "cpu_temp", "cx": 100, "cy": 100, "radius": 40, "rotate": 45, "min": 0, "max": 100}
     img = render.Renderer(dict(cfg, widgets=[g, txt]), 480, 320, base=ROOT).draw(col)
     assert img.size == (480, 320)
+
+
+@test
+def old_downloaded_setups_are_cleaned():
+    import updater
+    with tempfile.TemporaryDirectory() as d:
+        for n in ("Tela-Setup-1.4.1.exe", "Tela-Setup-1.4.2.part", "Tela-Setup-1.4.3.exe", "other.exe"):
+            (Path(d) / n).write_bytes(b"x")
+        assert updater.cleanup_downloads(d, keep="Tela-Setup-1.4.3.exe") == 2
+        assert sorted(p.name for p in Path(d).iterdir()) == ["Tela-Setup-1.4.3.exe", "other.exe"]
+    u = updater.Updater("1.4.3", options=lambda: {"hours": 1})
+    assert u.every() == 2 * 3600                                       # never more often than every 2 h
+    u.options = lambda: {"hours": 48}
+    assert u.every() == 24 * 3600
+
+
+@test
+def temperature_alerts_wait_then_stay_quiet():
+    from alerts import TempAlerts
+    a = TempAlerts()
+    cfg = {"alerts": {"enabled": True, "cpu": 90, "gpu": 85, "seconds": 20, "quiet_minutes": 15}}
+    assert a.check(cfg, {"cpu": 95, "gpu": 60}, now=0) == []          # just went above: wait
+    assert a.check(cfg, {"cpu": 95, "gpu": 60}, now=21) == [("cpu", 95, 90.0)]
+    assert a.check(cfg, {"cpu": 96, "gpu": 60}, now=60) == []         # already told: quiet
+    a.check(cfg, {"cpu": 80, "gpu": 60}, now=100)                      # cooled down
+    a.check(cfg, {"cpu": 95, "gpu": 60}, now=200)
+    assert a.check(cfg, {"cpu": 95, "gpu": 60}, now=230) == []        # still inside the 15 min quiet time
+    assert a.check(cfg, {"cpu": 95, "gpu": 60}, now=21 + 15 * 60) == [("cpu", 95, 90.0)]
+    assert a.check({"alerts": {"enabled": False}}, {"cpu": 120}, now=5000) == []
 
 
 def main():

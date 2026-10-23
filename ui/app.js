@@ -58,7 +58,7 @@ async function setSetting(path, value, quiet) {
   if (path === "updates.test" && value) setTimeout(() => checkUpdate(true), 1500);
   if (path === "display.orientation") { E.lay = null; setTimeout(() => { if (S.tab === "layout") edLoad(); }, 900); }
   if (path === "ui.language") { S.lang = effectiveLang(); applyTexts(); }
-  if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("history.")) renderNight();
+  if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("alerts.") || path.startsWith("history.")) renderNight();
   syncControls();
   refreshPreset();
 }
@@ -86,6 +86,8 @@ function syncControls() {
     }
   });
   $("#rotate").setAttribute("aria-checked", String(String(getSetting("display.orientation") || "").endsWith("_flipped")));
+  const ori = String(getSetting("display.orientation") || "landscape");
+  $$("#home-orient button").forEach(b => b.setAttribute("aria-pressed", String(ori.startsWith(b.dataset.v))));
   $("#logos-auto").setAttribute("aria-checked", String(((S.settings.logos || {}).mode || "auto") === "auto"));
   $("#brightness").value = getSetting("display.brightness") ?? 40;
   $("#brightness-v").textContent = $("#brightness").value + "%";
@@ -139,6 +141,11 @@ function bindControls() {
     if (now - last > 120) { last = now; api.preview_brightness(Number(e.target.value)); }
   });
   $("#brightness").addEventListener("change", e => setSetting("display.brightness", Number(e.target.value)));
+  $$("#home-orient button").forEach(b => b.addEventListener("click", () => {   // keeps the 180° choice
+    const o = String(getSetting("display.orientation") || "landscape");
+    const want = b.dataset.v + (o.endsWith("_flipped") ? "_flipped" : "");
+    if (want !== o) setSetting("display.orientation", want);
+  }));
   $("#rotate").addEventListener("click", () => {
     const o = getSetting("display.orientation") || "landscape";
     setSetting("display.orientation", o.endsWith("_flipped") ? o.replace("_flipped", "") : o + "_flipped");
@@ -194,6 +201,7 @@ function bindControls() {
 
 // ------------------------------------------------------------------ tabs and language
 function showTab(name) {
+  if (S.tab === "layout" && name !== "layout" && typeof clearSelection === "function") clearSelection();
   S.tab = name;
   $$("nav [role=tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   $$("[data-panel]").forEach(p => { p.hidden = p.dataset.panel !== name; });
@@ -331,6 +339,7 @@ function renderNight() {
   if (hs) hs.classList.toggle("off", (S.settings.history || {}).save === false);
   $("#night-sub").classList.toggle("off", !d.night_enabled);
   $("#off-sub").classList.toggle("off", !d.off_enabled);
+  $("#al-sub").classList.toggle("off", !(S.settings.alerts || {}).enabled);
   $("#night-desc").textContent = t("home.night_desc", { b: d.night_brightness ?? 15, a: d.night_start || "22:00", z: d.night_end || "07:00" });
 }
 function renderDisks() {
@@ -408,6 +417,9 @@ function screenState(st) {
 function renderState(s, quick) {
   S.state = s;
   renderUpdate(s.update);
+  const cf = s.conflict || [];
+  $("#conflict").hidden = !cf.length;
+  if (cf.length) $("#conflict-msg").textContent = t("conf.msg", { apps: cf.join(", ") });
   const st = s.status;
   // pills
   const pills = [];
@@ -640,6 +652,8 @@ async function start() {
   renderHistoryFolder();
   bindUpdate();
   bindPresets();
+  $("#conflict-btn").addEventListener("click", async () => { await api.close_conflict(); toast(t("conf.closed")); });
+  $("#set-search").addEventListener("input", e => searchSettings(e.target.value));
   $("#about-ver").textContent = S.init.version;
   $$("[data-url]").forEach(b => b.addEventListener("click", () => api.open_url(b.dataset.url)));
   if (wizNeeded()) setTimeout(wizStart, 800);
@@ -660,4 +674,24 @@ function boot() {
 if (!boot()) {
   window.addEventListener("pywebviewready", () => { if (!api) boot(); });
   if (location.protocol.startsWith("http") && new URLSearchParams(location.search).get("t")) { api = bridgeApi(); start(); }
+}
+
+// ------------------------------------------------------------------ search in Settings
+function searchSettings(q) {
+  const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const words = norm(q).split(/\s+/).filter(Boolean);
+  const hit = el => { const tx = norm(el.textContent); return words.every(w => tx.includes(w)); };
+  let any = false;
+  $$('[data-panel="settings"] .grid > .card').forEach(card => {
+    const parts = $$(":scope > .row, :scope > .sub, :scope > p, :scope > .presets, :scope > .profiles, :scope > .item-list, :scope > .btns, :scope > hr", card);
+    if (!words.length) { card.hidden = false; parts.forEach(p => p.classList.remove("s-hide")); card.classList.remove("s-hit"); return; }
+    const title = $("h3", card);
+    const whole = title && hit(title);
+    let n = 0;
+    parts.forEach(p => { const ok = whole || hit(p); p.classList.toggle("s-hide", !ok); if (ok) n++; });
+    card.hidden = !whole && !n;
+    card.classList.toggle("s-hit", !card.hidden);
+    if (!card.hidden) any = true;
+  });
+  $("#set-search-none").hidden = !words.length || any;
 }
