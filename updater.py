@@ -18,7 +18,7 @@ REPO = "Fekaziroh/Tela"
 LATEST = f"https://api.github.com/repos/{REPO}/releases/latest"
 RELEASES = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 PAGE = f"https://github.com/{REPO}/releases/latest"
-EVERY = 6 * 3600      # seconds between automatic checks
+EVERY = 6 * 3600      # default seconds between automatic checks (Settings: 2 to 24 hours)
 FIRST = 90            # first check after the start (the PC is busy right after logon)
 
 
@@ -69,6 +69,20 @@ def pick_update(releases, current, test=False, skip=None):
     return best
 
 
+def cleanup_downloads(folder=None, keep=None):
+    """Deletes setups downloaded by earlier updates (the one running right now is in use and stays)."""
+    removed = 0
+    for p in Path(folder or tempfile.gettempdir()).glob("Tela-Setup-*"):
+        if p.suffix.lower() not in (".exe", ".part") or (keep and p.name == keep):
+            continue
+        try:
+            p.unlink()
+            removed += 1
+        except OSError:
+            pass
+    return removed
+
+
 def _get(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": "Tela-updater", "Accept": "application/vnd.github+json"})
     return urllib.request.urlopen(req, timeout=timeout)   # noqa: S310 — fixed https URLs
@@ -106,11 +120,19 @@ class Updater:
 
     def _loop(self):
         self._wake.wait(FIRST)
+        cleanup_downloads()
         while True:
             self._wake.clear()
             if self.enabled() and self.state in ("idle", "available", "error"):
                 self.check()
-            self._wake.wait(EVERY)
+            self._wake.wait(self.every())
+
+    def every(self):
+        try:
+            hours = float((self.options() or {}).get("hours") or EVERY / 3600)
+        except (TypeError, ValueError):
+            hours = EVERY / 3600
+        return max(2.0, min(24.0, hours)) * 3600
 
     def check(self):
         """Asks GitHub for the latest release. Returns the snapshot."""

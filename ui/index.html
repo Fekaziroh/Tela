@@ -40,6 +40,7 @@
 
     <!-- HOME -->
     <section data-panel="home" style="display:grid;gap:18px">
+      <div class="conflict" id="conflict" hidden><span id="conflict-msg"></span><button class="btn pri" id="conflict-btn" data-i18n="conf.take"></button></div>
       <div class="pills" id="pills"></div>
       <div class="home">
         <div class="screen"><canvas id="preview" width="480" height="320" aria-label="preview"></canvas><div class="paused" id="preview-paused" hidden><p data-i18n="pre.paused"></p><button class="btn" id="peek-btn" data-i18n="pre.peek"></button></div><div class="legend"><span><span data-i18n="home.preview"></span> <span id="preview-size"></span></span><b id="preview-note"></b></div></div>
@@ -49,6 +50,7 @@
             <div class="row"><label for="brightness" data-i18n="home.brightness"></label><span class="val" id="brightness-v"></span></div>
             <input type="range" id="brightness" min="0" max="100" step="1">
             <div class="hint" data-i18n="home.brightness_hint"></div>
+            <div class="row"><span class="lbl" data-i18n="set.orientation"></span><div class="seg" id="home-orient"><button data-v="landscape" data-i18n="orient.h"></button><button data-v="portrait" data-i18n="orient.v"></button></div></div>
             <div class="row"><span class="lbl" data-i18n="home.rotate"></span><button class="sw" role="switch" id="rotate" data-label="home.rotate"></button></div>
             <div class="row"><span class="lbl"><span data-i18n="home.night"></span><small id="night-desc"></small></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="home.night"></button></div>
             <div class="btns"><button class="btn" id="pause"></button></div>
@@ -63,6 +65,8 @@
 
     <!-- LAYOUT EDITOR -->
     <section data-panel="layout" hidden style="display:grid;gap:14px">
+      <div class="row orient-row"><span class="lbl" data-i18n="set.orientation"></span>
+        <div class="seg" data-set="display.orientation"><button data-v="landscape" data-i18n="orient.landscape"></button><button data-v="landscape_flipped" data-i18n="orient.landscape_flipped"></button><button data-v="portrait" data-i18n="orient.portrait"></button><button data-v="portrait_flipped" data-i18n="orient.portrait_flipped"></button></div></div>
       <div class="row"><p class="hint" style="margin:0" data-i18n="ed.hint"></p>
         <div class="btns"><button class="btn" id="ed-undo" data-i18n="ed.undo"></button><button class="btn" id="ed-reset" data-i18n="ed.reset"></button></div></div>
       <div class="editor">
@@ -82,6 +86,7 @@
           </div>
           <div class="card" id="ed-block" hidden>
             <div class="row"><h3 data-i18n="ed.selected"></h3><button class="btn danger" id="ed-del" data-i18n="ed.delete"></button></div>
+            <p class="hint" id="ed-multi" hidden></p>
             <div class="field"><label for="ed-name" data-i18n="ed.name"></label><input class="txt" id="ed-name"></div>
             <div class="nums">
               <label>X <input class="num" type="number" id="ed-x"></label><label>Y <input class="num" type="number" id="ed-y"></label>
@@ -135,6 +140,7 @@
 
     <!-- SETTINGS -->
     <section data-panel="settings" hidden>
+      <div class="set-search"><input class="txt" type="search" id="set-search" data-placeholder="search.ph" autocomplete="off"><small class="hint" id="set-search-none" hidden data-i18n="search.none"></small></div>
       <div class="grid">
         <div class="card" style="grid-column:1/-1"><h3 data-i18n="pre.title"></h3>
           <div class="presets" id="presets">
@@ -154,6 +160,7 @@
           <div class="row"><span class="lbl" data-i18n="set.off_monitor"></span><button class="sw" role="switch" data-set="display.off_with_monitor" data-label="set.off_monitor"></button></div>
           <div class="row"><span class="lbl"><span data-i18n="set.tray_icon"></span><small data-i18n="set.tray_icon_desc"></small></span>
             <div class="seg" data-set="tray.temp_icon"><button data-v="none" data-i18n="tray.none"></button><button data-v="cpu" data-i18n="tray.cpu"></button><button data-v="gpu" data-i18n="tray.gpu"></button></div></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.unload"></span><small data-i18n="set.unload_hint"></small></span><button class="sw" role="switch" data-set="ui.unload_hidden" data-label="set.unload"></button></div>
         </div>
 
         <div class="card"><h3 data-i18n="set.night"></h3>
@@ -166,6 +173,15 @@
           <div class="row"><span class="lbl"><span data-i18n="set.off_on"></span><small data-i18n="set.off_hint"></small></span><button class="sw" role="switch" data-set="display.off_enabled" data-label="set.off_on"></button></div>
           <div class="sub" id="off-sub">
             <div class="inline hours"><span data-i18n="set.from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="02:00" data-set="display.off_start"><span data-i18n="set.to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="display.off_end"></div>
+          </div>
+        </div>
+
+        <div class="card"><h3 data-i18n="al.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="al.on"></span><small data-i18n="al.hint"></small></span><button class="sw" role="switch" data-set="alerts.enabled" data-label="al.on"></button></div>
+          <div class="sub" id="al-sub">
+            <div class="row"><span class="lbl" data-i18n="al.cpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.cpu"><span>°C</span></span></div>
+            <div class="row"><span class="lbl" data-i18n="al.gpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.gpu"><span>°C</span></span></div>
+            <div class="row"><span class="lbl" data-i18n="al.hold"></span><span class="inline"><input class="num" type="number" min="5" max="300" step="5" data-set="alerts.seconds"><span data-i18n="s"></span></span></div>
           </div>
         </div>
 
@@ -221,8 +237,6 @@
         </div>
 
         <div class="card"><h3 data-i18n="set.connection"></h3>
-          <div class="row"><span class="lbl" data-i18n="set.orientation"></span>
-            <div class="seg" data-set="display.orientation"><button data-v="landscape" data-i18n="orient.landscape"></button><button data-v="landscape_flipped" data-i18n="orient.landscape_flipped"></button><button data-v="portrait" data-i18n="orient.portrait"></button><button data-v="portrait_flipped" data-i18n="orient.portrait_flipped"></button></div></div>
           <div class="field"><label for="port" data-i18n="set.port"></label><select id="port" data-set="display.port"></select></div>
           <div class="row"><small class="hint" id="port-now"></small><button class="btn" id="rescan" data-i18n="set.rescan"></button></div>
         </div>
@@ -246,6 +260,7 @@
         </div>
         <div class="card"><h3 data-i18n="upd.title"></h3>
           <div class="row"><span class="lbl"><span data-i18n="upd.auto"></span><small data-i18n="upd.auto_hint"></small></span><button class="sw" role="switch" data-set="updates.check" data-label="upd.auto"></button></div>
+          <div class="row"><span class="lbl" data-i18n="upd.every"></span><span class="inline"><input class="num" type="number" min="2" max="24" step="1" data-set="updates.hours"><span data-i18n="upd.hours"></span></span></div>
           <div class="row"><span class="lbl"><span data-i18n="upd.test"></span><small data-i18n="upd.test_hint"></small></span><button class="sw" role="switch" data-set="updates.test" data-label="upd.test"></button></div>
           <p class="hint" id="upd-status"></p>
           <p class="hint" id="upd-skip" hidden></p>

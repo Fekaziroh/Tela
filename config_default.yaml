@@ -22,6 +22,7 @@ ui:
   language: auto               # auto (follows Windows) | pt | en | es | zh
   wizard_done: false           # the first-run assistant was finished
   reflow: true                 # layout editor: neighbour blocks follow when one is deleted or resized
+  unload_hidden: false         # empty the window while it is in the tray (frees memory; it reloads when opened)
 
 tray:
   temp_icon: none              # none | cpu | gpu  (temperature drawn in the tray icon)
@@ -87,8 +88,16 @@ performance:                   # the presets in Settings change these together w
   quality: high                # high (2x supersampled, smoother edges) | normal (less CPU)
   preview: true                # live preview in the window (off = less CPU while the window is open)
 
+alerts:
+  enabled: false               # a Windows notice when a temperature stays high (once, then quiet for a while)
+  cpu: 90                      # °C
+  gpu: 85                      # °C
+  seconds: 20                  # how long above the limit before the notice
+  quiet_minutes: 15            # no new notice for the same part during this time
+
 updates:
   check: true                  # look for a new Tela! on GitHub (at start and every 6 hours)
+  hours: 6                     # time between automatic checks (2 to 24)
   test: false                  # also offer test versions (GitHub pre-releases)
   skip: ""                     # a version not to offer (set when going back to an older one)
 

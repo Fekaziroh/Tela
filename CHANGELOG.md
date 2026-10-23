@@ -2,6 +2,29 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.4
+
+### New
+
+- Temperature alerts: a discreet Windows notice when the CPU or GPU stays above the limit you choose for a while, without repeating all the time.
+- When another program (such as the screen's original app) is using the screen, Tela! tells you which one and offers to close it and take over.
+- Search in Settings.
+- Screen orientation in the Layout tab and a Landscape/Portrait shortcut on Home.
+- In the editor: Shift selects several blocks to move or delete together; Esc clears the selection; Delete and Backspace delete.
+- Option to free the window's memory while it is in the tray (on in the Performance preset).
+- Adjustable time between update checks (2 to 24 hours).
+
+### Fixes
+
+- The patch notes in Spanish and Chinese showed in English.
+- Updating or going back to another version now also removes the old hardware monitor and PresentMon folders, and downloaded setups no longer pile up in the temp folder.
+
+### Appearance and personalization
+
+- In portrait, the media takes the date's place during a game and the frame time sits below the FPS.
+- Bigger frame time in landscape, with number size, seconds and position (above or beside) adjustable in the editor.
+- In the editor, the selected block moves to the top of the side column and its content stays readable.
+
 ## Tela! 1.4.3
 
 ### New

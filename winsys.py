@@ -430,3 +430,35 @@ def color_title_bar(hwnd, caption, text, dark):
     if ok:
         put(36, colorref(text))
     return ok
+
+
+# programs that may hold the screen's port (their process name, lower case -> name shown to the user)
+SCREEN_APPS = {"usbmonitor.exe": "Turing (USBMonitor)", "extendscreen.exe": "Turing (ExtendScreen)",
+               "turzx.exe": "TURZX", "telav3.exe": "TelaV3", "telav2.exe": "TelaV2"}
+
+
+def screen_apps():
+    """Known programs running now that use these screens: [(pid, name)]."""
+    import psutil
+    out = []
+    me = os.getpid()
+    for p in psutil.process_iter(["pid", "name"]):
+        try:
+            name = (p.info["name"] or "").lower()
+            if p.info["pid"] != me and name in SCREEN_APPS:
+                out.append((p.info["pid"], SCREEN_APPS[name]))
+        except Exception:  # noqa: BLE001
+            continue
+    return out
+
+
+def close_screen_apps():
+    import psutil
+    n = 0
+    for pid, _ in screen_apps():
+        try:
+            psutil.Process(pid).terminate()
+            n += 1
+        except Exception:  # noqa: BLE001
+            pass
+    return n

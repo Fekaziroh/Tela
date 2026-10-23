@@ -1,7 +1,7 @@
 "use strict";
 // Layout editor: blocks on the preview can be selected, moved and resized; their items are edited on the side.
 
-const E = { lay: null, groups: [], sel: null, open: null, item: null, boxes: {}, undo: [], W: 480, H: 320, timer: null, loading: false, boxTimer: null };
+const E = { lay: null, groups: [], sel: null, multi: new Set(), open: null, item: null, boxes: {}, undo: [], W: 480, H: 320, timer: null, loading: false, boxTimer: null };
 const FONTS = ["", "segoe", "arial", "verdana", "trebuchet", "georgia", "consolas", "impact"];
 const ROTATIONS = [0, 90, 180, 270];
 const SENSOR_TYPES = ["value", "bar", "gauge", "graph"];
@@ -63,7 +63,7 @@ function edRenderBoxes() {
   box.innerHTML = "";
   for (const g of E.groups) {
     const el = document.createElement("div");
-    el.className = "box" + (g.id === E.sel ? " sel" : "") + (g.enabled === false ? " off" : "");
+    el.className = "box" + (g.id === E.sel ? " sel" : "") + (E.multi.has(g.id) && g.id !== E.sel ? " sel2" : "") + (g.enabled === false ? " off" : "");
     Object.assign(el.style, { left: g.x * sc + "px", top: g.y * sc + "px", width: g.w * sc + "px", height: g.h * sc + "px" });
     el.dataset.id = g.id;
     el.innerHTML = `<span class="tag-b">${esc(blockName(g))}</span><i class="handle nw"></i><i class="handle ne"></i><i class="handle sw"></i><i class="handle se"></i>`;
@@ -91,12 +91,18 @@ function edRenderBoxes() {
 function edPointer(e, g, el) {
   e.preventDefault();
   e.stopPropagation();
+  if (e.shiftKey && !e.target.classList.contains("handle")) {   // Shift: add to / remove from the selection
+    toggleMulti(g.id);
+    return;
+  }
+  if (!E.multi.has(g.id)) E.multi.clear();
   if (E.sel !== g.id || E.item != null) { E.sel = g.id; E.open = null; E.item = null; edRender(); el = $(`#stage-boxes [data-id="${CSS.escape(g.id)}"]`); }
   const handle = e.target.classList.contains("handle") ? [...e.target.classList].find(c => c.length === 2) : null;
   const sc = stageScale();
   const start = { px: e.clientX, py: e.clientY, x: g.x, y: g.y, w: g.w, h: g.h };
   const snapshot = JSON.stringify(E.groups);
   const nbs = handle ? edgeNeighbours(g) : [];
+  const others = handle ? [] : E.groups.filter(o => o !== g && E.multi.has(o.id)).map(o => ({ o, x: o.x, y: o.y }));
   const img = $("#stage-img");
   // the block's current picture travels with the mouse
   el.style.backgroundImage = `url("${img.toDataURL()}")`;   // one picture per drag, not per frame
@@ -117,6 +123,12 @@ function edPointer(e, g, el) {
     if (!handle) {
       g.x = Math.max(0, Math.min(E.W - g.w, snap(start.x + dx)));
       g.y = Math.max(0, Math.min(E.H - g.h, snap(start.y + dy)));
+      for (const s of others) {   // the other selected blocks move together
+        s.o.x = Math.max(0, Math.min(E.W - s.o.w, s.x + (g.x - start.x)));
+        s.o.y = Math.max(0, Math.min(E.H - s.o.h, s.y + (g.y - start.y)));
+        const oel = $(`#stage-boxes [data-id="${CSS.escape(s.o.id)}"]`);
+        if (oel) Object.assign(oel.style, { left: s.o.x * sc + "px", top: s.o.y * sc + "px" });
+      }
     } else {
       if (!g.base) g.base = [start.w, start.h];
       const keep = ev.shiftKey ? start.w / start.h : null;
@@ -160,6 +172,7 @@ function edPointer(e, g, el) {
 // ------------------------------------------------------------------ side panels
 function edRender() {
   if (!E.lay) return;
+  if (E.paletteLang !== S.lang) { E.paletteLang = S.lang; renderPalette(); }   // follows the window language
   const img = $("#stage-img");
   img.style.aspectRatio = `${E.W} / ${E.H}`;
   edRenderBoxes();
@@ -168,15 +181,21 @@ function edRender() {
   list.innerHTML = "";
   for (const g of E.groups) {
     const row = document.createElement("div");
-    row.className = "row" + (g.id === E.sel ? " on" : "");
+    row.className = "row" + (g.id === E.sel || E.multi.has(g.id) ? " on" : "");
     row.innerHTML = `<span class="lbl">${esc(blockName(g))} <small>${Math.round(g.w)}×${Math.round(g.h)}</small></span><button class="sw" role="switch" aria-checked="${g.enabled !== false}" aria-label="${esc(blockName(g))}"></button>`;
-    row.addEventListener("click", e => { if (e.target.classList.contains("sw")) return; E.sel = g.id; E.open = null; E.item = null; edRender(); });
+    row.addEventListener("click", e => {
+      if (e.target.classList.contains("sw")) return;
+      if (e.shiftKey) { toggleMulti(g.id); return; }
+      E.multi.clear(); selectBlock(g.id);
+    });
     $(".sw", row).addEventListener("click", () => edChange(() => { g.enabled = g.enabled === false; }));
     list.appendChild(row);
   }
   // selected block
   const g = selGroup();
   $("#ed-block").hidden = !g;
+  $("#ed-multi").hidden = E.multi.size < 2;
+  $("#ed-multi").textContent = t("ed.multi", { n: E.multi.size });
   if (!g) { $("#ed-pos").textContent = ""; return; }
   $("#ed-name").value = blockName(g);
   $("#ed-x").value = Math.round(g.x); $("#ed-y").value = Math.round(g.y);
@@ -270,6 +289,18 @@ function edItemFields(it) {
   if (SENSOR_TYPES.includes(it.type)) box.append(field("ed.sensor", sensorSelect(it)));
   if (it.type === "value") box.append(pair(field("ed.unit", textInput(it, "unit")), field("ed.size", numInput(it, "size"))));
   if (it.type === "bar" || it.type === "gauge") box.append(pair(field("ed.min", numInput(it, "min")), field("ed.max", numInput(it, "max"))));
+  if (it.type === "frametime") {
+    box.append(pair(field("ed.ft_seconds", numInput(it, "seconds", 0.5)), field("ed.ft_labels", selectInput(it, "labels", ["top", "right"], [t("ed.ft_top"), t("ed.ft_right")]))));
+    const sw = (key, label) => {
+      const s = document.createElement("button");
+      s.className = "sw"; s.setAttribute("role", "switch"); s.setAttribute("aria-checked", String(it[key] !== false));
+      s.addEventListener("click", () => edChange(() => { it[key] = it[key] === false; }));
+      const row = document.createElement("div"); row.className = "row";
+      row.innerHTML = `<span class="lbl">${t(label)}</span>`; row.appendChild(s);
+      return row;
+    };
+    box.append(sw("show_ms", "ed.ft_ms"), sw("show_1low", "ed.ft_low"), field("ed.ft_size", numInput(it, "label_size")));
+  }
   if (it.type === "clock") box.append(field("ed.format", selectInput(it, "format", CLOCK_FORMATS, CLOCK_FORMATS.map(f => t("clock." + CLOCK_FORMATS.indexOf(f))))));
   if (["text", "clock", "value", "gauge"].includes(it.type)) {
     const font = selectInput(it, "font", FONTS, FONTS.map(f => f ? f[0].toUpperCase() + f.slice(1) : t("ed.font_default")));
@@ -361,7 +392,7 @@ function bindEditor() {
     menu.hidden = !menu.hidden;
   });
   document.addEventListener("click", e => { if (!menu.contains(e.target)) menu.hidden = true; });
-  $("#ed-del").addEventListener("click", () => edChange(() => { const g = selGroup(); if (g) reflowDelete(g); E.groups = E.groups.filter(x => x.id !== E.sel); E.sel = null; E.item = null; }));
+  $("#ed-del").addEventListener("click", deleteSelectedBlocks);
   renderPalette();
   bindStageDrop();
   $("#ed-name").addEventListener("change", () => { const g = selGroup(); if (g) edChange(() => { g.name = $("#ed-name").value.trim() || g.name; }); });
@@ -387,8 +418,10 @@ function bindEditor() {
     edChange(() => { g.items.push({ type: "value", sensor: s, x: Math.round(bw / 2), y: Math.round(bh / 2), size: 14 }); E.open = g.items.length - 1; });
   });
   document.addEventListener("keydown", e => {
-    if (S.tab !== "layout" || !E.sel || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
-    const g = selGroup();
+    if (S.tab !== "layout" || (!E.sel && !E.multi.size) || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    if (!$("#overlay").hidden) return;
+    const g = selGroup() || E.groups.find(o => E.multi.has(o.id));
+    if (!g) return;
     const d = e.shiftKey ? 10 : 2;
     const mv = { ArrowLeft: [-d, 0], ArrowRight: [d, 0], ArrowUp: [0, -d], ArrowDown: [0, d] }[e.key];
     const it = E.item != null ? (g.items || [])[E.item] : null;
@@ -406,12 +439,15 @@ function bindEditor() {
       } else if (e.key === "Escape") { E.item = null; E.open = null; edRender(); edRenderBoxes(); }
       return;
     }
+    if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); deleteSelectedBlocks(); return; }
+    if (e.key === "Escape") { clearSelection(); return; }
     if (mv) {
       e.preventDefault();
-      edChange(() => { g.x = Math.max(0, Math.min(E.W - g.w, g.x + mv[0])); g.y = Math.max(0, Math.min(E.H - g.h, g.y + mv[1])); });
+      const all = E.groups.filter(o => o === g || E.multi.has(o.id));
+      edChange(() => all.forEach(o => { o.x = Math.max(0, Math.min(E.W - o.w, o.x + mv[0])); o.y = Math.max(0, Math.min(E.H - o.h, o.y + mv[1])); }));
     } else if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $("#ed-undo").click(); }
   });
-  $("#stage").addEventListener("pointerdown", e => { if (e.target.id === "stage" || e.target.id === "stage-img" || e.target.id === "stage-boxes") { E.sel = null; E.item = null; edRender(); } });
+  $("#stage").addEventListener("pointerdown", e => { if (e.target.id === "stage" || e.target.id === "stage-img" || e.target.id === "stage-boxes") clearSelection(); });
   window.addEventListener("resize", () => { if (S.tab === "layout") edRenderBoxes(); });
   setInterval(async () => {   // live values in the sensor lists
     if (S.tab !== "layout" || document.visibilityState !== "visible" || !E.lay || E.open == null) return;
@@ -599,4 +635,33 @@ function reflowResize(g, handle, nbs) {
     if (s.edge === "s") { const y = g.y + g.h + s.gap; n.h = Math.max(16, s.y + s.h - y); n.y = s.y + s.h - n.h; }
     if (s.edge === "n") { n.h = Math.max(16, g.y - s.gap - s.y); }
   }
+}
+
+// ------------------------------------------------------------------ selection
+function selectBlock(id) {
+  E.sel = id; E.open = null; E.item = null;
+  edRender(); edRenderBoxes();
+  const card = $("#ed-block");   // the selected block's options sit at the top of the side column
+  if (card && !card.hidden) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+function toggleMulti(id) {
+  if (E.sel && !E.multi.size) E.multi.add(E.sel);
+  if (E.multi.has(id)) E.multi.delete(id); else E.multi.add(id);
+  E.sel = E.multi.has(E.sel) ? E.sel : [...E.multi][0] || null;
+  E.item = null; E.open = null;
+  edRender(); edRenderBoxes();
+}
+function clearSelection() {
+  if (!E.sel && !E.multi.size && E.item == null) return;
+  E.sel = null; E.item = null; E.open = null; E.multi.clear();
+  edRender(); edRenderBoxes();
+}
+function deleteSelectedBlocks() {
+  const ids = new Set(E.multi.size ? E.multi : (E.sel ? [E.sel] : []));
+  if (!ids.size) return;
+  edChange(() => {
+    for (const g of E.groups.filter(x => ids.has(x.id))) reflowDelete(g);
+    E.groups = E.groups.filter(x => !ids.has(x.id));
+    E.sel = null; E.item = null; E.open = null; E.multi.clear();
+  });
 }
