@@ -1,7 +1,7 @@
 "use strict";
-// First run: language and theme, screen connection, orientation, start with Windows.
+// First run: language and theme, screen connection, orientation, start with Windows and the weather.
 
-const W = { step: 0, old: null };
+const W = { step: 0, old: null, weather: null };
 const WIZ_STEPS = 4;
 
 function wizNeeded() { return !(S.settings.ui || {}).wizard_done && !S.init.demo; }
@@ -75,10 +75,26 @@ function wizRender() {
       seg.appendChild(b);
     }
   } else {
-    body.innerHTML = `<div class="row"><span class="lbl">${t("set.autostart")}<small>${t("wiz.autostart")}</small></span><button class="sw" role="switch" aria-checked="false"></button></div>
+    const wx = S.settings.weather || {};
+    if (W.weather == null) W.weather = wx.enabled !== false && !!(wx.city || "").trim();
+    body.innerHTML = `<div class="row"><span class="lbl">${t("set.autostart")}<small>${t("wiz.autostart")}</small></span><button class="sw wiz-auto" role="switch" aria-checked="false"></button></div>
+      <div class="row" style="margin-top:10px"><span class="lbl">${t("wx.on")}<small>${t("wx.on_desc")}</small></span><button class="sw wiz-wx" role="switch" aria-checked="${W.weather}"></button></div>
+      <div class="field wiz-city" ${W.weather ? "" : "hidden"}><label>${t("wx.city")}</label><input class="txt" maxlength="60" placeholder="${t("wx.city_ph")}" value="${esc(wx.city || "")}"><small class="hint">${t("wx.privacy")}</small></div>
       ${W.old ? `<div class="card" style="margin-top:14px"><p>${t("wiz.old")}</p><pre>${esc(W.old)}</pre><div class="btns"><button class="btn danger wiz-old">${t("wiz.old_remove")}</button></div></div>` : ""}
       <p class="hint" style="margin-top:14px">${t("wiz.done")}</p>`;
-    const sw = $(".sw", body);
+    const wsw = $(".wiz-wx", body), city = $(".wiz-city", body);
+    wsw.addEventListener("click", async () => {
+      W.weather = wsw.getAttribute("aria-checked") !== "true";
+      wsw.setAttribute("aria-checked", String(W.weather));
+      city.hidden = !W.weather;
+      await setSetting("weather.enabled", W.weather, true);
+      if (W.weather) $("input", city).focus();
+    });
+    $("input", city).addEventListener("change", e => {
+      setSetting("weather.city", e.target.value.trim(), true);
+      if (e.target.value.trim()) setSetting("weather.enabled", true, true);
+    });
+    const sw = $(".wiz-auto", body);
     sw.setAttribute("aria-checked", $("#autostart").getAttribute("aria-checked"));
     sw.addEventListener("click", async () => {
       const want = sw.getAttribute("aria-checked") !== "true";

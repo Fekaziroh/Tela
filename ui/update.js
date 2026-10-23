@@ -17,7 +17,7 @@ function renderUpdate(u) {
   const skip = (S.settings.updates || {}).skip;
   const sk = $("#upd-skip");
   sk.hidden = !skip;
-  if (skip) { sk.innerHTML = `${esc(t("upd.skipping", { v: skip }))} <a href="#" id="upd-unskip">${t("upd.unskip")}</a>`; $("#upd-unskip").onclick = async e => { e.preventDefault(); await api.update_unskip(); S.settings.updates.skip = ""; renderUpdate(U.last); checkUpdate(true); }; }
+  if (skip) { sk.innerHTML = `${esc(t("upd.skipping", { v: skip }))} <a href="#" id="upd-unskip">${t(u.skipped ? "upd.install_anyway" : "upd.unskip")}</a>`; $("#upd-unskip").onclick = async e => { e.preventDefault(); await api.update_unskip(); S.settings.updates.skip = ""; renderUpdate(U.last); checkUpdate(true); }; }
   const bar = $("#upd-dl i");
   if (bar) bar.style.width = `${Math.round((u.progress || 0) * 100)}%`;
   const msg = $("#upd-dl-msg");
@@ -33,6 +33,7 @@ function updText(u) {
     default:
       if (u.error) return t("upd.offline");
       if (!u.checked_at) return t("upd.never");
+      if (u.skipped) return t("upd.by_choice", { v: S.init.version, s: u.skipped }) + " " + t("upd.checked", { t: fmtWhen(u.checked_at) });
       return t("upd.latest", { v: S.init.version }) + " " + t("upd.checked", { t: fmtWhen(u.checked_at) });
   }
 }
@@ -84,8 +85,8 @@ function startWatch(version) {
 function bindUpdate() {
   $("#upd").addEventListener("click", () => {
     const u = U.last || {};
-    if (u.state === "available") askUpdate();
-    else if (u.state !== "downloading" && u.state !== "installing") checkUpdate(false);
+    // always asks GitHub again first: with several versions out, the newest is the one offered
+    if (u.state !== "downloading" && u.state !== "installing") checkUpdate(false);
   });
   $("#upd-check").addEventListener("click", () => checkUpdate(false));
   $("#upd-back").addEventListener("click", showReleases);
@@ -106,11 +107,11 @@ async function showReleases() {
     const cur = rel.version === r.current;
     const mb = rel.size ? ` · ${num(rel.size / 1048576, 1)} MB` : "";   // download size of that version's setup
     row.innerHTML = `<b>Tela! ${esc(rel.version)}</b><small>${esc(rel.date || "")}${mb}${rel.test ? " · " + t("upd.test_tag") : ""}${cur ? " · " + t("upd.installed") : ""}</small>`;
-    if (!cur) {
+    {   // the installed one can be installed again too (a fixed build of the same experimental version)
       const b = document.createElement("button");
-      b.className = "btn"; b.textContent = t("upd.install_this");
+      b.className = "btn"; b.textContent = t(cur ? "upd.reinstall" : "upd.install_this");
       b.addEventListener("click", async () => {
-        const ok = await api.update_install_version(rel.version, $("#rel-skip").checked);
+        const ok = await api.update_install_version(rel.version, !cur && $("#rel-skip").checked);
         if (!ok) { toast(t("upd.offline")); return; }
         U.tried = true; U.last = { ...(U.last || {}), version: rel.version, state: "downloading", progress: 0 };
         startWatch(rel.version);

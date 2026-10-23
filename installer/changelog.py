@@ -64,7 +64,11 @@ if __name__ == "__main__":
     ap.add_argument("--ready")
     ap.add_argument("--channel")
     ap.add_argument("--stable", action="store_true", help="every stable version, oldest first")
+    ap.add_argument("--withdrawn", action="store_true", help="versions taken back (their setups are removed)")
     a = ap.parse_args()
+    if a.withdrawn:
+        print("\n".join(e["v"] for e in load() if e.get("withdrawn")))
+        sys.exit(0)
     if a.stable:
         print("\n".join(e["v"] for e in reversed(load()) if not e.get("draft") and not e.get("beta")))
         sys.exit(0)

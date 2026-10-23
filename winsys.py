@@ -78,7 +78,7 @@ def installed_by_setup():
     return FROZEN and (HERE / "unins000.exe").exists()
 
 
-def instance_server(on_show, on_quit=None):
+def instance_server(on_show, on_quit=None, page_age=None):
     try:
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         srv.bind(("127.0.0.1", INSTANCE_PORT))
@@ -92,8 +92,9 @@ def instance_server(on_show, on_quit=None):
                 c, _ = srv.accept()
                 with c:
                     msg = c.recv(16)
-                    if msg == b"ping":   # the guard process checks that Tela! is alive
-                        c.sendall(b"pong")
+                    if msg == b"ping":   # the guard process checks that Tela! is alive (and its page)
+                        age = page_age() if page_age else None
+                        c.sendall(b"pong" if age is None else f"pong:{age:.0f}".encode())
                     elif msg == b"mostrar":
                         on_show()
                     elif msg == b"quit" and on_quit is not None:

@@ -23,10 +23,16 @@ ui:
   wizard_done: false           # the first-run assistant was finished
   reflow: true                 # layout editor: neighbour blocks follow when one is deleted or resized
   unload_hidden: false         # empty the window while it is in the tray (frees memory; it reloads when opened)
+  guard: true                  # a small guard process reopens Tela! if it freezes (takes effect on the next start)
 
 theme:
   name: clean                  # screen theme (Appearance tab): clean | full | cockpit | lines | retro | one of yours
   notice: false                # show the "new themes" notice once (set when updating from 1.4.5 or older)
+  schedule: false              # switch themes by the time of day
+  day: clean                   # theme during the day
+  night: retro                 # theme at night (between night_start and night_end)
+  night_start: "19:00"
+  night_end: "07:00"
 
 weather:                       # next to the date on the screen (Open-Meteo: only the city and its coordinates go online)
   enabled: true

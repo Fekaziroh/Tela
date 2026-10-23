@@ -101,6 +101,7 @@ class Updater:
         self.progress = 0.0
         self.error = None
         self.checked_at = None
+        self.skipped = None         # newest version, when it is the one the user chose to skip
         self._lock = threading.Lock()
         self._wake = threading.Event()
         self._thread = None
@@ -111,7 +112,8 @@ class Updater:
 
     def snapshot(self):
         return {"state": self.state, "version": (self.info or {}).get("version"), "progress": round(self.progress, 3),
-                "error": self.error, "page": (self.info or {}).get("page", PAGE), "checked_at": self.checked_at}
+                "error": self.error, "page": (self.info or {}).get("page", PAGE), "checked_at": self.checked_at,
+                "skipped": self.skipped}
 
     def start(self):
         if self._thread is None:
@@ -144,10 +146,15 @@ class Updater:
             opts = self.options() or {}
             if opts.get("test"):
                 with _get(RELEASES) as r:
-                    info = pick_update(json.loads(r.read().decode("utf-8")), self.version, True, opts.get("skip"))
+                    releases = json.loads(r.read().decode("utf-8"))
             else:
                 with _get(LATEST) as r:
-                    info = pick_update([json.loads(r.read().decode("utf-8"))], self.version, False, opts.get("skip"))
+                    releases = [json.loads(r.read().decode("utf-8"))]
+            test = bool(opts.get("test"))
+            info = pick_update(releases, self.version, test, opts.get("skip"))
+            # a newer version the user chose not to install (after going back): shown as a choice, not offered
+            newest = pick_update(releases, self.version, test, None)
+            self.skipped = newest["version"] if newest and opts.get("skip") == newest["version"] else None
             self.checked_at = time.time()
             if info:
                 if (self.info or {}).get("version") != info["version"]:

@@ -109,12 +109,19 @@
     <section data-panel="look" hidden style="display:grid;gap:16px">
       <div class="card" id="st-card">
         <div class="row"><h3 data-i18n="st.title"></h3>
-          <div class="btns"><button class="btn" id="st-import" data-i18n="st.import"></button><button class="btn" id="st-export" data-i18n="st.export"></button><button class="btn pri" id="st-save" data-i18n="st.save_as"></button></div></div>
+          <div class="btns"><button class="btn" id="st-import" data-i18n="st.import"></button><button class="btn" id="st-export" data-i18n="st.export"></button><button class="btn" id="st-new" data-i18n="st.new"></button><button class="btn pri" id="st-save" data-i18n="st.save_as"></button></div></div>
         <div class="st-wrap">
           <div class="st-preview"><canvas id="st-canvas" width="480" height="320" aria-label="preview"></canvas>
             <div class="legend"><b id="st-now"></b><span id="st-hint"></span></div>
             <div class="btns" id="st-actions"></div></div>
           <div class="st-grid" id="st-grid"></div>
+        </div>
+        <hr class="sep">
+        <div class="row"><span class="lbl"><span data-i18n="st.schedule"></span><small data-i18n="st.schedule_d"></small></span><button class="sw" role="switch" data-set="theme.schedule" data-label="st.schedule"></button></div>
+        <div class="sub" id="st-sched">
+          <div class="two"><div class="field"><label for="st-day" data-i18n="st.day"></label><select id="st-day" data-set="theme.day" data-default="clean"></select></div>
+            <div class="field"><label for="st-night" data-i18n="st.night"></label><select id="st-night" data-set="theme.night" data-default="retro"></select></div></div>
+          <div class="inline hours"><span data-i18n="st.night_from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="19:00" data-set="theme.night_start"><span data-i18n="st.night_to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="theme.night_end"></div>
         </div>
       </div>
       <div class="card">
@@ -295,6 +302,7 @@
             <button class="btn" id="folder-btn" data-i18n="adv.folder"></button>
             <button class="btn" id="edit-btn" data-i18n="adv.edit"></button>
           </div>
+          <div class="row" style="margin-top:6px"><span class="lbl"><span data-i18n="adv.guard"></span><small data-i18n="adv.guard_d"></small></span><button class="sw" role="switch" data-set="ui.guard" data-label="adv.guard"></button></div>
           <p class="hint" style="margin:6px 0 0" data-i18n="adv.stuck"></p>
           <div class="btns">
             <button class="btn" data-cmd="reconnect" data-i18n="adv.reconnect"></button>

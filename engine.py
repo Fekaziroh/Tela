@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.7"
+VERSION = "1.4.8"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -115,6 +115,7 @@ def changed_regions(new, old, tw=40, th=32):
 
 
 class Engine(threading.Thread):
+    REFRESH_EVERY = 20 * 60   # seconds between whole-picture refreshes (not during a game)
     def __init__(self, cfg_path, log, demo=False, simulate=False, once=False, demo_game=True, demo_media=True):
         super().__init__(daemon=True, name="engine")
         self.cfg_path = Path(cfg_path)
@@ -133,6 +134,8 @@ class Engine(threading.Thread):
         self._previous = None
         self._last_error = self._render_error = None
         self._prev_layout = None
+        self._wipe = False           # next frame: black screen first, then the whole picture
+        self._full_at = 0.0          # when the whole picture was last sent
         self._sleep = set()          # reasons for a black screen: "lock", "monitor", "suspend"
         self.eco = False
         self.beat = time.monotonic()  # heartbeat for the watchdog
@@ -182,9 +185,14 @@ class Engine(threading.Thread):
         if self.collector.last_summary is None:
             self.collector.last_summary = self.last_summary
         ss = 1 if str((cfg.get("performance") or {}).get("quality", "high")).lower() == "normal" else 2
+        old_r = self.renderer
         self.renderer = Renderer(cfg, self.screen.width, self.screen.height, ss=ss, base=DATA, fields=fields, lang=self.lang,
                                  logo_dirs=[DATA / "logos", HERE / "logos"],
                                  cache_static=not (cfg.get("layout") or {}).get("overlap"))
+        theme = (cfg.get("layout") or {}).get("theme")
+        if old_r is not None and theme != getattr(self, "_theme", theme):
+            self._wipe = True   # another theme: clean the screen and send it whole (no leftovers)
+        self._theme = theme
         self.interval = float(cfg.get("interval", 1.0))
         self.anim_step = 1.0 / max(1.0, float((cfg.get("animation") or {}).get("fps", 8)))
         self.fast_step = max(0.05, float((cfg.get("fps") or {}).get("update", 0.2)))
@@ -431,6 +439,14 @@ class Engine(threading.Thread):
                 self.connected, self._previous, self._last_error, self.screen_error = True, None, None, None
                 self.log(f"Screen connected ({self.screen.port_in_use})")
             t0 = time.monotonic()
+            if self._wipe:
+                from PIL import Image
+                self._wipe = False
+                self.screen.send_image(Image.new("RGB", (self.screen.width, self.screen.height), "#000000"), 0, 0)
+                self.screen.end_frame()
+                self._previous = None
+            elif t0 - self._full_at > self.REFRESH_EVERY and not self.collector.in_game():
+                self._previous = None   # now and then the whole picture again: clears any pixel that went stale
             first = self._previous is None
             layout = self.renderer.layout
             if not first and self._prev_layout is not None and layout != self._prev_layout and self.renderer.anim_enabled:
@@ -442,7 +458,9 @@ class Engine(threading.Thread):
             self._prev_layout = layout
             self._previous = img
             if first:
-                self.log(f"Full frame sent ({time.monotonic() - t0:.1f} s)")
+                if not self._full_at:
+                    self.log(f"Full frame sent ({time.monotonic() - t0:.1f} s)")
+                self._full_at = time.monotonic()
         except (OSError, RuntimeError) as e:   # serial/USB errors (SerialException is an OSError)
             msg = f"{type(e).__name__}: {e}"
             self.screen_error = msg

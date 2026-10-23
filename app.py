@@ -106,13 +106,14 @@ class App:
         self.log(f"Tela! {VERSION} started" + (" (demo)" if self.demo else "")
                  + (" again after it stopped responding" if self.recovered else ""))
         self.engine.start()
-        if winsys.WINDOWS and not self.demo:
+        if winsys.WINDOWS and not self.demo and (self.engine.cfg.get("ui") or {}).get("guard", True) is not False:
             import os
             import watchdog
             self._guard = watchdog.launch(os.getpid())   # reopens Tela! if it ever hangs
         if not self.demo:
             self.updater.start()
-        winsys.instance_server(self.show_window, lambda: threading.Thread(target=self.quit, daemon=True).start())
+        winsys.instance_server(self.show_window, lambda: threading.Thread(target=self.quit, daemon=True).start(),
+                               page_age=self._page_age)
         self._events = winsys.watch_windows_events(self._windows_shutdown, self._locked, self._monitor_off,
                                                    lambda going: self.engine.command("suspend" if going else "resume"))
         threading.Thread(target=winsys.refresh_start_with_windows, args=(self.log,), daemon=True).start()
@@ -468,6 +469,7 @@ class App:
         """Restarts the engine if it stops responding (e.g. a driver call that never returns)."""
         while not self._quit.wait(self.WATCHDOG_CHECK):
             self._check_window_hung()
+            self._theme_schedule()
             e = self.engine
             stuck = (not e.sleeping and time.monotonic() - e.beat > self.WATCHDOG_SECONDS)
             if self._quit.is_set() or not (stuck or not e.is_alive()):
@@ -488,22 +490,47 @@ class App:
             self.engine = new
             new.start()
 
+    def _theme_schedule(self):
+        """Theme by the time of day: switches when the period changes (a theme chosen by hand stays until then)."""
+        tc = self.engine.cfg.get("theme") or {}
+        if not tc.get("schedule"):
+            self._theme_period = None
+            return
+        period = "night" if Engine.in_hours(tc.get("night_start", "19:00"), tc.get("night_end", "07:00")) else "day"
+        if period == getattr(self, "_theme_period", None):
+            return
+        self._theme_period = period
+        want = str(tc.get(period) or "")
+        try:
+            import themes
+            if want and themes.exists(want) and want != themes.current(self.engine.cfg):
+                self.api.theme_apply(want)
+                self.log(f"Theme by the time of day: {period}")
+        except Exception as e:  # noqa: BLE001
+            self.log(f"Theme by the time of day failed: {e}")
+
     def _notify(self, text):
         try:
             self.tray.notify(text, "Tela!")
         except Exception:  # noqa: BLE001
             pass
 
+    def _page_age(self):
+        """Seconds since the page in the window last asked for the state (None: hidden, or never)."""
+        at = getattr(self.api, "_page_seen", None)
+        return None if (at is None or not self.visible) else time.monotonic() - at
+
     def _check_window_hung(self):
-        """The window "Not responding": writes what every thread is doing to tela.log once (to find the cause).
-        The guard process (watchdog.py) reopens Tela! if it does not recover."""
+        """The window "Not responding" (and its page silent): writes what every thread is doing to tela.log
+        once, to find the cause. The guard process (watchdog.py) reopens Tela! if it does not recover."""
         if not winsys.WINDOWS or self.window is None:
             return
         try:
             import os
 
             import watchdog
-            hung = watchdog.ui_hung(watchdog.windows_of(os.getpid()))
+            age = self._page_age()
+            hung = watchdog.ui_hung(watchdog.main_window(os.getpid())) and (age is None or age >= 10)
         except Exception:  # noqa: BLE001
             return
         if not hung:
@@ -513,7 +540,7 @@ class App:
             self._hung_since = time.monotonic()
             import traceback
             names = {t.ident: t.name for t in threading.enumerate()}
-            lines = ["The window is not responding. What each part was doing:"]
+            lines = ["The window \"Tela!\" is not responding and its page went silent. What each part was doing:"]
             for ident, frame in sys._current_frames().items():
                 stack = "".join(traceback.format_stack(frame)[-6:]).rstrip().replace("\n", " | ")
                 lines.append(f"  [{names.get(ident, ident)}] {stack}")
@@ -561,7 +588,18 @@ def main():
     ap.add_argument("--quit", action="store_true", help="(setup) close a running Tela! properly and exit")
     ap.add_argument("--wait-pid", type=int, help=argparse.SUPPRESS)   # restart: wait for the old copy to end
     ap.add_argument("--recovered", action="store_true", help=argparse.SUPPRESS)   # reopened by the guard process
+    ap.add_argument("--import-theme", metavar="FILE", help="add a .tela-theme file (double click in Explorer)")
     a = ap.parse_args()
+    if a.import_theme:
+        try:
+            import themes
+            tid = themes.import_file(a.import_theme)
+            (config.DATA / "theme_imported.txt").write_text(tid, encoding="utf-8")   # the window shows it
+        except Exception as e:  # noqa: BLE001
+            winsys.message_box(f"{a.import_theme}\n\n{e}")
+            return
+        if winsys.ask_running_instance_to_show():   # Tela! is open: it picks the theme up
+            return
     if a.wait_pid:
         winsys.wait_for_exit(a.wait_pid, 30)
 

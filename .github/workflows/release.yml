@@ -16,6 +16,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v6
         with:
@@ -74,7 +76,7 @@ jobs:
           name: Tela-Setup-${{ steps.version.outputs.version }}
           path: build/Tela-Setup-*.exe
 
-      - name: Promote approved test versions
+      - name: Promote approved experimental versions
         if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
@@ -87,8 +89,44 @@ jobs:
             $r = gh release view "v$v" --json isPrerelease 2>$null | ConvertFrom-Json
             if ($LASTEXITCODE -eq 0 -and $r -and $r.isPrerelease) {
               gh release edit "v$v" --prerelease=false --latest --title "Tela! $v"
-              Write-Host "v$v promoted from test to stable"
+              Write-Host "v$v promoted from experimental to stable"
             }
+          }
+          exit 0
+
+      - name: Withdraw versions taken back
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # "withdrawn": true in ui/changelog.js: the setups go away (the app no longer offers that version, not
+          # even in "Go back to another version") and the release notes say why
+          foreach ($v in (python installer/changelog.py --withdrawn)) {
+            $v = $v.Trim(); if (-not $v) { continue }
+            $r = gh release view "v$v" --json assets 2>$null | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0 -or -not $r -or -not $r.assets) { continue }
+            foreach ($a in $r.assets) { gh release delete-asset "v$v" $a.name -y }
+            python installer/changelog.py --notes $v | Out-File -Encoding utf8 build\withdrawn.md
+            gh release edit "v$v" --notes-file build\withdrawn.md --title "Tela! $v (withdrawn)"
+            Write-Host "v$v withdrawn"
+          }
+          exit 0
+
+      - name: Version tags follow main's commits
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          # every "Tela! x.y.z" commit on main carries the tag vx.y.z (when main's history is rewritten, the tags move with it)
+          git fetch -q --tags --force origin
+          foreach ($line in (git log --format="%H %s" HEAD)) {
+            if ($line -notmatch '^(\w+) Tela! (\d+\.\d+\.\d+)$') { continue }
+            $sha = $Matches[1]; $tag = "v$($Matches[2])"
+            $cur = git rev-parse -q --verify "refs/tags/$tag^{commit}" 2>$null
+            if (-not $cur -or $cur -eq $sha) { continue }
+            git tag -f $tag $sha
+            git push -f origin "refs/tags/$tag"
+            Write-Host "$tag now points to $sha"
           }
           exit 0
 
@@ -105,7 +143,18 @@ jobs:
           if ($LASTEXITCODE -eq 0 -and $existing) {
             if ($channel -eq 'stable' -and $existing.isPrerelease) {
               gh release edit "v$v" --prerelease=false --latest --title "Tela! $v"
-              Write-Host "v$v promoted from test to stable"
+              Write-Host "v$v promoted from experimental to stable"
+            } elseif ($channel -eq 'test' -and $existing.isPrerelease) {
+              # the same experimental version built again (a fix before it was approved): new setup and notes,
+              # and the tag moves to this commit
+              Copy-Item "build\Tela-Setup-$v.exe" build\Tela-Setup.exe
+              python installer/changelog.py --notes $v | Out-File -Encoding utf8 build\notes.md
+              gh release upload "v$v" "build\Tela-Setup-$v.exe" build\Tela-Setup.exe --clobber
+              if ($LASTEXITCODE) { throw 'could not replace the setup' }
+              gh release edit "v$v" --notes-file build\notes.md --title "Tela! $v (experimental)"
+              git tag -f "v$v" $env:GITHUB_SHA
+              git push -f origin "refs/tags/v$v"
+              Write-Host "v$v (experimental) rebuilt from this commit"
             } else { Write-Host "v$v is already released: nothing to publish" }
             exit 0
           }
@@ -113,10 +162,26 @@ jobs:
           python installer/changelog.py --notes $v | Out-File -Encoding utf8 build\notes.md
           if ($LASTEXITCODE) { throw 'no patch notes for this version' }
           $kind = if ($channel -eq 'test') { '--prerelease' } else { '--latest' }
-          $title = if ($channel -eq 'test') { "Tela! $v (test)" } else { "Tela! $v" }
+          $title = if ($channel -eq 'test') { "Tela! $v (experimental)" } else { "Tela! $v" }
           gh release create "v$v" --target $env:GITHUB_SHA --title $title --notes-file build\notes.md $kind `
             "build\Tela-Setup-$v.exe" build\Tela-Setup.exe
           if ($LASTEXITCODE) { throw 'could not create the release' }
+
+      - name: Release notes follow ui/changelog.js
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # notes edited later (shorter, clearer) also change on the GitHub releases already published
+          foreach ($v in (python installer/changelog.py --stable) + (python installer/changelog.py --withdrawn)) {
+            $v = $v.Trim(); if (-not $v) { continue }
+            gh release view "v$v" --json tagName 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) { continue }
+            python installer/changelog.py --notes $v | Out-File -Encoding utf8 build\sync.md
+            gh release edit "v$v" --notes-file build\sync.md | Out-Null
+          }
+          exit 0
 
   # README pictures: drawn from the real window in demo mode and kept on the "screenshots" branch (main keeps
   # one commit per version). Updated when a version is released as stable, or when the branch is missing.

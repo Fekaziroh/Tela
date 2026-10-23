@@ -3,7 +3,7 @@
 ; Expects build\dist\Tela (PyInstaller), build\components\lhm and build\components\presentmon, build\tela.ico.
 
 #ifndef AppVersion
-  #define AppVersion "1.4.7"
+  #define AppVersion "1.4.8"
 #endif
 #ifndef PawnIOUrl
   #define PawnIOUrl ""
@@ -35,6 +35,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 CloseApplications=no
 SetupMutex=TelaSetupMutex
+ChangesAssociations=yes
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
@@ -92,6 +93,13 @@ Source: "{#Root}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Build}\components\lhm\*"; DestDir: "{app}\lhm"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Build}\components\presentmon\*"; DestDir: "{app}\presentmon"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+
+[Registry]
+; .tela-theme files open in Tela! (double click adds the theme to Appearance › Screen themes)
+Root: HKA; Subkey: "Software\Classes\.tela-theme"; ValueType: string; ValueName: ""; ValueData: "Tela.Theme"; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\Tela.Theme"; ValueType: string; ValueName: ""; ValueData: "Tela! theme"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Tela.Theme\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Tela.exe,0"
+Root: HKA; Subkey: "Software\Classes\Tela.Theme\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Tela.exe"" --import-theme ""%1"""
 
 [Icons]
 Name: "{autoprograms}\Tela!"; Filename: "{app}\Tela.exe"

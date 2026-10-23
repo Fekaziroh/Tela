@@ -2,36 +2,52 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.8
+
+### New
+
+- Create a theme from scratch, and switch themes by themselves for day and night.
+- .tela-theme files open with a double click.
+- The weather warns when rain is coming in the next hours.
+- The first-run assistant asks for your city for the weather.
+- You can reinstall the current version from Go back to another version.
+
+### Fixes
+
+- Tela! no longer closes by itself (a 1.4.7 problem).
+- The version button always offers the newest version.
+- Top bar of the themes: the music no longer covers the date, and the logo or the FPS always shows.
+- Switching themes no longer leaves bits of the previous one on the screen.
+- In the Lines theme, the graphs follow the chosen colors.
+
 ## Tela! 1.4.7
 
 ### Fixes
 
-- If the window freezes (“Not responding”) for 20 seconds, or the whole of Tela! stops responding, it is closed and opened again by itself, with a notice in the tray. A small guard process runs alongside Tela! for this.
-- When the window freezes, Tela! writes to its log (tela.log) what each part was doing, to find the cause.
+- Withdrawn version: it closed Tela! by itself. Use 1.4.8 or newer.
 
 ## Tela! 1.4.6
 
 ### New
 
-- Screen themes (Appearance): Clean, Full, Cockpit, Lines and Retro, with different shapes and not just colors, each in landscape and portrait. Hover a theme to preview it and click to use it.
-- Save the screen your way as a new theme, export and import .tela-theme files to share. Layout changes and colors are kept per theme, and “Restore original” undoes them.
-- Weather next to the date: temperature and sky for your city (Settings › Weather, from Open-Meteo; only the city name leaves the PC).
-- Editable screen texts (e.g. POWER to WATTS) and a disks block title that is automatic (SSD, HD or Disks) or your own.
-- Customizable game summary: choose FPS, temperatures, graph (top or bottom) and duration; what stays shows bigger.
-- Editor: copy, paste and duplicate (Ctrl+C / Ctrl+V / Ctrl+D), alignment guides while dragging (Shift moves freely, without the grid), zoom (Ctrl+mouse wheel) with a grid, and automatic adjustment of the elements inside a block when one is deleted or resized.
-- Reconnect the screen and Restart Tela! in the tray menu and in Advanced, for when something gets stuck. Release the screen for another program and Free the window's memory also in the tray menu.
-- Going back to another version shows the size of each one.
+- Screen themes: Clean, Full, Cylinder, Lines and Retro, in landscape and portrait, with a preview on hover.
+- Save, export and import themes to share them.
+- Weather next to the date (Settings › Weather).
+- Editable screen texts and disks title.
+- Customizable game summary.
+- Editor: copy, paste and duplicate, alignment guides and zoom.
+- Reconnect the screen and Restart Tela! in the tray and in Advanced.
 
 ### Fixes
 
-- With no game open, the music sometimes moved to the right and the logo took its place: a program that had shown FPS kept counting as a game. Now only a game that still has a window (minimized too) and had FPS in the last half hour counts.
-- Pause now only freezes the screen; when resumed it carries on without redrawing everything. Releasing the screen for another program is a separate option.
-- Windows notifications show just “Tela!” as the app name.
+- The music moved to the right even with no game open.
+- Pause now only freezes the screen; releasing the screen for another program is a separate option.
+- Windows notifications show just “Tela!” as the name.
 
 ### Appearance and personalization
 
-- New default theme, Clean, inspired by the first version: logos at the ends, a big clock in the middle, cleaner CPU and GPU panels and one block for network and volume. If you already used Tela!, you keep your layout (now the Full theme) and get a notice.
-- Appearance reorganized: Screen themes, Colors and background together, Logos and Window theme.
+- New default theme, Clean. If you already used Tela!, you keep your layout, now as the Full theme.
+- Appearance reorganized.
 
 ## Tela! 1.4.5
 

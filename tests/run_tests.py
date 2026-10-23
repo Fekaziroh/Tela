@@ -944,6 +944,19 @@ def updater_test_channel_and_skip():
     assert updater.pick_update(data, "1.4.2", test=True, skip="1.4.4")["version"] == "1.4.3"
     assert updater.pick_update(data, "1.4.4", test=True) is None
     assert updater.release_info(rel("1.4.4", True), test=True)["test"] is True
+    import io
+    import json as _json
+    real = updater._get
+    try:   # a version skipped after going back: reported as the user's choice, not offered
+        updater._get = lambda url, timeout=20: io.BytesIO(_json.dumps(data).encode())
+        u = updater.Updater("1.4.3", options=lambda: {"test": True, "skip": "1.4.4"})
+        snap = u.check()
+        assert snap["state"] == "idle" and snap["skipped"] == "1.4.4"
+        u.options = lambda: {"test": True}
+        snap = u.check()
+        assert snap["state"] == "available" and snap["skipped"] is None
+    finally:
+        updater._get = real
 
 
 @test
@@ -1152,39 +1165,78 @@ def summary_shows_what_the_user_chose():
 @test
 def guard_reopens_a_hung_tela():
     import watchdog
-    saved = {k: getattr(watchdog, k) for k in ("alive", "answers", "kill_tree", "start_main", "windows_of", "ui_hung",
-                                                "EVERY", "GRACE", "HUNG_PING", "HUNG_UI", "log")}
+    saved = {k: getattr(watchdog, k) for k in ("alive", "answers", "kill_tree", "start_main", "main_window", "ui_hung",
+                                                "EVERY", "GRACE", "HUNG_PING", "HUNG_UI", "log", "recent_restarts",
+                                                "note_restart")}
     done = []
     try:
         watchdog.EVERY, watchdog.GRACE, watchdog.HUNG_PING, watchdog.HUNG_UI = 0.01, 0, 0.05, 0.05
         watchdog.log = lambda line: done.append(("log", line))
+        watchdog.recent_restarts = lambda now=None: []
+        watchdog.note_restart = lambda: done.append(("noted",))
         watchdog.alive = lambda pid: not any(d[0] == "kill" for d in done)
         watchdog.kill_tree = lambda pid: done.append(("kill", pid))
         watchdog.start_main = lambda hidden: done.append(("start", hidden))
-        watchdog.windows_of = lambda pid: [(1, True)]
-        watchdog.answers = lambda: True
-        watchdog.ui_hung = lambda wins: True                 # window "Not responding"
+        watchdog.main_window = lambda pid: (1, True)
+        watchdog.ui_hung = lambda win: True                  # window "Not responding"...
+        watchdog.answers = lambda: 30.0                      # ...and its page silent for 30 s
         watchdog.watch(123)
-        assert ("kill", 123) in done and ("start", False) in done and "window" in done[0][1]
-        done.clear()
-        watchdog.ui_hung = lambda wins: False
-        watchdog.answers = lambda: False                     # everything frozen, window hidden in the tray
-        watchdog.windows_of = lambda pid: [(1, False)]
-        watchdog.watch(123)
-        assert ("start", True) in done
+        assert ("kill", 123) in done and ("start", False) in done and ("noted",) in done
         done.clear()
         calls = [0]
 
-        def gone(pid):
+        def until(pid):
             calls[0] += 1
-            return calls[0] < 5
-        watchdog.alive = gone                                 # Tela! closed normally: the guard just ends
-        watchdog.answers = lambda: True
+            return calls[0] < 40
+        watchdog.alive = until
+        watchdog.answers = lambda: 0.5                       # the page still calls: a false alarm (1.4.7 bug)
         watchdog.watch(123)
-        assert not done
+        assert not any(d[0] == "kill" for d in done)
+        done.clear()
+        watchdog.alive = lambda pid: not any(d[0] == "kill" for d in done)
+        watchdog.ui_hung = lambda win: False
+        watchdog.answers = lambda: None                      # everything frozen, window hidden in the tray
+        watchdog.main_window = lambda pid: (1, False)
+        watchdog.watch(123)
+        assert ("start", True) in done
+        done.clear()
+        watchdog.recent_restarts = lambda now=None: [1, 2]   # reopened twice already: the guard stays off
+        watchdog.watch(123)
+        assert not any(d[0] == "kill" for d in done) and "stays off" in done[0][1]
     finally:
         for k, v in saved.items():
             setattr(watchdog, k, v)
+
+
+@test
+def rain_soon_new_theme_and_media_place():
+    import themes
+    import weather
+    hourly = {"time": ["2026-10-23T19:00", "2026-10-23T20:00", "2026-10-23T21:00", "2026-10-23T22:00"],
+              "precipitation_probability": [90, 20, 70, 95]}
+    assert weather.rain_soon(hourly, "2026-10-23T19:15") == 21          # the current hour does not count
+    assert weather.rain_soon(dict(hourly, precipitation_probability=[0, 10, 20, 90]), "2026-10-23T19:15") is None
+    r = render.Renderer(dict(default_cfg(), weather={}), 480, 320, base=ROOT, lang="pt")
+    col = FakeCollector()
+    col.weather_info = lambda: {"temp": 22.0, "condition": "cloudy", "day": True, "rain_at": 21}
+    assert r.weather_text(col) == " · 22° nublado, chuva às 21h"
+    r.colors["panel"], r.colors["accent"] = "#000000", "#FF0000"
+    assert r.color("accent@50") == "#800000" and r.color("accent") == "#FF0000"
+    # one media place: media and date never show together, the logo keeps its place
+    w = {"type": "media", "when": "media_any", "group": "top"}
+    d = {"type": "clock", "when": "no_media_any", "group": "top"}
+    for game, media in ((False, True), (True, True), (False, False)):
+        c = FakeCollector(game, media)
+        assert r._visible(w, c) != r._visible(d, c)
+    old = config.DATA
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            config.DATA = Path(tmp)
+            tid = themes.new_theme("Do zero")
+            lay = layout.load("portrait", theme=tid)
+            assert [g["id"] for g in lay["groups"]] == ["top"] and not themes.load(tid)["builtin"]
+        finally:
+            config.DATA = old
 
 
 def main():

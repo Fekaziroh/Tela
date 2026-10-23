@@ -63,6 +63,7 @@ async function setSetting(path, value, quiet) {
   if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("alerts.") || path.startsWith("history.")
       || path.startsWith("weather.") || path.startsWith("session.")) renderNight();
   if (path.startsWith("weather.")) { setTimeout(pollWeather, 2500); setTimeout(pollWeather, 7000); }
+  if (path.startsWith("theme.")) stRender();
   if (path === "ui.language") setTimeout(renderWords, 1500);
   syncControls();
   refreshPreset();
@@ -85,7 +86,7 @@ function syncControls() {
     } else if (el.type === "range") {
       if (document.activeElement !== el) el.value = v ?? 0;
     } else if (el.tagName === "SELECT") {
-      el.value = v ?? "auto";
+      el.value = v ?? (el.dataset.default || "auto");
     } else if (document.activeElement !== el) {
       el.value = v ?? "";
     }
@@ -513,6 +514,7 @@ function renderState(s, quick) {
   $("#release").title = t("home.release_hint");
   $("#port-now").textContent = t("set.port_now", { port: st.connected ? st.port : t("set.port_none") });
   if (s.frame) showFrame(s.frame);
+  if (s.theme_imported) stImported(s.theme_imported);
   $("#preview-paused").hidden = s.preview !== false;
   if (s.disks && JSON.stringify(s.disks) !== JSON.stringify(S.init.disks)) { S.init.disks = s.disks; renderDisks(); }
   renderLastGame(s.last_game);
@@ -672,6 +674,14 @@ async function showSensors(pick) {
     $$("button", list).forEach(b => { b.hidden = q && !b.dataset.q.includes(q); });
   });
 }
+// Tela! was reopened by the guard process after it stopped responding
+function showRecovered() {
+  api.recovered_seen();
+  openModal({ title: t("crash.title"), desc: t("crash.desc"), buttons: [
+    { label: t("crash.report"), onClick: () => { api.open_url("https://github.com/Fekaziroh/Tela/issues/new/choose"); return false; } },
+    { label: t("adv.diag"), onClick: () => { closeModal(); showDiagnostics(); return false; } },
+    { label: t("modal.close"), primary: true }] });
+}
 function showUninstall() {
   const body = `<p style="margin:0 0 12px;color:var(--muted)">${t("uninstall.body")}</p>
     <div class="row"><span class="lbl">${t("uninstall.data")}<small>${esc(S.init.folder || "")}</small></span><button class="sw" role="switch" id="un-data" aria-checked="false"></button></div>`;
@@ -715,7 +725,8 @@ async function start() {
   $("#set-search").addEventListener("input", e => searchSettings(e.target.value));
   $("#about-ver").textContent = S.init.version;
   $$("[data-url]").forEach(b => b.addEventListener("click", () => api.open_url(b.dataset.url)));
-  if (wizNeeded()) setTimeout(wizStart, 800);
+  if (S.init.recovered) setTimeout(showRecovered, 700);
+  else if (wizNeeded()) setTimeout(wizStart, 800);
   else if (S.init.updated_from) setTimeout(() => { showWhatsNew(S.init.updated_from); api.news_seen(); }, 600);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "advanced") pollUsage(); });
 }

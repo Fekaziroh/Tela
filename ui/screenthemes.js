@@ -41,6 +41,15 @@ function stRender() {
     b.addEventListener("click", () => stApply(th.id));
     grid.appendChild(b);
   }
+  for (const id of ["#st-day", "#st-night"]) {   // theme by the time of day: the same list of themes
+    const sel = $(id);
+    if (!sel) continue;
+    const want = ((S.settings.theme || {})[id === "#st-day" ? "day" : "night"]) || sel.dataset.default;
+    sel.innerHTML = ST.list.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");
+    sel.value = want;
+  }
+  const sch = $("#st-sched");
+  if (sch) sch.classList.toggle("off", !(S.settings.theme || {}).schedule);
   const cur = stCur();
   $("#st-now").textContent = cur ? cur.name : "";
   const acts = $("#st-actions");
@@ -129,6 +138,16 @@ function stSaveAs() {
     toast(t("st.saved", { name }));
   });
 }
+function stNew() {
+  stAsk(t("st.new_title"), t("st.new_desc"), "", async name => {
+    const r = await api.theme_new(name);
+    ST.list = r.themes; ST.current = r.current;
+    if (typeof E !== "undefined") E.lay = null;
+    stRender(); stThumbs();
+    toast(t("st.saved", { name }));
+    showTab("layout");
+  });
+}
 function stRename() {
   const cur = stCur();
   if (!cur) return;
@@ -188,9 +207,17 @@ function stNotice() {
 
 function bindScreenThemes() {
   $("#st-save").addEventListener("click", stSaveAs);
+  $("#st-new").addEventListener("click", stNew);
   $("#st-import").addEventListener("click", stImport);
   $("#st-export").addEventListener("click", stExport);
   $("#st-notice-go").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); showTab("look"); });
   $("#st-notice-no").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); });
   document.addEventListener("tela-frame", stMirror);
+}
+
+// a .tela-theme opened with a double click in Explorer (Tela.exe --import-theme)
+async function stImported(id) {
+  await stLoad();
+  showTab("look");
+  toast(t("st.imported", { name: stName(id) }));
 }

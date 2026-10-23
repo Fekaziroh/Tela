@@ -24,11 +24,10 @@ landscape:
       h: 34
       items:
         - {type: value, sensor: fps, x: 12, y: 18, size: 22, unit: ' FPS', unit_size: 10, bold: true, empty: ''}
-        - {type: image, files: logos, when: logos, x: 12, y: 9, w: 90, h: 16}
+        - {type: image, files: logos, when: no_fps, x: 12, y: 9, w: 90, h: 16}
         - {type: clock, format: '%H:%M', x: 240.0, y: 18, align: center, size: 24, bold: true}
-        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 18, align: right, size: 11, color: secondary, when: no_media_in_game, fade: true}
-        - {type: media, x: 298, y: 3, w: 172, h: 28, when: media_in_game, fade: true}
-        - {type: media, x: 298, y: 3, w: 172, h: 28, when: [no_game, media], fade: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 18, align: right, size: 11, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 298, y: 3, w: 172, h: 28, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4
@@ -38,10 +37,10 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 136, title: CPU, subtitle: '{cpu_name}', border: track}
         - {type: value, sensor: cpu_temp, x: 224, y: 14, size: 13, unit: °C, align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: cpu_temp, x: 10, y: 30, w: 214, h: 54, min: 20, max: 95, points: 90, fill_color: '#0F2A27'}
+        - {type: graph, sensor: cpu_temp, x: 10, y: 30, w: 214, h: 54, min: 20, max: 95, points: 90, fill_color: accent@18}
         - {type: text, text: '#load', x: 10, y: 92, size: 8.5, color: secondary, bold: true}
         - {type: value, sensor: cpu_load, x: 224, y: 92, size: 10, unit: '%', align: right, unit_size: 7}
-        - {type: graph, sensor: cpu_load, x: 10, y: 100, w: 214, h: 26, min: 0, max: 100, points: 90, color: secondary, fill_color: '#1A1F26'}
+        - {type: graph, sensor: cpu_load, x: 10, y: 100, w: 214, h: 26, min: 0, max: 100, points: 90, color: secondary, fill_color: secondary@14}
     - id: gpu
       name: GPU
       x: 242
@@ -51,10 +50,10 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 136, title: GPU, subtitle: '{gpu_name}', border: track}
         - {type: value, sensor: gpu_temp, x: 224, y: 14, size: 13, unit: °C, align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: gpu_temp, x: 10, y: 30, w: 214, h: 54, min: 20, max: 95, points: 90, fill_color: '#0F2A27'}
+        - {type: graph, sensor: gpu_temp, x: 10, y: 30, w: 214, h: 54, min: 20, max: 95, points: 90, fill_color: accent@18}
         - {type: text, text: '#load', x: 10, y: 92, size: 8.5, color: secondary, bold: true}
         - {type: value, sensor: gpu_load, x: 224, y: 92, size: 10, unit: '%', align: right, unit_size: 7}
-        - {type: graph, sensor: gpu_load, x: 10, y: 100, w: 214, h: 26, min: 0, max: 100, points: 90, color: secondary, fill_color: '#1A1F26'}
+        - {type: graph, sensor: gpu_load, x: 10, y: 100, w: 214, h: 26, min: 0, max: 100, points: 90, color: secondary, fill_color: secondary@14}
     - id: ram
       name: RAM
       x: 4
@@ -64,7 +63,7 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 66, title: RAM, subtitle: '{ram_desc}', border: track}
         - {type: value, sensor: ram_pct, x: 224, y: 14, size: 13, unit: '%', align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: ram_pct, x: 10, y: 28, w: 214, h: 30, min: 0, max: 100, points: 90}
+        - {type: graph, sensor: ram_pct, x: 10, y: 28, w: 214, h: 30, min: 0, max: 100, points: 90, fill_color: accent@12}
     - id: network
       name: '#network'
       x: 242
@@ -74,7 +73,7 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 66, title: '#network', border: track}
         - {type: value, sensor: net_down, x: 224, y: 14, size: 13, unit: ' Mb/s ↓', align: right, bold: true, unit_size: 8, format: '{:.1f}'}
-        - {type: graph, sensor: net_down, x: 10, y: 28, w: 214, h: 30, min: 0, max: 500, points: 90}
+        - {type: graph, sensor: net_down, x: 10, y: 28, w: 214, h: 30, min: 0, max: 500, points: 90, fill_color: accent@12}
     - id: vram
       name: VRAM
       x: 4
@@ -84,7 +83,7 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 68, title: VRAM, subtitle: '{vram_desc}', border: track}
         - {type: value, sensor: vram_mb, x: 224, y: 14, size: 13, unit: ' GB', align: right, bold: true, unit_size: 8, scale: 0.001, format: '{:.1f}'}
-        - {type: graph, sensor: vram_mb, x: 10, y: 28, w: 214, h: 32, min: 0, max: 12288, points: 90}
+        - {type: graph, sensor: vram_mb, x: 10, y: 28, w: 214, h: 32, min: 0, max: 12288, points: 90, fill_color: accent@12}
     - id: disks
       name: '{disks_title}'
       x: 242
@@ -94,7 +93,7 @@ landscape:
       items:
         - {type: panel, x: 0, y: 0, w: 234, h: 68, title: '{disks_title}', subtitle: '{disk1_name}', border: track}
         - {type: value, sensor: disk1_act, x: 224, y: 14, size: 13, unit: '%', align: right, bold: true, unit_size: 8, ssd: true}
-        - {type: graph, sensor: disk1_act, x: 10, y: 28, w: 214, h: 32, min: 0, max: 100, points: 90}
+        - {type: graph, sensor: disk1_act, x: 10, y: 28, w: 214, h: 32, min: 0, max: 100, points: 90, fill_color: accent@12}
 
 portrait:
   groups:
@@ -106,10 +105,10 @@ portrait:
       h: 56
       items:
         - {type: value, sensor: fps, x: 10, y: 16, size: 20, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
-        - {type: image, files: logos, when: logos, x: 10, y: 9, w: 80, h: 15}
+        - {type: image, files: logos, when: no_fps, x: 10, y: 9, w: 80, h: 15}
         - {type: clock, format: '%H:%M', x: 310, y: 16, align: right, size: 22, bold: true}
-        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media, fade: true}
-        - {type: media, x: 10, y: 30, w: 300, h: 24, when: media, fade: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 10, y: 30, w: 300, h: 24, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4
@@ -119,10 +118,10 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 312, h: 118, title: CPU, subtitle: '{cpu_name}', border: track}
         - {type: value, sensor: cpu_temp, x: 302, y: 14, size: 13, unit: °C, align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: cpu_temp, x: 10, y: 30, w: 292, h: 47, min: 20, max: 95, points: 90, fill_color: '#0F2A27'}
+        - {type: graph, sensor: cpu_temp, x: 10, y: 30, w: 292, h: 47, min: 20, max: 95, points: 90, fill_color: accent@18}
         - {type: text, text: '#load', x: 10, y: 85, size: 8.5, color: secondary, bold: true}
         - {type: value, sensor: cpu_load, x: 302, y: 85, size: 10, unit: '%', align: right, unit_size: 7}
-        - {type: graph, sensor: cpu_load, x: 10, y: 93, w: 292, h: 15, min: 0, max: 100, points: 90, color: secondary, fill_color: '#1A1F26'}
+        - {type: graph, sensor: cpu_load, x: 10, y: 93, w: 292, h: 15, min: 0, max: 100, points: 90, color: secondary, fill_color: secondary@14}
     - id: gpu
       name: GPU
       x: 4
@@ -132,10 +131,10 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 312, h: 118, title: GPU, subtitle: '{gpu_name}', border: track}
         - {type: value, sensor: gpu_temp, x: 302, y: 14, size: 13, unit: °C, align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: gpu_temp, x: 10, y: 30, w: 292, h: 47, min: 20, max: 95, points: 90, fill_color: '#0F2A27'}
+        - {type: graph, sensor: gpu_temp, x: 10, y: 30, w: 292, h: 47, min: 20, max: 95, points: 90, fill_color: accent@18}
         - {type: text, text: '#load', x: 10, y: 85, size: 8.5, color: secondary, bold: true}
         - {type: value, sensor: gpu_load, x: 302, y: 85, size: 10, unit: '%', align: right, unit_size: 7}
-        - {type: graph, sensor: gpu_load, x: 10, y: 93, w: 292, h: 15, min: 0, max: 100, points: 90, color: secondary, fill_color: '#1A1F26'}
+        - {type: graph, sensor: gpu_load, x: 10, y: 93, w: 292, h: 15, min: 0, max: 100, points: 90, color: secondary, fill_color: secondary@14}
     - id: ram
       name: RAM
       x: 4
@@ -145,7 +144,7 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 154, h: 84, title: RAM, border: track}
         - {type: value, sensor: ram_pct, x: 144, y: 14, size: 13, unit: '%', align: right, bold: true, unit_size: 8}
-        - {type: graph, sensor: ram_pct, x: 10, y: 28, w: 134, h: 48, min: 0, max: 100, points: 90}
+        - {type: graph, sensor: ram_pct, x: 10, y: 28, w: 134, h: 48, min: 0, max: 100, points: 90, fill_color: accent@12}
     - id: network
       name: '#network'
       x: 162
@@ -155,7 +154,7 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 154, h: 84, title: '#network', border: track}
         - {type: value, sensor: net_down, x: 144, y: 14, size: 13, unit: ' ↓', align: right, bold: true, unit_size: 8, format: '{:.0f}'}
-        - {type: graph, sensor: net_down, x: 10, y: 28, w: 134, h: 48, min: 0, max: 500, points: 90}
+        - {type: graph, sensor: net_down, x: 10, y: 28, w: 134, h: 48, min: 0, max: 500, points: 90, fill_color: accent@12}
     - id: vram
       name: VRAM
       x: 4
@@ -165,7 +164,7 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 154, h: 84, title: VRAM, border: track}
         - {type: value, sensor: vram_mb, x: 144, y: 14, size: 13, unit: ' GB', align: right, bold: true, unit_size: 8, scale: 0.001, format: '{:.1f}'}
-        - {type: graph, sensor: vram_mb, x: 10, y: 28, w: 134, h: 48, min: 0, max: 12288, points: 90}
+        - {type: graph, sensor: vram_mb, x: 10, y: 28, w: 134, h: 48, min: 0, max: 12288, points: 90, fill_color: accent@12}
     - id: disks
       name: '{disks_title}'
       x: 162
@@ -175,4 +174,4 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 154, h: 84, title: '{disks_title}', border: track}
         - {type: value, sensor: disk1_act, x: 144, y: 14, size: 13, unit: '%', align: right, bold: true, unit_size: 8, ssd: true}
-        - {type: graph, sensor: disk1_act, x: 10, y: 28, w: 134, h: 48, min: 0, max: 100, points: 90}
+        - {type: graph, sensor: disk1_act, x: 10, y: 28, w: 134, h: 48, min: 0, max: 100, points: 90, fill_color: accent@12}

@@ -26,7 +26,7 @@ landscape:
         - {type: text, text: TELA! >, x: 10, y: 18, size: 12, color: accent, font: consolas, bold: true}
         - {type: value, sensor: fps, x: 90, y: 18, size: 18, unit: ' FPS', font: consolas, bold: true, unit_size: 10, empty: ''}
         - {type: clock, format: '%H:%M:%S', x: 468, y: 18, align: right, size: 18, bold: true, font: consolas}
-        - {type: media, x: 170, y: 3, w: 180, h: 28, when: media, fade: true}
+        - {type: media, x: 170, y: 3, w: 180, h: 28, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4
@@ -103,7 +103,7 @@ portrait:
         - {type: text, text: TELA! >, x: 10, y: 18, size: 12, color: accent, font: consolas, bold: true}
         - {type: value, sensor: fps, x: 76, y: 18, size: 18, unit: ' FPS', font: consolas, bold: true, unit_size: 10, empty: ''}
         - {type: clock, format: '%H:%M:%S', x: 308, y: 18, align: right, size: 18, bold: true, font: consolas}
-        - {type: media, x: 10, y: 36, w: 300, h: 24, when: media, fade: true}
+        - {type: media, x: 10, y: 36, w: 300, h: 24, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4

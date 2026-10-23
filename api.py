@@ -21,7 +21,7 @@ from engine import HERE, VERSION, system_language
 from render import DEFAULT_COLORS, Renderer
 
 NOT_FOR_INTERVALS = {"fps", "volume"}
-UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow"), ("ui", "unload_hidden")}
+UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow"), ("ui", "unload_hidden"), ("ui", "guard")}
 
 
 def _png_data_url(img):
@@ -87,12 +87,28 @@ class Api:
             "folder": str(config.DATA),
             "themes": self._load_themes(),
             "updated_from": self._updated_from(),
+            "recovered": bool(getattr(self._app, "recovered", False)),
         }
 
     @staticmethod
     def _updated_from():
         try:
             return (config.DATA / "updated_from.txt").read_text(encoding="utf-8").strip() or None
+        except OSError:
+            return None
+
+    def recovered_seen(self):
+        self._app.recovered = False
+        return True
+
+    @staticmethod
+    def _theme_imported():
+        """A theme opened with a double click (Tela.exe --import-theme): its id, once."""
+        p = config.DATA / "theme_imported.txt"
+        try:
+            tid = p.read_text(encoding="utf-8").strip()
+            p.unlink()
+            return tid or None
         except OSError:
             return None
 
@@ -148,6 +164,11 @@ class Api:
             return False
         if skip_current:
             self.set("updates", "skip", VERSION)
+        else:   # going to the skipped version (or a newer one) means it is wanted again
+            from updater import newer
+            sk = str((self._cfg().get("updates") or {}).get("skip") or "")
+            if sk and not newer(sk, version):
+                self.set("updates", "skip", "")
         self._engine.log(f"Going to version {version}")
         return up.install(lambda: threading.Thread(target=self._app.quit, daemon=True).start(), info)
 
@@ -170,6 +191,7 @@ class Api:
 
     # ------------------------------------------------------------ live state
     def state(self, since=-1):
+        self._page_seen = time.monotonic()   # the page is alive (the guard process asks for this)
         if getattr(self._app, "visible", True) is False:
             return {"hidden": True}
         e = self._engine
@@ -197,6 +219,7 @@ class Api:
         up = getattr(self._app, "updater", None)
         out["update"] = up.snapshot() if up else None
         out["conflict"] = sorted({n for _, n in getattr(self._app, "conflict", [])})
+        out["theme_imported"] = self._theme_imported()
         return out
 
     def _hardware_line(self):
@@ -483,6 +506,14 @@ class Api:
         cfg = self._cfg()
         new = themes.save_as(themes.current(cfg), name, cfg.get("colors"), self._engine.lang)
         self._engine.log(f"Theme saved: {name}")
+        self.theme_apply(new)
+        return self.theme_list()
+
+    def theme_new(self, name):
+        """A new theme from scratch (only the clock), used at once so it can be built in the Layout tab."""
+        import themes
+        new = themes.new_theme(name, self._cfg().get("colors"))
+        self._engine.log(f"New theme: {name}")
         self.theme_apply(new)
         return self.theme_list()
 

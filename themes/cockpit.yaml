@@ -1,6 +1,6 @@
 # Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
 
-name: {pt: Cockpit, en: Cockpit, es: Cockpit, zh: 仪表}
+name: {pt: Cilindro, en: Cylinder, es: Cilindro, zh: 圆柱}
 order: 3
 tela: 1
 
@@ -24,11 +24,10 @@ landscape:
       h: 34
       items:
         - {type: value, sensor: fps, x: 12, y: 18, size: 22, unit: ' FPS', unit_size: 10, bold: true, empty: ''}
-        - {type: image, files: logos, when: logos, x: 12, y: 9, w: 90, h: 16}
+        - {type: image, files: logos, when: no_fps, x: 12, y: 9, w: 90, h: 16}
         - {type: clock, format: '%H:%M', x: 240.0, y: 18, align: center, size: 24, bold: true}
-        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 18, align: right, size: 11, color: secondary, when: no_media_in_game, fade: true}
-        - {type: media, x: 298, y: 3, w: 172, h: 28, when: media_in_game, fade: true}
-        - {type: media, x: 298, y: 3, w: 172, h: 28, when: [no_game, media], fade: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 18, align: right, size: 11, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 298, y: 3, w: 172, h: 28, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4
@@ -104,10 +103,10 @@ portrait:
       h: 56
       items:
         - {type: value, sensor: fps, x: 10, y: 16, size: 20, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
-        - {type: image, files: logos, when: logos, x: 10, y: 9, w: 80, h: 15}
+        - {type: image, files: logos, when: no_fps, x: 10, y: 9, w: 80, h: 15}
         - {type: clock, format: '%H:%M', x: 310, y: 16, align: right, size: 22, bold: true}
-        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media, fade: true}
-        - {type: media, x: 10, y: 30, w: 300, h: 24, when: media, fade: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 10, y: 30, w: 300, h: 24, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4

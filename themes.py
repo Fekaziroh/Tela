@@ -304,6 +304,29 @@ def save_as(tid, new_name, colors_now=None, lang="en"):
     return new
 
 
+def blank_groups(fam):
+    """A new theme from scratch starts with just the clock and the date; the rest is added in the editor."""
+    W = 480 if fam == "landscape" else 320
+    return [{"id": "top", "name": "#top", "x": 0, "y": 0, "w": W, "h": 56, "items": [
+        {"type": "clock", "format": "%H:%M", "x": W / 2, "y": 22, "align": "center", "size": 30, "bold": True},
+        {"type": "clock", "format": "{weekday} %d/%m{weather}", "x": W / 2, "y": 46, "align": "center", "size": 11,
+         "color": "secondary"}]}]
+
+
+def new_theme(new_name, colors_now=None):
+    """An empty theme of the user's. Returns its id."""
+    from render import DEFAULT_COLORS
+    new_name = str(new_name or "").strip()[:40] or "Tema"
+    data = {"name": new_name, "tela": 1, "created": time.time(),
+            "colors": {k: v for k, v in {**DEFAULT_COLORS, **(colors_now or {})}.items() if _hex(v)}}
+    for fam in FAMILIES:
+        data[fam] = {"groups": blank_groups(fam)}
+    new = _free_id(_slug(new_name))
+    user_dir().mkdir(parents=True, exist_ok=True)
+    (user_dir() / f"{new}.yaml").write_text(dump(data), encoding="utf-8")
+    return new
+
+
 def rename(tid, new_name):
     data = load(tid)
     if data["builtin"]:

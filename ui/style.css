@@ -405,3 +405,4 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .zb{all:unset;cursor:pointer;min-width:22px;height:22px;padding:0 6px;border-radius:6px;border:1px solid #30333a;color:#c9ccd1;text-align:center;line-height:22px;font:500 11px var(--f-mono)}
 .zb:hover{border-color:#7d8590}
 .zb[aria-pressed="true"]{background:#2a2d33;border-color:#7cc4ff;color:#fff}
+#st-sched .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}

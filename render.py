@@ -5,7 +5,7 @@ import re
 import time
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFont
 
 from media import progress as media_progress
 
@@ -44,7 +44,7 @@ SCREEN_TEXT = {
         "used": "USADO", "duration": "DURAÇÃO",
         "w_clear": "ensolarado", "w_clear_night": "céu limpo", "w_partly": "parc. nublado", "w_cloudy": "nublado",
         "w_fog": "neblina", "w_drizzle": "garoa", "w_rain": "chuva", "w_showers": "pancadas", "w_snow": "neve",
-        "w_storm": "tempestade",
+        "w_storm": "tempestade", "w_rain_at": ", chuva às {h}h",
     },
     "en": {
         "weekdays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
@@ -58,7 +58,7 @@ SCREEN_TEXT = {
         "used": "USED", "duration": "DURATION",
         "w_clear": "sunny", "w_clear_night": "clear", "w_partly": "partly cloudy", "w_cloudy": "cloudy",
         "w_fog": "fog", "w_drizzle": "drizzle", "w_rain": "rain", "w_showers": "showers", "w_snow": "snow",
-        "w_storm": "storm",
+        "w_storm": "storm", "w_rain_at": ", rain at {h}:00",
     },
     "es": {
         "weekdays": ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"],
@@ -72,7 +72,7 @@ SCREEN_TEXT = {
         "used": "USADO", "duration": "DURACIÓN",
         "w_clear": "soleado", "w_clear_night": "despejado", "w_partly": "parc. nublado", "w_cloudy": "nublado",
         "w_fog": "niebla", "w_drizzle": "llovizna", "w_rain": "lluvia", "w_showers": "chubascos", "w_snow": "nieve",
-        "w_storm": "tormenta",
+        "w_storm": "tormenta", "w_rain_at": ", lluvia a las {h}h",
     },
     "zh": {
         "weekdays": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
@@ -85,7 +85,7 @@ SCREEN_TEXT = {
         "fps_session": "本局 FPS", "example_game": "示例游戏",
         "used": "已用", "duration": "时长",
         "w_clear": "晴", "w_clear_night": "晴朗", "w_partly": "多云", "w_cloudy": "阴", "w_fog": "雾",
-        "w_drizzle": "毛毛雨", "w_rain": "雨", "w_showers": "阵雨", "w_snow": "雪", "w_storm": "雷雨",
+        "w_drizzle": "毛毛雨", "w_rain": "雨", "w_showers": "阵雨", "w_snow": "雪", "w_storm": "雷雨", "w_rain_at": "，{h}点有雨",
     },
 }
 # fonts for titles in other scripts (Windows fonts first, Linux fallbacks after)
@@ -204,6 +204,14 @@ class Renderer:
     # ------------------------------------------------------------ helpers
     def color(self, c, default="text"):
         c = default if c is None else c
+        if isinstance(c, str) and "@" in c:   # "accent@18" = the accent at 18% over the panel color
+            name, _, pct = c.partition("@")
+            try:
+                a = max(0.0, min(1.0, float(pct) / 100))
+                top, under = ImageColor.getrgb(self.colors.get(name, name)), ImageColor.getrgb(self.colors.get("panel"))
+                return "#%02X%02X%02X" % tuple(round(u + (t - u) * a) for t, u in zip(top, under))
+            except (ValueError, TypeError):
+                return self.colors.get(name, name)
         return self.colors.get(c, c)
 
     def font(self, size, bold=False):
@@ -392,7 +400,10 @@ class Renderer:
                  "media_in_game": game and media and self.media_in_game and "media_right" in slots,
                  # logos: the FPS is not on the left and the media is not there either (counting only the
                  # items that are turned on in this block, so turning one off shows the logos instead)
-                 "logos": not (fps and "fps" in slots) and not (media and not game and "media_left" in slots)}
+                 "logos": not (fps and "fps" in slots) and not (media and not game and "media_left" in slots),
+                 # themes with one media place: it shows the media whenever it would appear anywhere
+                 "media_any": media and (not game or self.media_in_game)}
+        state["no_media_any"] = not state["media_any"]
         state["no_media_in_game"] = not state["media_in_game"]
         return all(state.get(c, True) for c in conds)
 
@@ -632,6 +643,8 @@ class Renderer:
         if self.weather_cfg.get("condition", True) and info.get("condition"):
             key = "w_clear_night" if info["condition"] == "clear" and not info.get("day", True) else f"w_{info['condition']}"
             parts.append(self.words.get(key, ""))
+            if info.get("rain_at") is not None:   # rain coming in the next 2 hours
+                parts[-1] += self.words.get("w_rain_at", " · rain at {h}").format(h=info["rain_at"])
         text = " ".join(p for p in parts if p)
         return f" · {text}" if text else ""
 

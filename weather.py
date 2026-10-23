@@ -10,7 +10,10 @@ import urllib.request
 
 GEO = "https://geocoding-api.open-meteo.com/v1/search?count=1&format=json&name={city}&language={lang}"
 NOW = ("https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
-       "&current=temperature_2m,weather_code,is_day&temperature_unit={unit}&timezone=auto")
+       "&current=temperature_2m,weather_code,is_day&hourly=precipitation_probability&forecast_hours=4"
+       "&temperature_unit={unit}&timezone=auto")
+RAIN_CHANCE = 60      # % chance in one of the next 2 hours = "rain at 15h" next to the weather
+WET = {"drizzle", "rain", "showers", "snow", "storm"}
 EVERY = 20 * 60
 RETRY = 3 * 60
 
@@ -88,8 +91,10 @@ class Weather:
                 self._say(f"Weather: {self.place['name']} ({self.place.get('country') or ''})")
             data = _ok(self._fetch(NOW.format(lat=self.place["lat"], lon=self.place["lon"], unit=self.unit)))
             cur = data.get("current") or {}
+            cond = condition(cur.get("weather_code"))
             self.now = {"temp": float(cur["temperature_2m"]), "code": cur.get("weather_code"),
-                        "condition": condition(cur.get("weather_code")), "day": bool(cur.get("is_day", 1)),
+                        "condition": cond, "day": bool(cur.get("is_day", 1)),
+                        "rain_at": None if cond in WET else rain_soon(data.get("hourly"), cur.get("time")),
                         "at": time.time()}
             self.error = None
             return True
@@ -102,6 +107,20 @@ class Weather:
         if self.now and time.time() - self.now["at"] < 2 * 3600:
             return self.now
         return None
+
+
+def rain_soon(hourly, now):
+    """Hour (0-23) of the first of the next 2 hours with a good chance of rain, or None."""
+    try:
+        times, chance = hourly["time"], hourly["precipitation_probability"]
+        cur = str(now or "")[:13]                    # "2026-10-23T19"
+        after = [(t, p) for t, p in zip(times, chance) if str(t)[:13] > cur][:2]
+        for t, p in after:
+            if p is not None and float(p) >= RAIN_CHANCE:
+                return int(str(t)[11:13])
+    except (KeyError, TypeError, ValueError):
+        pass
+    return None
 
 
 def _ok(data):
@@ -118,7 +137,8 @@ class DemoWeather:
 
     def __init__(self, unit="celsius"):
         f = str(unit).lower().startswith("f")
-        self.now = {"temp": 75.0 if f else 24.0, "code": 2, "condition": "partly", "day": True, "at": time.time()}
+        self.now = {"temp": 75.0 if f else 24.0, "code": 2, "condition": "partly", "day": True, "rain_at": None,
+                    "at": time.time()}
 
     def key(self):
         return ("demo",)
