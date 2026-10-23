@@ -13,11 +13,15 @@ display:
   night_brightness: 15
   night_start: "22:00"
   night_end: "07:00"
+  off_enabled: false           # screen off during these hours
+  off_start: "02:00"
+  off_end: "07:00"
 
 ui:
   theme: auto                  # auto (follows Windows) | light | dark | preset:<name> | custom:<name>
   language: auto               # auto (follows Windows) | pt | en | es | zh
   wizard_done: false           # the first-run assistant was finished
+  reflow: true                 # layout editor: neighbour blocks follow when one is deleted or resized
 
 tray:
   temp_icon: none              # none | cpu | gpu  (temperature drawn in the tray icon)
@@ -85,6 +89,8 @@ performance:                   # the presets in Settings change these together w
 
 updates:
   check: true                  # look for a new Tela! on GitHub (at start and every 6 hours)
+  test: false                  # also offer test versions (GitHub pre-releases)
+  skip: ""                     # a version not to offer (set when going back to an older one)
 
 intervals:                     # slower items (seconds); they show the average of the period
   net_down: 3

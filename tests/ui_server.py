@@ -33,7 +33,15 @@ class FakeUpdater:
         self.state = "available" if self.version else "idle"
         return self.snapshot()
 
-    def install(self, quit_app):
+    def releases(self):
+        out = [{"version": v, "date": d, "test": t, "url": "", "size": 0, "sha256": None, "page": ""}
+               for v, d, t in (("1.4.2", "2026-10-23", False), ("1.4.1", "2026-10-23", False))]
+        if self.version:
+            out.insert(0, {"version": self.version, "date": "2026-10-30", "test": True, "url": "", "size": 0,
+                           "sha256": None, "page": ""})
+        return out
+
+    def install(self, quit_app, info=None):
         import threading
 
         def run():

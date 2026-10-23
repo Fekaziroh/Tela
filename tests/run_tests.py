@@ -896,6 +896,64 @@ def other_screen_models_are_recognized():
     assert display.other_screen(P("USB35INCHIPSV2", 0x1A86, 0x5722)) is None
 
 
+@test
+def turned_off_item_frees_its_place_for_the_logos():
+    lay = layout.load("landscape", user=False)
+    top = next(g for g in lay["groups"] if g["id"] == "top")
+    logos = next(i for i in top["items"] if i["type"] == "image")
+    left_media = next(i for i in top["items"] if i["type"] == "media" and "media_in_game" not in i["when"])
+    cfg = default_cfg()
+    col = FakeCollector(game=False, media=True)
+    r = render.Renderer(dict(cfg, widgets=layout.flatten([top])), 480, 320, base=ROOT)
+    w_logos = next(w for w in r.widgets if w["type"] == "image")
+    assert not r._visible(w_logos, col)                      # music playing: it sits where the logos go
+    left_media["enabled"] = False
+    r = render.Renderer(dict(cfg, widgets=layout.flatten([top])), 480, 320, base=ROOT)
+    w_logos = next(w for w in r.widgets if w["type"] == "image")
+    assert r._visible(w_logos, col), "with the media item off, the logos must fill its place"
+    assert logos is not None
+
+
+@test
+def updater_test_channel_and_skip():
+    import updater
+    rel = lambda v, pre=False: {"tag_name": "v" + v, "prerelease": pre,
+                                "assets": [{"name": "Tela-Setup.exe", "browser_download_url": v, "size": 1}]}
+    data = [rel("1.4.4", True), rel("1.4.3"), rel("1.4.2")]
+    assert updater.pick_update(data, "1.4.2")["version"] == "1.4.3"                 # stable only
+    assert updater.pick_update(data, "1.4.2", test=True)["version"] == "1.4.4"      # test versions too
+    assert updater.pick_update(data, "1.4.2", test=True, skip="1.4.4")["version"] == "1.4.3"
+    assert updater.pick_update(data, "1.4.4", test=True) is None
+    assert updater.release_info(rel("1.4.4", True), test=True)["test"] is True
+
+
+@test
+def exe_version_resource_matches_the_version():
+    sys.path.insert(0, str(ROOT / "installer"))
+    import version_info
+    from engine import VERSION
+    txt = version_info.text()
+    assert f"'ProductVersion', '{VERSION}'" in txt and "'ProductName', 'Tela!'" in txt
+    assert "filevers=(" + ", ".join(VERSION.split(".")) + ", 0)" in txt
+
+
+@test
+def elements_rotate_measure_and_change_font():
+    cfg = default_cfg()
+    txt = {"type": "text", "text": "TELA", "x": 200, "y": 100, "size": 20, "bold": True}
+    r = render.Renderer(dict(cfg, widgets=[]), 480, 320, ss=1, base=ROOT)
+    col = FakeCollector()
+    flat = r.item_box(txt, col)
+    assert flat and flat[2] > flat[3], flat                                   # wide text
+    tall = r.item_box(dict(txt, rotate=90), col)
+    assert tall and tall[3] > tall[2], tall                                   # turned: now tall
+    assert abs((tall[0] + tall[2] / 2) - (flat[0] + flat[2] / 2)) < 3          # around its own center
+    assert r.item_box(dict(txt, font="consolas"), col)                        # unknown on Linux: falls back
+    g = {"type": "gauge", "sensor": "cpu_temp", "cx": 100, "cy": 100, "radius": 40, "rotate": 45, "min": 0, "max": 100}
+    img = render.Renderer(dict(cfg, widgets=[g, txt]), 480, 320, base=ROOT).draw(col)
+    assert img.size == (480, 320)
+
+
 def main():
     failed = 0
     t0 = time.monotonic()

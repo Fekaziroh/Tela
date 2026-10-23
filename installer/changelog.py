@@ -3,6 +3,7 @@
     python installer/changelog.py --markdown        rewrites CHANGELOG.md
     python installer/changelog.py --notes 1.4.1     prints the GitHub release notes of a version
     python installer/changelog.py --ready 1.4.1     exit code 0 when that version can be released (not a draft)
+    python installer/changelog.py --channel 1.4.1   prints draft | test | stable
 """
 import argparse
 import json
@@ -61,7 +62,12 @@ if __name__ == "__main__":
     ap.add_argument("--markdown", action="store_true")
     ap.add_argument("--notes")
     ap.add_argument("--ready")
+    ap.add_argument("--channel")
     a = ap.parse_args()
+    if a.channel:
+        e = next((x for x in load() if x["v"] == a.channel), None)
+        print("draft" if not e or e.get("draft") else "test" if e.get("beta") else "stable")
+        sys.exit(0)
     if a.ready:
         e = next((x for x in load() if x["v"] == a.ready), None)
         sys.exit(0 if e and not e.get("draft") else 1)

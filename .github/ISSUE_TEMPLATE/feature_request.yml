@@ -1,0 +1,11 @@
+name: Idea or suggestion
+description: Something you would like Tela! to do
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: What you would like and how it would help you. A sketch or a picture of the screen helps.
+    validations:
+      required: true

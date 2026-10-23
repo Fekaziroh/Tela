@@ -21,7 +21,7 @@ from engine import HERE, VERSION, system_language
 from render import DEFAULT_COLORS, Renderer
 
 NOT_FOR_INTERVALS = {"fps", "volume"}
-UI_ONLY = {("ui", "theme"), ("tray", "temp_icon")}
+UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow")}
 
 
 def _png_data_url(img):
@@ -106,11 +106,44 @@ class Api:
         up = getattr(self._app, "updater", None)
         return up.check() if up else None
 
+    def open_url(self, url):
+        """Opens one of the project's own pages in the browser (nothing else)."""
+        import webbrowser
+        if str(url).startswith("https://github.com/Fekaziroh/Tela"):
+            webbrowser.open(url)
+            return True
+        return False
+
     def open_release_page(self):
         import webbrowser
         from updater import PAGE
         up = getattr(self._app, "updater", None)
         webbrowser.open((up.info or {}).get("page", PAGE) if up else PAGE)
+        return True
+
+    def update_releases(self):
+        up = getattr(self._app, "updater", None)
+        try:
+            return {"releases": up.releases() if up else [], "current": VERSION,
+                    "skip": (self._cfg().get("updates") or {}).get("skip") or ""}
+        except Exception as e:  # noqa: BLE001
+            return {"error": f"{type(e).__name__}: {e}"}
+
+    def update_install_version(self, version, skip_current=True):
+        """Installs a chosen release (usually an older one); optionally stops offering the current version."""
+        up = getattr(self._app, "updater", None)
+        if not up:
+            return False
+        info = next((r for r in up.releases() if r["version"] == version), None)
+        if not info:
+            return False
+        if skip_current:
+            self.set("updates", "skip", VERSION)
+        self._engine.log(f"Going to version {version}")
+        return up.install(lambda: threading.Thread(target=self._app.quit, daemon=True).start(), info)
+
+    def update_unskip(self):
+        self.set("updates", "skip", "")
         return True
 
     def update_install(self):
@@ -539,6 +572,35 @@ class Api:
         layout.save(fam, {"size": lay.get("size"), "sensors": lay.get("sensors"), "groups": groups})
         self._engine.command("reload")
         return True
+
+    def layout_boxes(self, groups):
+        """Where each element of each block lands on the screen: {block id: [[x, y, w, h] | None, ...]}.
+        Measured by drawing every element alone, so texts and values get their real size."""
+        import layout
+        from render import Renderer
+        e = self._engine
+        r0 = getattr(e, "renderer", None)
+        cfg = dict(e.cfg, widgets=[])
+        W, H = (r0.W, r0.H) if r0 else (480, 320)
+        r = Renderer(cfg, W, H, ss=1, base=config.DATA, fields=getattr(r0, "fields", None), lang=e.lang,
+                     cache_static=False, logo_dirs=getattr(r0, "logo_dirs", None))
+        col = e.collector
+        out = {}
+        for g in groups or []:
+            boxes = []
+            for it in g.get("items") or []:
+                w = layout.flatten([dict(g, enabled=True, items=[dict(it, enabled=True)])])
+                box = r.item_box(w[0], col) if w else None
+                if box is None and w:   # draws nothing right now (e.g. media with nothing playing): its frame
+                    f = w[0]
+                    if "w" in f and "h" in f:
+                        box = [f["x"], f["y"], f["w"], f["h"]]
+                    else:
+                        x, y = f.get("x", f.get("cx", 0)), f.get("y", f.get("cy", 0))
+                        box = [x - 12, y - 8, 24, 16]
+                boxes.append(box)
+            out[g["id"]] = boxes
+        return out
 
     def layout_reset(self):
         import layout

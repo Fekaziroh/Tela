@@ -1,0 +1,38 @@
+name: Bug report
+description: Something in Tela! does not work as it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report it. Tela! is an independent project: problems with the screen
+        itself or with the app that came with it go to the store where you bought the screen.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Tela! version
+      description: Shown next to the name in the window (for example 1.4.3).
+    validations:
+      required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows
+      options: [Windows 11, Windows 10, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: In Tela!, open Advanced › Create diagnostics › Copy, and paste it here.
+      render: text
+    validations:
+      required: true

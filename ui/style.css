@@ -310,3 +310,43 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .paused .btn{justify-self:center}
 @media (max-width:760px){.presets{grid-template-columns:1fr}}
 .cl h5{margin:10px 0 4px;font:600 11px var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+.int-group{border-radius:8px;background:var(--panel2);padding:2px 10px}
+.int-group+.int-group{margin-top:6px}
+.int-group summary{cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 0;list-style:none}
+.int-group summary::-webkit-details-marker{display:none}
+.int-group summary::before{content:"›";color:var(--muted);transition:transform .15s;display:inline-block;width:10px}
+.int-group[open] summary::before{transform:rotate(90deg)}
+.int-group summary small{color:var(--muted);margin-left:auto;font-size:12px}
+.int-group .row{background:none;padding:4px 0 4px 18px}
+.int-more{margin-top:8px}
+
+.hours{gap:8px}
+.time24{width:64px;text-align:center;font:500 13px var(--f-mono)}
+#night-sub .range-row{margin-top:10px}
+.cl-wrap{gap:0}
+.cl{padding:16px 0}
+.cl+.cl{border-top:1px solid var(--line)}
+.cl:first-child{padding-top:2px}
+.rel-list{display:grid;gap:6px;max-height:46vh;overflow:auto}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--muted)}
+#upd-skip a{color:var(--accent)}
+.about p{margin:0 0 8px}
+
+.ibox{position:absolute;border:1px solid rgba(120,190,255,.55);border-radius:2px;cursor:move;z-index:3;background:rgba(120,190,255,.06)}
+.ibox:hover{border-color:rgba(120,190,255,.95)}
+.ibox.sel{border:2px solid #7cc4ff;background:rgba(120,190,255,.12)}
+.ibox .handle{display:none;width:9px;height:9px;right:-6px;bottom:-6px;background:#7cc4ff}
+.ibox.sel .handle{display:block}
+.box.sel{box-shadow:0 0 0 9999px rgba(0,0,0,.28)}
+.stage.drop{outline:2px dashed #7cc4ff;outline-offset:4px}
+.palette{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.chip-el{all:unset;cursor:grab;padding:5px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px}
+.chip-el:hover{border-color:var(--accent)}
+.chip-el:active{cursor:grabbing}
+.item-ed.on{outline:1px solid #7cc4ff}
+.rot{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rot .btn{padding:4px 9px;font-size:12px}
+.rot .num{width:62px}
+.chip-el.ghost{position:fixed;z-index:99;pointer-events:none;background:var(--accent);color:var(--win);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.chip-el{touch-action:none}

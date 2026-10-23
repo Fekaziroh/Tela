@@ -16,6 +16,7 @@ from pathlib import Path
 
 REPO = "Fekaziroh/Tela"
 LATEST = f"https://api.github.com/repos/{REPO}/releases/latest"
+RELEASES = f"https://api.github.com/repos/{REPO}/releases?per_page=30"
 PAGE = f"https://github.com/{REPO}/releases/latest"
 EVERY = 6 * 3600      # seconds between automatic checks
 FIRST = 90            # first check after the start (the PC is busy right after logon)
@@ -41,9 +42,9 @@ def pick_asset(assets):
     return next((a for a in exes if a["name"].lower().startswith("tela-setup")), None)
 
 
-def release_info(data):
-    """The fields Tela! needs from a GitHub 'release' object."""
-    if not data or data.get("draft") or data.get("prerelease"):
+def release_info(data, test=False):
+    """The fields Tela! needs from a GitHub 'release' object (test versions only when asked for)."""
+    if not data or data.get("draft") or (data.get("prerelease") and not test):
         return None
     version = str(data.get("tag_name") or "").lstrip("vV")
     asset = pick_asset(data.get("assets"))
@@ -52,7 +53,20 @@ def release_info(data):
     digest = str(asset.get("digest") or "")
     return {"version": version, "url": asset.get("browser_download_url"), "size": int(asset.get("size") or 0),
             "sha256": digest.split(":", 1)[1].lower() if digest.startswith("sha256:") else None,
-            "page": data.get("html_url") or PAGE}
+            "page": data.get("html_url") or PAGE, "test": bool(data.get("prerelease")),
+            "date": str(data.get("published_at") or "")[:10]}
+
+
+def pick_update(releases, current, test=False, skip=None):
+    """Newest release above the installed version, ignoring the one the user chose to skip."""
+    best = None
+    for data in releases or []:
+        info = release_info(data, test)
+        if not info or info["version"] == skip or not newer(info["version"], current):
+            continue
+        if best is None or newer(info["version"], best["version"]):
+            best = info
+    return best
 
 
 def _get(url, timeout=20):
@@ -63,10 +77,11 @@ def _get(url, timeout=20):
 class Updater:
     """state: idle | checking | available | downloading | installing | error"""
 
-    def __init__(self, version, log=None, enabled=lambda: True):
+    def __init__(self, version, log=None, enabled=lambda: True, options=lambda: {}):
         self.version = version
         self.log = log
         self.enabled = enabled
+        self.options = options     # {"test": receive test versions, "skip": a version not to offer}
         self.state = "idle"
         self.info = None
         self.progress = 0.0
@@ -104,10 +119,15 @@ class Updater:
                 return self.snapshot()
             self.state, self.error = "checking", None
         try:
-            with _get(LATEST) as r:
-                info = release_info(json.loads(r.read().decode("utf-8")))
+            opts = self.options() or {}
+            if opts.get("test"):
+                with _get(RELEASES) as r:
+                    info = pick_update(json.loads(r.read().decode("utf-8")), self.version, True, opts.get("skip"))
+            else:
+                with _get(LATEST) as r:
+                    info = pick_update([json.loads(r.read().decode("utf-8"))], self.version, False, opts.get("skip"))
             self.checked_at = time.time()
-            if info and newer(info["version"], self.version):
+            if info:
                 if (self.info or {}).get("version") != info["version"]:
                     self._say(f"New version available: {info['version']}")
                 self.info, self.state = info, "available"
@@ -118,13 +138,26 @@ class Updater:
             self.error = f"{type(e).__name__}: {e}"
         return self.snapshot()
 
-    def install(self, quit_app):
-        """Downloads the setup in the background, then runs it silently and closes Tela!."""
+    def releases(self):
+        """Every published version with a setup (newest first), for going back to an older one."""
+        with _get(RELEASES) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        out = [i for i in (release_info(d, True) for d in data) if i]
+        out.sort(key=lambda i: parse_version(i["version"]), reverse=True)
+        return out
+
+    def install(self, quit_app, info=None):
+        """Downloads the setup in the background, then runs it silently and closes Tela!.
+        info = a specific release (going back to an older version); default = the available update."""
         with self._lock:
-            if self.state != "available" or not self.info:
+            if self.state in ("checking", "downloading", "installing"):
                 return False
+            info = info or (self.info if self.state == "available" else None)
+            if not info:
+                return False
+            self.info = info
             self.state, self.progress, self.error = "downloading", 0.0, None
-        threading.Thread(target=self._install, args=(dict(self.info), quit_app), daemon=True, name="update").start()
+        threading.Thread(target=self._install, args=(dict(info), quit_app), daemon=True, name="update").start()
         return True
 
     def _install(self, info, quit_app):
@@ -141,7 +174,7 @@ class Updater:
             time.sleep(1.5)
             quit_app()
         except Exception as e:  # noqa: BLE001
-            self.state, self.error = "available", f"{type(e).__name__}: {e}"
+            self.state, self.error = ("available" if newer(info["version"], self.version) else "idle"), f"{type(e).__name__}: {e}"
             self._say(f"The update failed: {self.error}")
 
     def _download(self, info, path):

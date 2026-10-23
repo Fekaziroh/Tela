@@ -55,9 +55,10 @@ async function setSetting(path, value, quiet) {
     if (!quiet) toast(t("toast.saved"));
   } catch (e) { toast(String(e)); }
   if (path === "ui.theme") applyTheme();
+  if (path === "updates.test" && value) setTimeout(() => checkUpdate(true), 1500);
   if (path === "display.orientation") { E.lay = null; setTimeout(() => { if (S.tab === "layout") edLoad(); }, 900); }
   if (path === "ui.language") { S.lang = effectiveLang(); applyTexts(); }
-  if (path.startsWith("display.night") || path.startsWith("history.")) renderNight();
+  if (path.startsWith("display.night") || path.startsWith("display.off_") || path.startsWith("history.")) renderNight();
   syncControls();
   refreshPreset();
 }
@@ -115,6 +116,14 @@ function bindControls() {
         if (!isFinite(v)) { syncControls(); return; }
         if (el.min !== "") v = Math.max(Number(el.min), v);
         if (el.max !== "") v = Math.min(Number(el.max), v);
+        el.value = v;
+        setSetting(path, v);
+      });
+    } else if (el.classList.contains("time24")) {
+      el.addEventListener("change", () => {
+        const m = el.value.trim().replace(/[.h]/, ":").match(/^(\d{1,2})(?::?(\d{2}))?$/);
+        if (!m || +m[1] > 23 || +(m[2] || 0) > 59) { syncControls(); toast(t("set.bad_time")); return; }
+        const v = `${m[1].padStart(2, "0")}:${(m[2] || "00")}`;
         el.value = v;
         setSetting(path, v);
       });
@@ -267,20 +276,46 @@ function renderScreenThemes() {
     box.appendChild(b);
   }
 }
+const INTERVAL_GROUPS = [["cpu", /^cpu/], ["gpu", /^(gpu|vram)/], ["ram", /^ram/], ["disks", /^(disk|ssd)/], ["net", /^net/], ["app", /^app/]];
+function intervalGroup(name) { const g = INTERVAL_GROUPS.find(([, re]) => re.test(name)); return g ? g[0] : "other"; }
 function renderIntervals() {
   const box = $("#intervals");
   if (!box || !S.init) return;
   const base = Number(S.settings.interval || 1);
   const cur = S.settings.intervals || {};
+  const all = !!S.intervalsAll;
   box.innerHTML = "";
-  for (const name of S.init.sensors) {
-    const row = document.createElement("div");
-    row.className = "row";
-    row.innerHTML = `<span>${t("sensor." + name)}</span><span class="inline"><input class="num" type="number" min="0.5" max="120" step="0.5" value="${Math.max(Number(cur[name] || base), base)}"><span>${t("s")}</span></span>`;
-    $("input", row).addEventListener("change", saveIntervals);
-    row.dataset.name = name;
-    box.appendChild(row);
+  const groups = {};
+  for (const name of S.init.sensors) (groups[intervalGroup(name)] = groups[intervalGroup(name)] || []).push(name);
+  let changed = 0;
+  for (const key of [...INTERVAL_GROUPS.map(g => g[0]), "other"]) {
+    const names = groups[key];
+    if (!names) continue;
+    const diff = names.filter(n => Number(cur[n] || base) > base).length;
+    changed += diff;
+    const det = document.createElement("details");
+    det.className = "int-group";
+    det.open = all ? diff > 0 : true;
+    det.hidden = !all && !diff;
+    det.innerHTML = `<summary><b>${t("int.g_" + key)}</b><small>${diff ? t("int.changed", { n: diff }) : t("int.count", { n: names.length })}</small></summary>`;
+    for (const name of names) {
+      const v = Math.max(Number(cur[name] || base), base);
+      const row = document.createElement("div");
+      row.className = "row";
+      row.hidden = !all && !(v > base);
+      row.innerHTML = `<span>${t("sensor." + name)}</span><span class="inline"><input class="num" type="number" min="0.5" max="120" step="0.5" value="${v}"><span>${t("s")}</span></span>`;
+      $("input", row).addEventListener("change", saveIntervals);
+      row.dataset.name = name;
+      det.appendChild(row);
+    }
+    box.appendChild(det);
   }
+  const more = document.createElement("button");
+  more.className = "btn int-more";
+  more.textContent = all ? t("int.less") : t("int.all", { n: S.init.sensors.length });
+  more.addEventListener("click", () => { S.intervalsAll = !all; renderIntervals(); });
+  if (!all && !changed) { const p = document.createElement("p"); p.className = "hint"; p.textContent = t("int.none"); box.appendChild(p); }
+  box.appendChild(more);
 }
 async function saveIntervals() {
   const base = Number(S.settings.interval || 1);
@@ -295,6 +330,7 @@ function renderNight() {
   const hs = $("#hist-sub");
   if (hs) hs.classList.toggle("off", (S.settings.history || {}).save === false);
   $("#night-sub").classList.toggle("off", !d.night_enabled);
+  $("#off-sub").classList.toggle("off", !d.off_enabled);
   $("#night-desc").textContent = t("home.night_desc", { b: d.night_brightness ?? 15, a: d.night_start || "22:00", z: d.night_end || "07:00" });
 }
 function renderDisks() {
@@ -359,7 +395,7 @@ function screenState(st) {
   if (st.paused) return ["warn", t("st.paused")];
   if (st.sleeping && st.sleeping.length) {
     const r = st.sleeping[0];
-    return ["warn", t(r === "lock" ? "st.off_lock" : r === "monitor" ? "st.off_monitor" : "st.off_suspend")];
+    return ["warn", t(r === "lock" ? "st.off_lock" : r === "monitor" ? "st.off_monitor" : r === "schedule" ? "st.off_schedule" : "st.off_suspend")];
   }
   if (st.connected) return ["ok", t("st.connected", { port: st.port || "" })];
   const e = st.screen_error || "";
@@ -604,6 +640,8 @@ async function start() {
   renderHistoryFolder();
   bindUpdate();
   bindPresets();
+  $("#about-ver").textContent = S.init.version;
+  $$("[data-url]").forEach(b => b.addEventListener("click", () => api.open_url(b.dataset.url)));
   if (wizNeeded()) setTimeout(wizStart, 800);
   else if (S.init.updated_from) setTimeout(() => { showWhatsNew(S.init.updated_from); api.news_seen(); }, 600);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "advanced") pollUsage(); });

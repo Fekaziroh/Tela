@@ -14,6 +14,10 @@ function renderUpdate(u) {
   b.title = on ? t("upd.tip_on", { v: u.version }) : busy ? updText(u) : t("upd.tip_off");
   $("#version").textContent = busy && u.state === "downloading" ? `${Math.round(u.progress * 100)}%` : S.init.version;
   $("#upd-status").textContent = updText(u);
+  const skip = (S.settings.updates || {}).skip;
+  const sk = $("#upd-skip");
+  sk.hidden = !skip;
+  if (skip) { sk.innerHTML = `${esc(t("upd.skipping", { v: skip }))} <a href="#" id="upd-unskip">${t("upd.unskip")}</a>`; $("#upd-unskip").onclick = async e => { e.preventDefault(); await api.update_unskip(); S.settings.updates.skip = ""; renderUpdate(U.last); checkUpdate(true); }; }
   const bar = $("#upd-dl i");
   if (bar) bar.style.width = `${Math.round((u.progress || 0) * 100)}%`;
   const msg = $("#upd-dl-msg");
@@ -54,14 +58,19 @@ async function startUpdate() {
   U.tried = true;
   const ok = await api.update_install();
   if (!ok) { closeModal(); toast(t("upd.offline")); return; }
+  startWatch(U.last.version);
+}
+
+function startWatch(version) {
   const body = document.createElement("div");
   body.innerHTML = `<p id="upd-dl-msg" class="hint">${t("upd.downloading", { p: 0 })}</p><div class="upd-bar" id="upd-dl"><i></i></div>`;
-  openModal({ title: t("upd.ask_title", { v: U.last.version }), body, buttons: [] });
+  openModal({ title: t("upd.ask_title", { v: version }), body, buttons: [] });
   const watch = async () => {
     let u;
     try { u = (await api.state(S.frameNo)).update; } catch (e) { return; }   // Tela! is closing for the setup
+    if (!u) { setTimeout(watch, 400); return; }
     renderUpdate(u);
-    if (u.state === "available" && u.error) {
+    if (u.error && u.state !== "downloading" && u.state !== "installing") {
       openModal({ title: t("upd.title"), body: `<p>${esc(t("upd.failed", { e: u.error }))}</p>`, buttons: [
         { label: t("upd.page"), onClick: () => { api.open_release_page(); return false; } },
         { label: t("modal.close"), primary: true }] });
@@ -79,5 +88,34 @@ function bindUpdate() {
     else if (u.state !== "downloading" && u.state !== "installing") checkUpdate(false);
   });
   $("#upd-check").addEventListener("click", () => checkUpdate(false));
+  $("#upd-back").addEventListener("click", showReleases);
   $("#cl-btn").addEventListener("click", showChangelog);
+}
+
+async function showReleases() {
+  const body = document.createElement("div");
+  body.innerHTML = `<p class="hint">${t("upd.loading")}</p>`;
+  openModal({ title: t("upd.back_title"), desc: t("upd.back_desc"), body, buttons: [{ label: t("modal.close"), primary: true }] });
+  const r = await api.update_releases();
+  if (!r || r.error) { body.innerHTML = `<p class="hint">${t("upd.offline")}</p>`; return; }
+  body.innerHTML = `<div class="rel-list"></div><label class="chk"><input type="checkbox" id="rel-skip" checked> ${esc(t("upd.skip_this", { v: r.current }))}</label>`;
+  const list = $(".rel-list", body);
+  for (const rel of r.releases) {
+    const row = document.createElement("div");
+    row.className = "prof";
+    const cur = rel.version === r.current;
+    row.innerHTML = `<b>Tela! ${esc(rel.version)}</b><small>${esc(rel.date || "")}${rel.test ? " · " + t("upd.test_tag") : ""}${cur ? " · " + t("upd.installed") : ""}</small>`;
+    if (!cur) {
+      const b = document.createElement("button");
+      b.className = "btn"; b.textContent = t("upd.install_this");
+      b.addEventListener("click", async () => {
+        const ok = await api.update_install_version(rel.version, $("#rel-skip").checked);
+        if (!ok) { toast(t("upd.offline")); return; }
+        U.tried = true; U.last = { ...(U.last || {}), version: rel.version, state: "downloading", progress: 0 };
+        startWatch(rel.version);
+      });
+      row.appendChild(b);
+    }
+    list.appendChild(row);
+  }
 }

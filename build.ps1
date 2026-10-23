@@ -10,8 +10,9 @@ Py -m pip install --upgrade --quiet --disable-pip-version-check pyinstaller -r r
 Py tests/run_tests.py
 & ./installer/fetch_components.ps1 -Out build\components
 Py -c "from icon import save_ico; save_ico(r'build\tela.ico')"
+Py installer/version_info.py build\version_info.txt
 Py -m PyInstaller --noconfirm --clean --onedir --windowed --uac-admin --log-level ERROR --name Tela `
-  --icon "$PWD\build\tela.ico" --distpath build\dist --workpath build\work --specpath build `
+  --icon "$PWD\build\tela.ico" --version-file "$PWD\build\version_info.txt" --distpath build\dist --workpath build\work --specpath build `
   --hidden-import pystray._win32 --hidden-import webview.platforms.edgechromium --hidden-import webview.platforms.winforms `
   --collect-all pythonnet --collect-all clr_loader --collect-all winrt --collect-data webview app.py
 $version = (& $pyExe @pyArgs -c "import engine; print(engine.VERSION)").Trim()

@@ -74,6 +74,12 @@
               <div class="add-wrap"><button class="btn" id="ed-add" data-i18n="ed.add"></button><div class="add-menu" id="ed-add-menu" hidden></div></div></div>
             <div class="blocks" id="ed-blocks"></div>
           </div>
+          <div class="card">
+            <h3 data-i18n="ed.palette"></h3>
+            <p class="hint" style="margin:0" data-i18n="ed.drag_hint"></p>
+            <div class="palette" id="ed-palette"></div>
+            <div class="row"><span class="lbl"><span data-i18n="ed.reflow"></span><small data-i18n="ed.reflow_hint"></small></span><button class="sw" role="switch" data-set="ui.reflow" data-label="ed.reflow"></button></div>
+          </div>
           <div class="card" id="ed-block" hidden>
             <div class="row"><h3 data-i18n="ed.selected"></h3><button class="btn danger" id="ed-del" data-i18n="ed.delete"></button></div>
             <div class="field"><label for="ed-name" data-i18n="ed.name"></label><input class="txt" id="ed-name"></div>
@@ -92,16 +98,6 @@
 
     <!-- APPEARANCE -->
     <section data-panel="look" hidden style="display:grid;gap:16px">
-      <div class="card">
-        <div class="row"><h3 data-i18n="theme.title"></h3><button class="btn" id="theme-new" data-i18n="theme.customize"></button></div>
-        <div class="themes" id="themes"></div>
-        <div class="theme-editor" id="theme-editor" hidden>
-          <div class="colors" id="theme-colors"></div>
-          <div class="search"><input class="txt" id="theme-name" data-placeholder="theme.name_ph" maxlength="30">
-            <button class="btn pri" id="theme-save" data-i18n="theme.save"></button><button class="btn" id="theme-cancel" data-i18n="modal.cancel"></button>
-            <button class="btn danger" id="theme-delete" data-i18n="theme.delete"></button></div>
-        </div>
-      </div>
       <div class="card">
         <div class="row"><h3 data-i18n="look.colors"></h3><button class="btn" id="reset-colors" data-i18n="look.reset"></button></div>
         <div class="themes" id="screen-themes"></div>
@@ -124,6 +120,16 @@
         <div class="row"><span class="lbl" data-i18n="look.logos_every"></span><span class="inline"><input class="num" type="number" min="3" max="600" step="1" data-set="logos.switch_every"><span data-i18n="s"></span></span></div>
         <div class="search"><input class="txt" id="logo-search" type="search"><button class="btn" id="add-logos" data-i18n="look.add"></button><button class="btn" id="logos-folder" data-i18n="look.folder"></button></div>
         <div class="logos" id="logos"></div>
+      </div>
+      <div class="card">
+        <div class="row"><h3 data-i18n="theme.title"></h3><button class="btn" id="theme-new" data-i18n="theme.customize"></button></div>
+        <div class="themes" id="themes"></div>
+        <div class="theme-editor" id="theme-editor" hidden>
+          <div class="colors" id="theme-colors"></div>
+          <div class="search"><input class="txt" id="theme-name" data-placeholder="theme.name_ph" maxlength="30">
+            <button class="btn pri" id="theme-save" data-i18n="theme.save"></button><button class="btn" id="theme-cancel" data-i18n="modal.cancel"></button>
+            <button class="btn danger" id="theme-delete" data-i18n="theme.delete"></button></div>
+        </div>
       </div>
     </section>
 
@@ -153,8 +159,13 @@
         <div class="card"><h3 data-i18n="set.night"></h3>
           <div class="row"><span class="lbl" data-i18n="set.night_on"></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="set.night_on"></button></div>
           <div class="sub" id="night-sub">
+            <div class="inline hours"><span data-i18n="set.from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="22:00" data-set="display.night_start"><span data-i18n="set.to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="display.night_end"></div>
             <div class="range-row"><span class="val" id="night-b-v"></span><input type="range" id="night-b" min="0" max="100" step="1" data-set="display.night_brightness" data-label="set.night_level"></div>
-            <div class="inline"><span data-i18n="set.from"></span><input type="time" data-set="display.night_start"><span data-i18n="set.to"></span><input type="time" data-set="display.night_end"></div>
+          </div>
+          <hr class="sep">
+          <div class="row"><span class="lbl"><span data-i18n="set.off_on"></span><small data-i18n="set.off_hint"></small></span><button class="sw" role="switch" data-set="display.off_enabled" data-label="set.off_on"></button></div>
+          <div class="sub" id="off-sub">
+            <div class="inline hours"><span data-i18n="set.from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="02:00" data-set="display.off_start"><span data-i18n="set.to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="display.off_end"></div>
           </div>
         </div>
 
@@ -235,8 +246,16 @@
         </div>
         <div class="card"><h3 data-i18n="upd.title"></h3>
           <div class="row"><span class="lbl"><span data-i18n="upd.auto"></span><small data-i18n="upd.auto_hint"></small></span><button class="sw" role="switch" data-set="updates.check" data-label="upd.auto"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="upd.test"></span><small data-i18n="upd.test_hint"></small></span><button class="sw" role="switch" data-set="updates.test" data-label="upd.test"></button></div>
           <p class="hint" id="upd-status"></p>
-          <div class="btns"><button class="btn" id="upd-check" data-i18n="upd.check"></button><button class="btn" id="cl-btn" data-i18n="cl.title"></button></div>
+          <p class="hint" id="upd-skip" hidden></p>
+          <div class="btns"><button class="btn" id="upd-check" data-i18n="upd.check"></button><button class="btn" id="upd-back" data-i18n="upd.back"></button><button class="btn" id="cl-btn" data-i18n="cl.title"></button></div>
+        </div>
+        <div class="card about"><h3 data-i18n="about.title"></h3>
+          <p><b>Tela!</b> <span id="about-ver"></span> · <span data-i18n="about.license"></span></p>
+          <p class="hint" data-i18n="about.independent"></p>
+          <p class="hint" data-i18n="about.credits"></p>
+          <div class="btns"><button class="btn" data-url="https://github.com/Fekaziroh/Tela" data-i18n="about.github"></button><button class="btn" data-url="https://github.com/Fekaziroh/Tela/issues" data-i18n="about.report"></button><button class="btn" data-url="https://github.com/Fekaziroh/Tela/blob/main/THIRD-PARTY-NOTICES.md" data-i18n="about.notices"></button></div>
         </div>
         <div class="card danger-card"><h3 data-i18n="adv.remove"></h3><p data-i18n="adv.remove_desc"></p><div class="btns"><button class="btn danger" id="uninstall-btn" data-i18n="adv.uninstall"></button></div></div>
       </div>

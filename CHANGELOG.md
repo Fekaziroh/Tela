@@ -2,6 +2,32 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.3
+
+### New
+
+- Element-level layout editor: with a block selected, click any element (value, gauge, text, clock, logos, FPS...) to move, resize, rotate or delete it. The top bar can be edited item by item too.
+- Elements to drag onto the screen: inside a block they join the block; outside, they become a new block.
+- Font and text size per element.
+- When a block is deleted or resized, its neighbours adjust by themselves (can be turned off).
+- Turn the screen off at set hours, like the night brightness.
+- Go back to an older version in Advanced › Updates, with an option not to be offered the version you did not like again.
+- Option to receive test versions before they go out to everyone.
+- About section in Advanced, with license, credits and project links.
+
+### Fixes
+
+- Turning off the media (or the FPS) in the top bar left an empty space; the logos now show there.
+- Top bar elements had repeated, unclear names in the editor.
+
+### Appearance and personalization
+
+- Interval per item split into groups (CPU, GPU, RAM, Disks, Network), showing first only what differs from the default.
+- Night brightness with the hours above the slider, in 24 h.
+- Tela!'s CPU and memory use on a second line when hovering the tray icon.
+- More space between versions in the patch notes.
+- In Appearance, the screen options come first and the window theme last.
+
 ## Tela! 1.4.2
 
 ### New
