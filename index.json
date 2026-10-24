@@ -1,0 +1,18 @@
+{
+ "themes": [
+  {
+   "file": "sakura.tela-theme",
+   "name": "Sakura",
+   "author": "Tela!",
+   "added": "2026-10-24",
+   "picture": "sakura.png"
+  },
+  {
+   "file": "oceano.tela-theme",
+   "name": "Oceano",
+   "author": "Tela!",
+   "added": "2026-10-24",
+   "picture": "oceano.png"
+  }
+ ]
+}
