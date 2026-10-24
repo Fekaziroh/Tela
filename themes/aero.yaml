@@ -206,3 +206,17 @@ portrait:
         - {type: value, sensor: net_down, x: 200, y: 20, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
         - {type: text, text: ↑, x: 214, y: 20, size: 12, color: secondary, bold: true}
         - {type: value, sensor: net_up, x: 298, y: 20, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: gauge, cx: 240.0, cy: 140.8, radius: 128.0, thickness: 6, start_angle: -90, end_angle: 270, size: 0, unit: '', fill: '#F4FBFF', gloss: 0.75, track_color: accent}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 134.8, size: 50, align: center, bold: true, over: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 170.8, size: 14, align: center, color: secondary, over: true}
+    - {type: panel, x: 120.0, y: 270, w: 240, h: 36, border: '#FFFFFF', opacity: 0.5, gradient: ['#FFFFFF', '#D6EEFF'], gloss: 0.55, radius: 18}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 288, size: 14, align: center, over: true}
+  portrait:
+    - {type: gauge, cx: 160.0, cy: 182.4, radius: 115.19999999999999, thickness: 6, start_angle: -90, end_angle: 270, size: 0, unit: '', fill: '#F4FBFF', gloss: 0.75, track_color: accent}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 176.4, size: 46, align: center, bold: true, over: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 212.4, size: 14, align: center, color: secondary, over: true}
+    - {type: panel, x: 40.0, y: 430, w: 240, h: 36, border: '#FFFFFF', opacity: 0.5, gradient: ['#FFFFFF', '#D6EEFF'], gloss: 0.55, radius: 18}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 448, size: 14, align: center, over: true}

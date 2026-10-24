@@ -2,6 +2,28 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.5.1
+
+### New
+
+- Reorganized window: Home, Screen, Layout, Games, Sensors and System, with search across everything at the top and a small preview always in view.
+- Compact window style: narrow, with the menu at the bottom (also in the first-run assistant).
+- Nine new themes: Kitty, Cyber, Phantom, Tech, Rustic (Freijó, Honey and Imbuia), Christmas and Halloween.
+- Every theme has its own clock screen for Rest.
+- Transitions to choose: cascade, e-ink, glitch, curtain or none.
+- Visual mode: a picture, photos, a GIF or the clock instead of the sensors.
+- Festive themes (optional): Halloween in October and Christmas in December.
+- Tray menu with Screen theme and Profile.
+- Game name on the screen, under the FPS (optional).
+
+### Fixes
+
+- Opening the window from the tray with Free window memory on no longer freezes.
+
+### Appearance and personalization
+
+- Light animations in the window, off with the Performance preset.
+
 ## Tela! 1.5.0
 
 ### New

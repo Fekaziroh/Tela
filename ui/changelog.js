@@ -7,6 +7,86 @@
 // "withdrawn": true = taken back: the workflow removes its setups (no longer offered, not even to go back to).
 const CHANGELOG = [
  {
+  "v": "1.5.1",
+  "beta": true,
+  "pt": {
+   "new": [
+    "Janela reorganizada: Início, Tela, Layout, Jogos, Sensores e Sistema, com busca em tudo no topo e uma prévia pequena sempre à vista.",
+    "Estilo compacto da janela: estreita, com o menu embaixo (também no assistente inicial).",
+    "Nove temas novos: Kitty, Cyber, Phantom, Tech, Rústico (Freijó, Mel e Imbuia), Natal e Halloween.",
+    "Cada tema tem a sua própria tela de relógio no Descanso.",
+    "Transições para escolher: cascata, e-ink, glitch, cortina ou nenhuma.",
+    "Modo Visual: imagem, fotos, GIF ou relógio no lugar dos sensores.",
+    "Temas festivos (opcional): Halloween em outubro e Natal em dezembro.",
+    "Menu da bandeja com Tema da tela e Perfil.",
+    "Nome do jogo na tela, embaixo do FPS (opcional)."
+   ],
+   "fix": [
+    "Abrir a janela pela bandeja com Liberar memória ligado não trava mais."
+   ],
+   "look": [
+    "Animações leves na janela, desligadas na predefinição Performance."
+   ]
+  },
+  "en": {
+   "new": [
+    "Reorganized window: Home, Screen, Layout, Games, Sensors and System, with search across everything at the top and a small preview always in view.",
+    "Compact window style: narrow, with the menu at the bottom (also in the first-run assistant).",
+    "Nine new themes: Kitty, Cyber, Phantom, Tech, Rustic (Freijó, Honey and Imbuia), Christmas and Halloween.",
+    "Every theme has its own clock screen for Rest.",
+    "Transitions to choose: cascade, e-ink, glitch, curtain or none.",
+    "Visual mode: a picture, photos, a GIF or the clock instead of the sensors.",
+    "Festive themes (optional): Halloween in October and Christmas in December.",
+    "Tray menu with Screen theme and Profile.",
+    "Game name on the screen, under the FPS (optional)."
+   ],
+   "fix": [
+    "Opening the window from the tray with Free window memory on no longer freezes."
+   ],
+   "look": [
+    "Light animations in the window, off with the Performance preset."
+   ]
+  },
+  "es": {
+   "new": [
+    "Ventana reorganizada: Inicio, Pantalla, Layout, Juegos, Sensores y Sistema, con búsqueda en todo arriba y una vista previa pequeña siempre a la vista.",
+    "Estilo compacto de la ventana: estrecha, con el menú abajo (también en el asistente inicial).",
+    "Nueve temas nuevos: Kitty, Cyber, Phantom, Tech, Rústico (Freijó, Miel e Imbuia), Navidad y Halloween.",
+    "Cada tema tiene su propia pantalla de reloj en el Descanso.",
+    "Transiciones a elegir: cascada, e-ink, glitch, cortina o ninguna.",
+    "Modo Visual: imagen, fotos, GIF o reloj en lugar de los sensores.",
+    "Temas festivos (opcional): Halloween en octubre y Navidad en diciembre.",
+    "Menú de la bandeja con Tema de la pantalla y Perfil.",
+    "Nombre del juego en la pantalla, debajo de los FPS (opcional)."
+   ],
+   "fix": [
+    "Abrir la ventana desde la bandeja con Liberar memoria activado ya no se congela."
+   ],
+   "look": [
+    "Animaciones ligeras en la ventana, desactivadas en la predefinición Performance."
+   ]
+  },
+  "zh": {
+   "new": [
+    "窗口重新整理：首页、屏幕、布局、游戏、传感器和系统，顶部可搜索全部设置，并始终显示小预览。",
+    "紧凑窗口样式：窄窗口，菜单在底部（首次运行向导中也可选择）。",
+    "九个新主题：Kitty、Cyber、Phantom、Tech、原木（浅、蜂蜜、深）、圣诞和万圣节。",
+    "每个主题在休息屏幕中都有自己的时钟画面。",
+    "可选择过渡效果：逐块、墨水屏、故障风、幕布或无。",
+    "视觉模式：用图片、照片、GIF 或时钟代替传感器。",
+    "节日主题（可选）：十月万圣节，十二月圣诞节。",
+    "托盘菜单可切换屏幕主题和配置文件。",
+    "屏幕上显示游戏名称，位于 FPS 下方（可选）。"
+   ],
+   "fix": [
+    "开启“释放窗口内存”时从托盘打开窗口不再卡住。"
+   ],
+   "look": [
+    "窗口加入轻量动画，“性能”预设下关闭。"
+   ]
+  }
+ },
+ {
   "v": "1.5.0",
   "beta": true,
   "pt": {

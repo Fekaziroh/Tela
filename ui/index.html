@@ -14,16 +14,19 @@
       <h1>Tela!</h1><button class="upd" id="upd" type="button"><span id="version"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6.5 10.5 12 16l5.5-5.5M5 20h14"/></svg></button>
     </div>
     <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8"/></svg><span data-i18n="tab.home"></span></button>
+    <button role="tab" data-tab="screen" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3" fill="currentColor"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="10" r="1.3" fill="currentColor"/><path d="M12 21a3 3 0 0 1 0-6h1.5a2 2 0 0 0 0-4"/></svg><span data-i18n="tab.screen"></span></button>
     <button role="tab" data-tab="layout" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg><span data-i18n="tab.layout"></span></button>
-    <button role="tab" data-tab="look" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3" fill="currentColor"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="10" r="1.3" fill="currentColor"/><path d="M12 21a3 3 0 0 1 0-6h1.5a2 2 0 0 0 0-4"/></svg><span data-i18n="tab.look"></span></button>
-    <button role="tab" data-tab="settings" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-i18n="tab.settings"></span></button>
-    <button role="tab" data-tab="advanced" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg><span data-i18n="tab.advanced"></span></button>
+    <button role="tab" data-tab="games" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="12" r=".8" fill="currentColor"/><circle cx="18" cy="14" r=".8" fill="currentColor"/></svg><span data-i18n="tab.games"></span></button>
+    <button role="tab" data-tab="sensors" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg><span data-i18n="tab.sensors"></span></button>
+    <button role="tab" data-tab="system" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-i18n="tab.system"></span></button>
+    <div class="mini-prev" id="mini-wrap" title="" hidden><canvas id="mini-preview" width="480" height="320" aria-hidden="true"></canvas></div>
     <div class="foot"><span data-i18n="nav.tray_hint"></span><button class="btn" id="quit" data-i18n="nav.quit"></button></div>
   </nav>
 
   <main id="main">
     <div class="head">
       <h2 id="title"></h2>
+      <div class="set-search" id="search-box"><input class="txt" type="search" id="set-search" data-placeholder="search.ph" autocomplete="off"><small class="hint" id="set-search-none" hidden data-i18n="search.none"></small></div>
       <div class="device" id="device"><i></i>Turing Smart Screen 3.5" <small id="device-port">—</small></div>
       <div class="lang">
         <button id="lang-btn" aria-haspopup="true" aria-expanded="false"><span id="lang-flag"></span><svg class="arrow" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5l3 3 3-3"/></svg></button>
@@ -48,6 +51,8 @@
         <div class="col">
           <div class="card">
             <h3 data-i18n="home.screen"></h3>
+            <div class="two"><div class="field"><label for="home-theme" data-i18n="home.theme"></label><select id="home-theme"></select></div>
+              <div class="field"><label data-i18n="vis.mode"></label><div class="seg" data-set="display.mode"><button data-v="functional" data-i18n="vis.functional"></button><button data-v="visual" data-i18n="vis.visual"></button></div></div></div>
             <div class="row"><label for="brightness" data-i18n="home.brightness"></label><span class="val" id="brightness-v"></span></div>
             <input type="range" id="brightness" min="0" max="100" step="1">
             <div class="hint" data-i18n="home.brightness_hint"></div>
@@ -56,6 +61,7 @@
             <div class="row"><span class="lbl"><span data-i18n="home.night"></span><small id="night-desc"></small></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="home.night"></button></div>
             <div class="btns"><button class="btn" id="pause"></button><button class="btn" id="release"></button></div>
           </div>
+          <div class="go-tabs" id="go-tabs"><button class="go" data-go="screen"><span data-i18n="tab.screen"></span><i>›</i></button><button class="go" data-go="layout"><span data-i18n="tab.layout"></span><i>›</i></button><button class="go" data-go="games"><span data-i18n="tab.games"></span><i>›</i></button><button class="go" data-go="sensors"><span data-i18n="tab.sensors"></span><i>›</i></button><button class="go" data-go="system"><span data-i18n="tab.system"></span><i>›</i></button></div>
           <div class="card" id="last-game">
             <div class="row"><h3 data-i18n="home.last"></h3><small class="hint" id="last-when"></small></div>
             <div id="last-body"></div>
@@ -107,8 +113,10 @@
     </section>
 
     <!-- APPEARANCE -->
-    <section data-panel="look" hidden style="display:grid;gap:16px">
-      <div class="card" id="st-card">
+        <!-- SCREEN -->
+    <section data-panel="screen" hidden>
+      <div class="grid">
+        <div class="card" style="grid-column:1/-1" id="st-card">
         <div class="row"><h3 data-i18n="st.title"></h3>
           <div class="btns"><button class="btn" id="st-gallery" data-i18n="gal.open"></button><button class="btn" id="st-import" data-i18n="st.import"></button><button class="btn" id="st-export" data-i18n="st.export"></button><button class="btn" id="st-new" data-i18n="st.new"></button><button class="btn pri" id="st-save" data-i18n="st.save_as"></button></div></div>
         <div class="st-wrap">
@@ -124,8 +132,26 @@
             <div class="field"><label for="st-night" data-i18n="st.night"></label><select id="st-night" data-set="theme.night" data-default="retro"></select></div></div>
           <div class="inline hours"><span data-i18n="st.night_from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="19:00" data-set="theme.night_start"><span data-i18n="st.night_to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="theme.night_end"></div>
         </div>
+        <div class="row"><span class="lbl"><span data-i18n="st.festive"></span><small data-i18n="st.festive_d"></small></span><button class="sw" role="switch" data-set="theme.festive" data-label="st.festive"></button></div>
       </div>
-      <div class="card">
+        <div class="card" id="vis-card"><h3 data-i18n="vis.title"></h3>
+        <div class="row"><span class="lbl"><span data-i18n="vis.mode"></span><small data-i18n="vis.mode_d"></small></span><div class="seg" data-set="display.mode"><button data-v="functional" data-i18n="vis.functional"></button><button data-v="visual" data-i18n="vis.visual"></button></div></div>
+        <div class="sub" id="vis-sub">
+          <div class="row"><span class="lbl" data-i18n="vis.kind"></span><div class="seg" data-set="visual.kind"><button data-v="clock" data-i18n="vis.clock"></button><button data-v="image" data-i18n="vis.image"></button><button data-v="photos" data-i18n="vis.photos"></button><button data-v="gif" data-i18n="vis.gif"></button></div></div>
+          <div class="row"><span class="lbl"><span data-i18n="vis.files"></span><small id="vis-files" class="selectable"></small></span><button class="btn" id="vis-pick" data-i18n="vis.pick"></button></div>
+          <div class="row"><span class="lbl" data-i18n="vis.every"></span><span class="inline"><input class="num" type="number" min="3" max="3600" step="1" data-set="visual.every"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl" data-i18n="vis.clock_over"></span><button class="sw" role="switch" data-set="visual.clock" data-label="vis.clock_over"></button></div>
+          <p class="hint" data-i18n="vis.hint"></p>
+        </div>
+      </div>
+        <div class="card"><h3 data-i18n="set.rest"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="set.rest"></span><small data-i18n="set.rest_hint"></small></span><button class="sw" role="switch" data-set="rest.enabled" data-label="set.rest"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.rest_after"></span><span class="inline"><input class="num" type="number" min="1" max="240" step="1" data-set="rest.idle_minutes"><span data-i18n="min"></span><button class="btn" data-cmd="rest_preview" data-i18n="set.summary_try"></button></span></div>
+          <div class="row"><span class="lbl" data-i18n="tr.label"></span></div>
+          <div class="two"><div class="field"><label for="tr-theme" data-i18n="tr.theme"></label><select id="tr-theme" data-set="animation.transition_theme" data-default="cascade"><option value="cascade" data-i18n="tr.cascade"></option><option value="eink" data-i18n="tr.eink"></option><option value="glitch" data-i18n="tr.glitch"></option><option value="curtain" data-i18n="tr.curtain"></option><option value="none" data-i18n="tr.none"></option></select></div>
+            <div class="field"><label for="tr-summary" data-i18n="tr.summary"></label><select id="tr-summary" data-set="animation.transition_summary" data-default="cascade"><option value="cascade" data-i18n="tr.cascade"></option><option value="eink" data-i18n="tr.eink"></option><option value="glitch" data-i18n="tr.glitch"></option><option value="curtain" data-i18n="tr.curtain"></option><option value="none" data-i18n="tr.none"></option></select></div></div>
+        </div>
+        <div class="card">
         <div class="row"><h3 data-i18n="look.colors_bg"></h3><button class="btn" id="reset-colors" data-i18n="look.reset_theme"></button></div>
         <p class="hint" style="margin:0" data-i18n="look.colors_hint"></p>
         <div class="themes" id="screen-themes"></div>
@@ -138,7 +164,7 @@
         <div class="row"><label for="bg-op" data-i18n="bg.opacity"></label><span class="val" id="bg-op-v"></span></div>
         <input type="range" id="bg-op" min="20" max="100" step="5" data-set="background.panel_opacity">
       </div>
-      <div class="card">
+        <div class="card">
         <div class="row"><h3><span data-i18n="look.logos"></span></h3><small class="hint" id="logos-count"></small></div>
         <p data-i18n="look.logos_desc"></p>
         <div class="row"><span class="lbl"><span data-i18n="look.logos_auto"></span><small id="logos-auto-now"></small></span><button class="sw" role="switch" id="logos-auto" data-label="look.logos_auto"></button></div>
@@ -147,45 +173,6 @@
         <div class="search"><input class="txt" id="logo-search" type="search"><button class="btn" id="add-logos" data-i18n="look.add"></button><button class="btn" id="logos-folder" data-i18n="look.folder"></button></div>
         <div class="logos" id="logos"></div>
       </div>
-      <div class="card">
-        <div class="row"><h3 data-i18n="theme.title"></h3><button class="btn" id="theme-new" data-i18n="theme.customize"></button></div>
-        <div class="themes" id="themes"></div>
-        <div class="theme-editor" id="theme-editor" hidden>
-          <div class="colors" id="theme-colors"></div>
-          <div class="search"><input class="txt" id="theme-name" data-placeholder="theme.name_ph" maxlength="30">
-            <button class="btn pri" id="theme-save" data-i18n="theme.save"></button><button class="btn" id="theme-cancel" data-i18n="modal.cancel"></button>
-            <button class="btn danger" id="theme-delete" data-i18n="theme.delete"></button></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SETTINGS -->
-    <section data-panel="settings" hidden>
-      <div class="set-search"><input class="txt" type="search" id="set-search" data-placeholder="search.ph" autocomplete="off"><small class="hint" id="set-search-none" hidden data-i18n="search.none"></small></div>
-      <div class="grid">
-        <div class="card" style="grid-column:1/-1"><h3 data-i18n="pre.title"></h3>
-          <div class="presets" id="presets">
-            <button data-p="performance"><b data-i18n="pre.performance"></b><small data-i18n="pre.performance_d"></small></button>
-            <button data-p="default"><b data-i18n="pre.default"></b><small data-i18n="pre.default_d"></small></button>
-            <button data-p="custom" tabindex="-1"><b data-i18n="pre.custom"></b><small data-i18n="pre.custom_d"></small></button>
-          </div>
-          <hr class="sep">
-          <div class="row"><span class="lbl"><span data-i18n="prof.title"></span><small data-i18n="prof.hint"></small></span>
-            <span class="inline"><button class="btn" id="prof-import" data-i18n="prof.import"></button><button class="btn pri" id="prof-new" data-i18n="prof.save"></button></span></div>
-          <div class="profiles" id="profiles"></div>
-        </div>
-        <div class="card"><h3 data-i18n="set.general"></h3>
-          <div class="row"><span class="lbl" data-i18n="set.autostart"></span><button class="sw" role="switch" id="autostart" data-label="set.autostart"></button></div>
-          <div class="row"><span class="lbl" data-i18n="set.off_exit"></span><button class="sw" role="switch" data-set="display.off_on_exit" data-label="set.off_exit"></button></div>
-          <div class="row"><span class="lbl" data-i18n="set.off_lock"></span><button class="sw" role="switch" data-set="display.off_on_lock" data-label="set.off_lock"></button></div>
-          <div class="row"><span class="lbl" data-i18n="set.off_monitor"></span><button class="sw" role="switch" data-set="display.off_with_monitor" data-label="set.off_monitor"></button></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.rest"></span><small data-i18n="set.rest_hint"></small></span><button class="sw" role="switch" data-set="rest.enabled" data-label="set.rest"></button></div>
-          <div class="row"><span class="lbl" data-i18n="set.rest_after"></span><span class="inline"><input class="num" type="number" min="1" max="240" step="1" data-set="rest.idle_minutes"><span data-i18n="min"></span><button class="btn" data-cmd="rest_preview" data-i18n="set.summary_try"></button></span></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.tray_icon"></span><small data-i18n="set.tray_icon_desc"></small></span>
-            <div class="seg" data-set="tray.temp_icon"><button data-v="none" data-i18n="tray.none"></button><button data-v="cpu" data-i18n="tray.cpu"></button><button data-v="gpu" data-i18n="tray.gpu"></button></div></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.unload"></span><small data-i18n="set.unload_hint"></small></span><button class="sw" role="switch" data-set="ui.unload_hidden" data-label="set.unload"></button></div>
-        </div>
-
         <div class="card"><h3 data-i18n="set.night"></h3>
           <div class="row"><span class="lbl" data-i18n="set.night_on"></span><button class="sw" role="switch" data-set="display.night_enabled" data-label="set.night_on"></button></div>
           <div class="sub" id="night-sub">
@@ -198,33 +185,34 @@
             <div class="inline hours"><span data-i18n="set.from"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="02:00" data-set="display.off_start"><span data-i18n="set.to"></span><input class="num time24" inputmode="numeric" maxlength="5" placeholder="07:00" data-set="display.off_end"></div>
           </div>
         </div>
-
-        <div class="card"><h3 data-i18n="al.title"></h3>
-          <div class="row"><span class="lbl"><span data-i18n="al.on"></span><small data-i18n="al.hint"></small></span><button class="sw" role="switch" data-set="alerts.enabled" data-label="al.on"></button></div>
-          <div class="sub" id="al-sub">
-            <div class="row"><span class="lbl" data-i18n="al.cpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.cpu"><span>°C</span></span></div>
-            <div class="row"><span class="lbl" data-i18n="al.gpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.gpu"><span>°C</span></span></div>
-            <div class="row"><span class="lbl" data-i18n="al.hold"></span><span class="inline"><input class="num" type="number" min="5" max="300" step="5" data-set="alerts.seconds"><span data-i18n="s"></span></span></div>
+        <div class="card"><h3 data-i18n="set.music"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.music_on"></span><button class="sw" role="switch" data-set="media.enabled" data-label="set.music_on"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.during_game"></span><small data-i18n="set.during_game_desc"></small></span>
+            <div class="seg" data-set="media.during_game"><button data-v="date" data-i18n="music.date"></button><button data-v="hide" data-i18n="music.hide"></button></div></div>
+          <div class="row"><span class="lbl" data-i18n="set.progress"></span><button class="sw" role="switch" data-set="media.progress" data-label="set.progress"></button></div>
+          <div class="field"><label for="media-ignore" data-i18n="set.ignore"></label><input class="txt" id="media-ignore" data-set="media.ignore" data-placeholder="set.ignore_ph"></div>
+        </div>
+        <div class="card"><h3 data-i18n="wx.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="wx.on"></span><small data-i18n="wx.on_desc"></small></span><button class="sw" role="switch" data-set="weather.enabled" data-label="wx.on"></button></div>
+          <div class="sub" id="wx-sub">
+            <div class="field"><label for="wx-city" data-i18n="wx.city"></label><input class="txt" id="wx-city" data-set="weather.city" data-placeholder="wx.city_ph"></div>
+            <div class="row"><small class="hint" id="wx-status"></small></div>
+            <div class="row"><span class="lbl" data-i18n="wx.temp"></span><button class="sw" role="switch" data-set="weather.temperature" data-label="wx.temp"></button></div>
+            <div class="row"><span class="lbl" data-i18n="wx.cond"></span><button class="sw" role="switch" data-set="weather.condition" data-label="wx.cond"></button></div>
+            <div class="row"><span class="lbl" data-i18n="wx.unit"></span><div class="seg" data-set="weather.unit"><button data-v="celsius">°C</button><button data-v="fahrenheit">°F</button></div></div>
           </div>
+          <p class="hint" style="margin:0" data-i18n="wx.privacy"></p>
         </div>
-
-        <div class="card"><h3 data-i18n="set.update"></h3>
-          <div class="row"><span class="lbl" data-i18n="set.read_every"></span><span class="inline"><input class="num" type="number" min="0.5" max="10" step="0.5" data-set=".interval" id="base-interval"><span data-i18n="s"></span></span></div>
-          <div class="row"><span class="lbl" data-i18n="set.fps_every"></span><span class="inline"><input class="num" type="number" min="0.1" max="2" step="0.05" data-set="fps.update"><span data-i18n="s"></span></span></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.fps_avg"></span><small data-i18n="set.fps_avg_desc"></small></span><span class="inline"><input class="num" type="number" min="0.2" max="2" step="0.1" data-set="fps.average"><span data-i18n="s"></span></span></div>
-          <div class="row"><span class="lbl"><span data-i18n="pre.quality"></span><small data-i18n="pre.quality_d"></small></span><div class="seg" data-set="performance.quality"><button data-v="high" data-i18n="pre.q_high"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
-          <div class="row"><span class="lbl" data-i18n="pre.preview"></span><button class="sw" role="switch" data-set="performance.preview" data-label="pre.preview"></button></div>
-          <div class="row"><span class="lbl"><span data-i18n="pre.pq"></span><small data-i18n="pre.pq_d"></small></span><div class="seg" data-set="performance.preview_quality"><button data-v="sharp" data-i18n="pre.pq_sharp"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.anim"></span><small data-i18n="set.anim_desc"></small></span><button class="sw" role="switch" data-set="animation.enabled" data-label="set.anim"></button></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.eco"></span><small data-i18n="set.eco_desc"></small></span><button class="sw" role="switch" data-set="eco.enabled" data-label="set.eco"></button></div>
-          <div class="row"><span class="lbl" data-i18n="set.eco_after"></span><span class="inline"><input class="num" type="number" min="1" max="120" step="1" data-set="eco.idle_minutes"><span data-i18n="min"></span></span></div>
+        <div class="card"><div class="row"><h3 data-i18n="tx.title"></h3><button class="btn" id="tx-reset" data-i18n="tx.reset"></button></div>
+          <p class="hint" style="margin:0" data-i18n="tx.desc"></p>
+          <div class="words" id="tx-list"></div>
         </div>
+      </div>
+    </section>
 
-        <div class="card"><h3 data-i18n="set.per_item"></h3>
-          <p data-i18n="set.per_item_desc"></p>
-          <div class="item-list" id="intervals"></div>
-        </div>
-
+    <!-- GAMES -->
+    <section data-panel="games" hidden>
+      <div class="grid">
         <div class="card"><h3 data-i18n="set.summary"></h3>
           <div class="row"><span class="lbl" data-i18n="set.summary_on"></span><button class="sw" role="switch" data-set="session.summary" data-label="set.summary_on"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.summary_time"></span><span class="inline"><input class="num" type="number" min="3" max="120" step="1" data-set="session.summary_seconds"><span data-i18n="s"></span></span></div>
@@ -245,58 +233,106 @@
           </div>
           <div class="btns"><button class="btn" id="hist-open" data-i18n="hist.open"></button></div>
         </div>
-
-        <div class="card"><h3 data-i18n="set.music"></h3>
-          <div class="row"><span class="lbl" data-i18n="set.music_on"></span><button class="sw" role="switch" data-set="media.enabled" data-label="set.music_on"></button></div>
-          <div class="row"><span class="lbl"><span data-i18n="set.during_game"></span><small data-i18n="set.during_game_desc"></small></span>
-            <div class="seg" data-set="media.during_game"><button data-v="date" data-i18n="music.date"></button><button data-v="hide" data-i18n="music.hide"></button></div></div>
-          <div class="row"><span class="lbl" data-i18n="set.progress"></span><button class="sw" role="switch" data-set="media.progress" data-label="set.progress"></button></div>
-          <div class="field"><label for="media-ignore" data-i18n="set.ignore"></label><input class="txt" id="media-ignore" data-set="media.ignore" data-placeholder="set.ignore_ph"></div>
+        <div class="card"><h3 data-i18n="set.fps_card"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.fps_every"></span><span class="inline"><input class="num" type="number" min="0.1" max="2" step="0.05" data-set="fps.update"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.fps_avg"></span><small data-i18n="set.fps_avg_desc"></small></span><span class="inline"><input class="num" type="number" min="0.2" max="2" step="0.1" data-set="fps.average"><span data-i18n="s"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.show_game"></span><small data-i18n="set.show_game_d"></small></span><button class="sw" role="switch" data-set="fps.show_game" data-label="set.show_game"></button></div>
         </div>
+      </div>
+    </section>
 
-        <div class="card"><h3 data-i18n="wx.title"></h3>
-          <div class="row"><span class="lbl"><span data-i18n="wx.on"></span><small data-i18n="wx.on_desc"></small></span><button class="sw" role="switch" data-set="weather.enabled" data-label="wx.on"></button></div>
-          <div class="sub" id="wx-sub">
-            <div class="field"><label for="wx-city" data-i18n="wx.city"></label><input class="txt" id="wx-city" data-set="weather.city" data-placeholder="wx.city_ph"></div>
-            <div class="row"><small class="hint" id="wx-status"></small></div>
-            <div class="row"><span class="lbl" data-i18n="wx.temp"></span><button class="sw" role="switch" data-set="weather.temperature" data-label="wx.temp"></button></div>
-            <div class="row"><span class="lbl" data-i18n="wx.cond"></span><button class="sw" role="switch" data-set="weather.condition" data-label="wx.cond"></button></div>
-            <div class="row"><span class="lbl" data-i18n="wx.unit"></span><div class="seg" data-set="weather.unit"><button data-v="celsius">°C</button><button data-v="fahrenheit">°F</button></div></div>
+    <!-- SENSORS -->
+    <section data-panel="sensors" hidden>
+      <div class="grid">
+        <div class="card"><h3 data-i18n="set.update"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.read_every"></span><span class="inline"><input class="num" type="number" min="0.5" max="10" step="0.5" data-set=".interval" id="base-interval"><span data-i18n="s"></span></span></div>
+          
+          
+          
+          <div class="row"><span class="lbl"><span data-i18n="pre.quality"></span><small data-i18n="pre.quality_d"></small></span><div class="seg" data-set="performance.quality"><button data-v="high" data-i18n="pre.q_high"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
+          <div class="row"><span class="lbl" data-i18n="pre.preview"></span><button class="sw" role="switch" data-set="performance.preview" data-label="pre.preview"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="pre.pq"></span><small data-i18n="pre.pq_d"></small></span><div class="seg" data-set="performance.preview_quality"><button data-v="sharp" data-i18n="pre.pq_sharp"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.anim"></span><small data-i18n="set.anim_desc"></small></span><button class="sw" role="switch" data-set="animation.enabled" data-label="set.anim"></button></div>
+          
+          <div class="row"><span class="lbl"><span data-i18n="set.eco"></span><small data-i18n="set.eco_desc"></small></span><button class="sw" role="switch" data-set="eco.enabled" data-label="set.eco"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.eco_after"></span><span class="inline"><input class="num" type="number" min="1" max="120" step="1" data-set="eco.idle_minutes"><span data-i18n="min"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="adv.hwinfo"></span><small data-i18n="adv.hwinfo_d"></small></span><button class="sw" role="switch" data-set="data.hwinfo" data-label="adv.hwinfo"></button></div>
+        </div>
+        <div class="card"><h3 data-i18n="set.per_item"></h3>
+          <p data-i18n="set.per_item_desc"></p>
+          <div class="item-list" id="intervals"></div>
+        </div>
+        <div class="card"><h3 data-i18n="al.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="al.on"></span><small data-i18n="al.hint"></small></span><button class="sw" role="switch" data-set="alerts.enabled" data-label="al.on"></button></div>
+          <div class="sub" id="al-sub">
+            <div class="row"><span class="lbl" data-i18n="al.cpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.cpu"><span>°C</span></span></div>
+            <div class="row"><span class="lbl" data-i18n="al.gpu"></span><span class="inline"><input class="num" type="number" min="50" max="110" step="1" data-set="alerts.gpu"><span>°C</span></span></div>
+            <div class="row"><span class="lbl" data-i18n="al.hold"></span><span class="inline"><input class="num" type="number" min="5" max="300" step="5" data-set="alerts.seconds"><span data-i18n="s"></span></span></div>
           </div>
-          <p class="hint" style="margin:0" data-i18n="wx.privacy"></p>
         </div>
-
         <div class="card"><h3 data-i18n="set.network"></h3>
           <div class="row"><span class="lbl" data-i18n="set.ping"></span><button class="sw" role="switch" data-set="network.ping" data-label="set.ping"></button></div>
           <div class="field"><label for="servers" data-i18n="set.servers"></label><input class="txt" id="servers" data-set="network.servers"></div>
           <div class="inline"><span data-i18n="set.warn_above"></span><input class="num" type="number" min="1" max="2000" data-set="network.warn_ms"><span data-i18n="ms"></span><span data-i18n="set.or"></span><input class="num" type="number" min="0" max="100" data-set="network.warn_loss"><span data-i18n="set.loss"></span></div>
           <div class="inline"><span data-i18n="set.crit_above"></span><input class="num" type="number" min="1" max="5000" data-set="network.crit_ms"><span data-i18n="ms"></span><span data-i18n="set.or"></span><input class="num" type="number" min="0" max="100" data-set="network.crit_loss"><span data-i18n="set.loss"></span></div>
         </div>
-
         <div class="card"><h3 data-i18n="set.disks"></h3>
           <div class="row"><span class="lbl" data-i18n="set.disk_number"></span>
             <div class="seg" data-set="ssd.number"><button data-v="activity" data-i18n="disk.activity"></button><button data-v="space" data-i18n="disk.space"></button></div></div>
           <div class="row"><span class="lbl" data-i18n="set.detected"></span><span class="hint" id="disks"></span></div>
           <div class="field"><label for="disk-title" data-i18n="set.disk_title"></label><input class="txt" id="disk-title" maxlength="20" data-set="ssd.title"></div>
         </div>
+      </div>
+    </section>
 
-        <div class="card"><div class="row"><h3 data-i18n="tx.title"></h3><button class="btn" id="tx-reset" data-i18n="tx.reset"></button></div>
-          <p class="hint" style="margin:0" data-i18n="tx.desc"></p>
-          <div class="words" id="tx-list"></div>
+    <!-- SYSTEM -->
+    <section data-panel="system" hidden>
+      <div class="grid">
+        <div class="card" style="grid-column:1/-1"><h3 data-i18n="pre.title"></h3>
+          <div class="presets" id="presets">
+            <button data-p="performance"><b data-i18n="pre.performance"></b><small data-i18n="pre.performance_d"></small></button>
+            <button data-p="default"><b data-i18n="pre.default"></b><small data-i18n="pre.default_d"></small></button>
+            <button data-p="custom" tabindex="-1"><b data-i18n="pre.custom"></b><small data-i18n="pre.custom_d"></small></button>
+          </div>
+          <hr class="sep">
+          <div class="row"><span class="lbl"><span data-i18n="prof.title"></span><small data-i18n="prof.hint"></small></span>
+            <span class="inline"><button class="btn" id="prof-import" data-i18n="prof.import"></button><button class="btn pri" id="prof-new" data-i18n="prof.save"></button></span></div>
+          <div class="profiles" id="profiles"></div>
         </div>
-
+        <div class="card"><h3 data-i18n="set.general"></h3>
+          <div class="row"><span class="lbl" data-i18n="set.autostart"></span><button class="sw" role="switch" id="autostart" data-label="set.autostart"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_exit"></span><button class="sw" role="switch" data-set="display.off_on_exit" data-label="set.off_exit"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_lock"></span><button class="sw" role="switch" data-set="display.off_on_lock" data-label="set.off_lock"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.off_monitor"></span><button class="sw" role="switch" data-set="display.off_with_monitor" data-label="set.off_monitor"></button></div>
+          
+          
+          <div class="row"><span class="lbl"><span data-i18n="set.tray_icon"></span><small data-i18n="set.tray_icon_desc"></small></span>
+            <div class="seg" data-set="tray.temp_icon"><button data-v="none" data-i18n="tray.none"></button><button data-v="cpu" data-i18n="tray.cpu"></button><button data-v="gpu" data-i18n="tray.gpu"></button></div></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.unload"></span><small data-i18n="set.unload_hint"></small></span><button class="sw" role="switch" data-set="ui.unload_hidden" data-label="set.unload"></button></div>
+        </div>
+        <div class="card">
+        <div class="row"><span class="lbl"><span data-i18n="style.title"></span><small data-i18n="style.hint"></small></span><div class="seg" id="style-seg"><button data-v="default" data-i18n="style.default"></button><button data-v="compact" data-i18n="style.compact"></button></div></div>
+        <div class="row"><h3 data-i18n="theme.title"></h3><button class="btn" id="theme-new" data-i18n="theme.customize"></button></div>
+        <div class="themes" id="themes"></div>
+        <div class="theme-editor" id="theme-editor" hidden>
+          <div class="colors" id="theme-colors"></div>
+          <div class="search"><input class="txt" id="theme-name" data-placeholder="theme.name_ph" maxlength="30">
+            <button class="btn pri" id="theme-save" data-i18n="theme.save"></button><button class="btn" id="theme-cancel" data-i18n="modal.cancel"></button>
+            <button class="btn danger" id="theme-delete" data-i18n="theme.delete"></button></div>
+        </div>
+      </div>
+        <div class="card"><h3 data-i18n="upd.title"></h3>
+          <div class="row"><span class="lbl"><span data-i18n="upd.auto"></span><small data-i18n="upd.auto_hint"></small></span><button class="sw" role="switch" data-set="updates.check" data-label="upd.auto"></button></div>
+          <div class="row"><span class="lbl" data-i18n="upd.every"></span><span class="inline"><input class="num" type="number" min="2" max="24" step="1" data-set="updates.hours"><span data-i18n="upd.hours"></span></span></div>
+          <div class="row"><span class="lbl"><span data-i18n="upd.test"></span><small data-i18n="upd.test_hint"></small></span><button class="sw" role="switch" data-set="updates.test" data-label="upd.test"></button></div>
+          <p class="hint" id="upd-status"></p>
+          <p class="hint" id="upd-skip" hidden></p>
+          <div class="btns"><button class="btn" id="upd-check" data-i18n="upd.check"></button><button class="btn" id="upd-back" data-i18n="upd.back"></button><button class="btn" id="cl-btn" data-i18n="cl.title"></button></div>
+        </div>
         <div class="card"><h3 data-i18n="set.connection"></h3>
           <div class="field"><label for="port" data-i18n="set.port"></label><select id="port" data-set="display.port"></select></div>
           <div class="row"><small class="hint" id="port-now"></small><button class="btn" id="rescan" data-i18n="set.rescan"></button></div>
         </div>
-      </div>
-    </section>
-
-    <!-- ADVANCED -->
-    <section data-panel="advanced" hidden>
-      <div class="grid">
-        <div class="card" style="grid-column:1/-1"><h3 data-i18n="adv.activity"></h3><div class="log" id="log"></div></div>
-        <div class="card"><h3 data-i18n="adv.usage"></h3><div class="usage" id="usage"></div><small class="hint" id="usage-total"></small></div>
         <div class="card"><h3 data-i18n="adv.tools"></h3>
           <div class="btns">
             <button class="btn" data-cmd="test" data-i18n="adv.test"></button>
@@ -307,21 +343,15 @@
             <button class="btn" id="edit-btn" data-i18n="adv.edit"></button>
           </div>
           <div class="row" style="margin-top:6px"><span class="lbl"><span data-i18n="adv.guard"></span><small data-i18n="adv.guard_d"></small></span><button class="sw" role="switch" data-set="ui.guard" data-label="adv.guard"></button></div>
-          <div class="row"><span class="lbl"><span data-i18n="adv.hwinfo"></span><small data-i18n="adv.hwinfo_d"></small></span><button class="sw" role="switch" data-set="data.hwinfo" data-label="adv.hwinfo"></button></div>
+          
           <p class="hint" style="margin:6px 0 0" data-i18n="adv.stuck"></p>
           <div class="btns">
             <button class="btn" data-cmd="reconnect" data-i18n="adv.reconnect"></button>
             <button class="btn" id="restart-btn" data-i18n="adv.restart"></button>
           </div>
         </div>
-        <div class="card"><h3 data-i18n="upd.title"></h3>
-          <div class="row"><span class="lbl"><span data-i18n="upd.auto"></span><small data-i18n="upd.auto_hint"></small></span><button class="sw" role="switch" data-set="updates.check" data-label="upd.auto"></button></div>
-          <div class="row"><span class="lbl" data-i18n="upd.every"></span><span class="inline"><input class="num" type="number" min="2" max="24" step="1" data-set="updates.hours"><span data-i18n="upd.hours"></span></span></div>
-          <div class="row"><span class="lbl"><span data-i18n="upd.test"></span><small data-i18n="upd.test_hint"></small></span><button class="sw" role="switch" data-set="updates.test" data-label="upd.test"></button></div>
-          <p class="hint" id="upd-status"></p>
-          <p class="hint" id="upd-skip" hidden></p>
-          <div class="btns"><button class="btn" id="upd-check" data-i18n="upd.check"></button><button class="btn" id="upd-back" data-i18n="upd.back"></button><button class="btn" id="cl-btn" data-i18n="cl.title"></button></div>
-        </div>
+        <div class="card"><h3 data-i18n="adv.usage"></h3><div class="usage" id="usage"></div><small class="hint" id="usage-total"></small></div>
+        <div class="card" style="grid-column:1/-1"><h3 data-i18n="adv.activity"></h3><div class="log" id="log"></div></div>
         <div class="card about"><h3 data-i18n="about.title"></h3>
           <p><b>Tela!</b> <span id="about-ver"></span> · <span data-i18n="about.license"></span></p>
           <p class="hint" data-i18n="about.independent"></p>
@@ -331,6 +361,7 @@
         <div class="card danger-card"><h3 data-i18n="adv.remove"></h3><p data-i18n="adv.remove_desc"></p><div class="btns"><button class="btn danger" id="uninstall-btn" data-i18n="adv.uninstall"></button></div></div>
       </div>
     </section>
+
   </main>
 </div>
 

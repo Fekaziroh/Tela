@@ -17,3 +17,17 @@ colors:
 landscape: default
 
 portrait: default
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: clock, format: '%H:%M', x: 218.0, y: 134.4, size: 96, align: center, bold: true}
+    - {type: clock, format: '%S', x: 368.0, y: 151.68, size: 28, align: left, color: secondary}
+    - {type: clock, format: '{weekday} %d/%m{weather}', x: 240.0, y: 203.52, size: 18, align: center, color: secondary}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 302, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 302, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}
+  portrait:
+    - {type: clock, format: '%H:%M', x: 142.0, y: 182.4, size: 72, align: center, bold: true}
+    - {type: clock, format: '%S', x: 256.0, y: 195.36, size: 22, align: left, color: secondary}
+    - {type: clock, format: '{weekday} %d/%m{weather}', x: 160.0, y: 234.24, size: 15, align: center, color: secondary}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 462, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 462, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}

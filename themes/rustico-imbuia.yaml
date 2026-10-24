@@ -1,0 +1,226 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Rústico Imbuia, en: Rustic Imbuia, es: Rústico Imbuia, zh: 原木 · 深}
+order: 17
+tela: 1
+
+colors:
+  background: '#1A0F08'
+  panel: '#0D0805'
+  text: '#F1E2CF'
+  secondary: '#B89470'
+  track: '#2E2016'
+  accent: '#D9A46B'
+  warn: '#FF9F43'
+  crit: '#FF5A4F'
+
+landscape:
+  art: rustico-imbuia_l.jpg
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 52
+      items:
+        - {type: panel, x: 4, y: 2, w: 472, h: 48, title: '', opacity: 0.84, radius: 10, shadow: 2}
+        - {type: image, files: logos, pick: 0, when: no_fps, x: 12, y: 13, w: 120, h: 22}
+        - {type: value, sensor: fps, x: 12, y: 26, size: 26, unit: ' FPS', unit_size: 12, bold: true, empty: ''}
+        - {type: clock, format: '%H:%M', x: 240, y: 22, align: center, size: 28, bold: true, spacing: 1.5}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 240, y: 44, align: center, size: 9.5, color: secondary}
+        - {type: image, files: logos, pick: 1, when: no_media_any, align: right, x: 348, y: 13, w: 120, h: 22}
+        - {type: media, x: 340, y: 10, w: 134, h: 32, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 56
+      w: 234
+      h: 150
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 150, title: CPU, subtitle: '{cpu_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: gauge, sensor: cpu_temp, cx: 60, cy: 90, radius: 42, thickness: 5, min: 20, max: 95, unit: °C, size: 26, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: text, text: '#load', x: 118, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 224, y: 36, size: 15, unit: ' %', align: right, unit_size: 9}
+        - {type: rect, x: 118, y: 51, w: 106, h: 1, color: track}
+        - {type: text, text: '#clock', x: 118, y: 66, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 224, y: 66, size: 15, unit: ' GHz', align: right, unit_size: 9, scale: 0.001, format: '{:.2f}'}
+        - {type: rect, x: 118, y: 81, w: 106, h: 1, color: track}
+        - {type: text, text: '#power', x: 118, y: 96, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 224, y: 96, size: 15, unit: ' W', align: right, unit_size: 9}
+        - {type: rect, x: 118, y: 111, w: 106, h: 1, color: track}
+        - {type: text, text: '#fan', x: 118, y: 126, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_fan, x: 224, y: 126, size: 15, unit: ' RPM', align: right, unit_size: 9}
+    - id: gpu
+      name: GPU
+      x: 242
+      y: 56
+      w: 234
+      h: 150
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 150, title: GPU, subtitle: '{gpu_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: gauge, sensor: gpu_temp, cx: 60, cy: 90, radius: 42, thickness: 5, min: 20, max: 95, unit: °C, size: 26, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: text, text: '#load', x: 118, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 224, y: 36, size: 15, unit: ' %', align: right, unit_size: 9}
+        - {type: rect, x: 118, y: 51, w: 106, h: 1, color: track}
+        - {type: text, text: '#clock', x: 118, y: 66, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 224, y: 66, size: 15, unit: ' MHz', align: right, unit_size: 9}
+        - {type: rect, x: 118, y: 81, w: 106, h: 1, color: track}
+        - {type: text, text: '#power', x: 118, y: 96, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 224, y: 96, size: 15, unit: ' W', align: right, unit_size: 9}
+        - {type: rect, x: 118, y: 111, w: 106, h: 1, color: track}
+        - {type: text, text: '#fan', x: 118, y: 126, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_fan, x: 224, y: 126, size: 15, unit: ' RPM', align: right, unit_size: 9}
+    - id: ram
+      name: RAM
+      x: 4
+      y: 210
+      w: 150
+      h: 106
+      items:
+        - {type: panel, x: 0, y: 0, w: 150, h: 106, title: RAM, subtitle: '{ram_desc}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: '#load', x: 10, y: 44, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_pct, x: 140, y: 44, size: 16, unit: ' %', align: right, unit_size: 10}
+        - {type: rect, x: 10, y: 60, w: 130, h: 1, color: track}
+        - {type: text, text: '#used', x: 10, y: 76, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_used_gb, x: 140, y: 76, size: 16, unit: ' GB', align: right, unit_size: 10, format: '{:.1f}'}
+    - id: disks
+      name: '{disks_title}'
+      x: 158
+      y: 210
+      w: 150
+      h: 106
+      items:
+        - {type: panel, x: 0, y: 0, w: 150, h: 106, title: '{disks_title}', subtitle: '{disk1_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: '#load', x: 10, y: 44, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: disk1_act, x: 140, y: 44, size: 16, unit: ' %', align: right, unit_size: 10, ssd: true}
+        - {type: rect, x: 10, y: 60, w: 130, h: 1, color: track}
+        - {type: text, text: '#temp', x: 10, y: 76, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ssd1_temp, x: 140, y: 76, size: 16, unit: ' °C', align: right, unit_size: 10}
+    - id: netvol
+      name: '#network'
+      x: 312
+      y: 210
+      w: 164
+      h: 106
+      items:
+        - {type: panel, x: 0, y: 0, w: 164, h: 106, title: '#network', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: DOWN, x: 10, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: net_down, x: 154, y: 36, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: UP, x: 10, y: 58, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 154, y: 58, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: rect, x: 10, y: 70, w: 144, h: 1, color: track}
+        - {type: text, text: '#volume', x: 10, y: 88, size: 9.5, color: secondary, bold: true}
+        - {type: bar, sensor: volume, x: 66, y: 86, w: 54, h: 4, min: 0, max: 100}
+        - {type: value, sensor: volume, x: 154, y: 88, size: 13, unit: ' %', align: right, unit_size: 8}
+
+portrait:
+  art: rustico-imbuia_p.jpg
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 66
+      items:
+        - {type: panel, x: 4, y: 2, w: 312, h: 62, title: '', opacity: 0.84, radius: 10, shadow: 2}
+        - {type: image, files: logos, pick: 0, when: no_fps, x: 10, y: 12, w: 80, h: 16}
+        - {type: value, sensor: fps, x: 10, y: 20, size: 20, unit: ' FPS', unit_size: 10, bold: true, empty: ''}
+        - {type: clock, format: '%H:%M', x: 160, y: 22, align: center, size: 26, bold: true, spacing: 1.5}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 160, y: 46, align: center, size: 10, color: secondary, when: no_media_any}
+        - {type: image, files: logos, pick: 1, when: no_media_any, align: right, x: 230, y: 12, w: 80, h: 16}
+        - {type: media, x: 10, y: 38, w: 300, h: 26, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 70
+      w: 312
+      h: 124
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 124, title: CPU, subtitle: '{cpu_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: gauge, sensor: cpu_temp, cx: 62, cy: 74, radius: 40, thickness: 5, min: 20, max: 95, unit: °C, size: 26, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: text, text: '#load', x: 126, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 302, y: 36, size: 15, unit: ' %', align: right, unit_size: 9}
+        - {type: rect, x: 126, y: 48, w: 176, h: 1, color: track}
+        - {type: text, text: '#clock', x: 126, y: 60, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 302, y: 60, size: 15, unit: ' GHz', align: right, unit_size: 9, scale: 0.001, format: '{:.2f}'}
+        - {type: rect, x: 126, y: 72, w: 176, h: 1, color: track}
+        - {type: text, text: '#power', x: 126, y: 84, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 302, y: 84, size: 15, unit: ' W', align: right, unit_size: 9}
+        - {type: rect, x: 126, y: 96, w: 176, h: 1, color: track}
+        - {type: text, text: '#fan', x: 126, y: 108, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_fan, x: 302, y: 108, size: 15, unit: ' RPM', align: right, unit_size: 9}
+    - id: gpu
+      name: GPU
+      x: 4
+      y: 198
+      w: 312
+      h: 124
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 124, title: GPU, subtitle: '{gpu_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: gauge, sensor: gpu_temp, cx: 62, cy: 74, radius: 40, thickness: 5, min: 20, max: 95, unit: °C, size: 26, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: text, text: '#load', x: 126, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 302, y: 36, size: 15, unit: ' %', align: right, unit_size: 9}
+        - {type: rect, x: 126, y: 48, w: 176, h: 1, color: track}
+        - {type: text, text: '#clock', x: 126, y: 60, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 302, y: 60, size: 15, unit: ' MHz', align: right, unit_size: 9}
+        - {type: rect, x: 126, y: 72, w: 176, h: 1, color: track}
+        - {type: text, text: '#power', x: 126, y: 84, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 302, y: 84, size: 15, unit: ' W', align: right, unit_size: 9}
+        - {type: rect, x: 126, y: 96, w: 176, h: 1, color: track}
+        - {type: text, text: '#fan', x: 126, y: 108, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_fan, x: 302, y: 108, size: 15, unit: ' RPM', align: right, unit_size: 9}
+    - id: ram
+      name: RAM
+      x: 4
+      y: 326
+      w: 154
+      h: 74
+      items:
+        - {type: panel, x: 0, y: 0, w: 154, h: 74, title: RAM, subtitle: '{ram_desc}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: '#load', x: 10, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_pct, x: 144, y: 36, size: 14, unit: ' %', align: right, unit_size: 8}
+        - {type: rect, x: 10, y: 48, w: 134, h: 1, color: track}
+        - {type: text, text: '#used', x: 10, y: 60, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_used_gb, x: 144, y: 60, size: 14, unit: ' GB', align: right, unit_size: 8, format: '{:.1f}'}
+    - id: disks
+      name: '{disks_title}'
+      x: 162
+      y: 326
+      w: 154
+      h: 74
+      items:
+        - {type: panel, x: 0, y: 0, w: 154, h: 74, title: '{disks_title}', subtitle: '{disk1_name}', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: '#load', x: 10, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: disk1_act, x: 144, y: 36, size: 14, unit: ' %', align: right, unit_size: 8, ssd: true}
+        - {type: rect, x: 10, y: 48, w: 134, h: 1, color: track}
+        - {type: text, text: '#temp', x: 10, y: 60, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: ssd1_temp, x: 144, y: 60, size: 14, unit: ' °C', align: right, unit_size: 8}
+    - id: netvol
+      name: '#network'
+      x: 4
+      y: 404
+      w: 312
+      h: 72
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 72, title: '#network', border: track, opacity: 0.84, radius: 10, shadow: 2}
+        - {type: text, text: DOWN, x: 10, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: net_down, x: 150, y: 36, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: UP, x: 10, y: 58, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 150, y: 58, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: '#volume', x: 170, y: 36, size: 9.5, color: secondary, bold: true}
+        - {type: value, sensor: volume, x: 302, y: 36, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: volume, x: 170, y: 54, w: 132, h: 4, min: 0, max: 100}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 80.0, y: 70.0, w: 320, h: 180, opacity: 0.84, radius: 12, shadow: 2}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 145.6, size: 64, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 191.6, size: 15, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 215.6, size: 13, align: center, color: accent}
+  portrait:
+    - {type: panel, x: 20.0, y: 140.0, w: 280, h: 200, opacity: 0.84, radius: 12, shadow: 2}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 224.0, size: 56, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 270.0, size: 15, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 294.0, size: 13, align: center, color: accent}

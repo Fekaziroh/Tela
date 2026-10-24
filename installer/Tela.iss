@@ -3,7 +3,7 @@
 ; Expects build\dist\Tela (PyInstaller), build\components\lhm and build\components\presentmon, build\tela.ico.
 
 #ifndef AppVersion
-  #define AppVersion "1.5.0"
+  #define AppVersion "1.5.1"
 #endif
 #ifndef PawnIOUrl
   #define PawnIOUrl ""
@@ -103,6 +103,7 @@ Source: "{#Root}\ui\*"; DestDir: "{app}\ui"; Flags: ignoreversion recursesubdirs
 Source: "{#Root}\layouts\*.yaml"; DestDir: "{app}\layouts"; Flags: ignoreversion
 Source: "{#Root}\themes\*.yaml"; DestDir: "{app}\themes"; Flags: ignoreversion
 Source: "{#Root}\themes\art\*.png"; DestDir: "{app}\themes\art"; Flags: ignoreversion
+Source: "{#Root}\themes\art\*.jpg"; DestDir: "{app}\themes\art"; Flags: ignoreversion
 Source: "{#Root}\config_default.yaml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion

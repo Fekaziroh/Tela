@@ -84,12 +84,12 @@ async def shoot(url, out):
         await pg.keyboard.press("Escape")
         await pg.keyboard.press("Escape")
         # screen themes (Appearance)
-        await pg.click("nav [data-tab=look]")
+        await pg.click("nav [data-tab=screen]")
         await pg.wait_for_timeout(3500)
         await pg.evaluate("document.querySelector('#main').scrollTop = 0")
         await pg.screenshot(path=out / "appearance.png")
         # history
-        await pg.click("nav [data-tab=settings]")
+        await pg.click("nav [data-tab=games]")
         await pg.click("#hist-open")
         await pg.wait_for_timeout(500)
         await pg.click(".hist-row")
@@ -97,6 +97,8 @@ async def shoot(url, out):
         await pg.screenshot(path=out / "history.png")
         await pg.keyboard.press("Escape")
         # presets and profiles
+        await pg.click("nav [data-tab=system]")
+        await pg.wait_for_timeout(400)
         for name in ("Gaming", "Night"):
             await pg.click("#prof-new")
             await pg.wait_for_timeout(300)

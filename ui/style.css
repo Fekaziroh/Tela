@@ -379,8 +379,12 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .box.sel{box-shadow:0 0 0 9999px rgba(0,0,0,.22)}
 .box.sel2{border:2px dashed var(--accent);z-index:2}
 .orient-row{justify-content:flex-start;gap:14px}
-.set-search{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.set-search input{max-width:420px;width:100%}
+.set-search{display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:0;justify-content:flex-end}
+.set-search input{max-width:300px;width:100%}
+.mini-prev{margin:auto 2px 10px;border-radius:10px;overflow:hidden;background:#000;border:1px solid var(--line);cursor:pointer;line-height:0}
+.mini-prev canvas{width:100%;height:auto;display:block}
+.mini-prev:hover{border-color:var(--accent)}
+.mini-prev[hidden]{display:none}
 .s-hide{display:none!important}
 .conflict{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:12px 14px;border-radius:10px;
   background:color-mix(in srgb,var(--warn) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}
@@ -442,3 +446,32 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .zb:hover{border-color:#7d8590}
 .zb[aria-pressed="true"]{background:#2a2d33;border-color:#7cc4ff;color:#fff}
 #st-sched .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ---- mini preview next to the footer; compact window style (narrow window, menu at the bottom) */
+.mini-prev:not([hidden]) + .foot{margin-top:0}
+.go-tabs{display:none}
+body.compact .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+body.compact nav{order:2;flex-direction:row;justify-content:space-around;border-right:0;border-top:1px solid var(--line);padding:6px 4px;gap:2px}
+body.compact .brand,body.compact .foot,body.compact .mini-prev,body.compact nav .tag{display:none}
+body.compact nav [role=tab]{flex-direction:column;gap:3px;padding:6px 4px;font-size:10.5px;flex:1;justify-content:center;text-align:center}
+body.compact main{padding:14px}
+body.compact .home{grid-template-columns:1fr}
+body.compact .grid{grid-template-columns:1fr}
+body.compact .head h2{font-size:18px}
+body.compact .device{display:none}
+body.compact .go-tabs{display:grid;gap:6px}
+.go{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:46px;padding:0 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:14px}
+.go i{font-style:normal;color:var(--muted)}
+.go:hover,.go:focus-visible{border-color:var(--accent)}
+
+/* ---- small window animations (off with the Performance preset or when animations are off) */
+@keyframes tela-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+section[data-panel]:not([hidden]) > *{animation:tela-in .22s ease-out both}
+section[data-panel]:not([hidden]) .grid > .card{animation:tela-in .26s ease-out both}
+section[data-panel]:not([hidden]) .grid > .card:nth-child(2){animation-delay:.03s}
+section[data-panel]:not([hidden]) .grid > .card:nth-child(3){animation-delay:.06s}
+section[data-panel]:not([hidden]) .grid > .card:nth-child(n+4){animation-delay:.09s}
+.btn,.go,nav [role=tab],.seg button{transition:background-color .15s,border-color .15s,color .15s,transform .1s}
+.btn:active,.go:active,.seg button:active{transform:scale(.97)}
+.sw::after{transition:transform .18s cubic-bezier(.3,1.4,.5,1)}
+body.calm *,body.calm *::before,body.calm *::after{animation:none!important;transition:none!important}

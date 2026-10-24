@@ -185,3 +185,21 @@ portrait:
         - {type: text, text: net.up, x: 12, y: 134, size: 12, color: accent, font: consolas}
         - {type: text, text: '=', x: 104, y: 134, size: 12, color: track, font: consolas}
         - {type: value, sensor: net_up, x: 118, y: 134, size: 13, unit: ' Mb/s', unit_size: 10, font: consolas, format: '{:.1f}'}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: text, text: '$ date +%H:%M', x: 18, y: 40, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '%H:%M', x: 18, y: 100, size: 72, align: left, bold: true, font: consolas}
+    - {type: text, text: $ date +%a\ %d/%m, x: 18, y: 160, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 18, y: 190, size: 16, align: left, font: consolas}
+    - {type: text, text: $ weather, x: 18, y: 220, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 18, y: 250, size: 16, align: left, color: accent, font: consolas}
+    - {type: text, text: $ _, x: 18, y: 280, size: 14, align: left, color: accent, font: consolas}
+  portrait:
+    - {type: text, text: '$ date +%H:%M', x: 18, y: 40, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '%H:%M', x: 18, y: 104, size: 64, align: left, bold: true, font: consolas}
+    - {type: text, text: $ date +%a\ %d/%m, x: 18, y: 172, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 18, y: 206, size: 16, align: left, font: consolas}
+    - {type: text, text: $ weather, x: 18, y: 240, size: 14, align: left, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 18, y: 274, size: 16, align: left, color: accent, font: consolas}
+    - {type: text, text: $ _, x: 18, y: 308, size: 14, align: left, color: accent, font: consolas}

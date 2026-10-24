@@ -208,3 +208,19 @@ portrait:
         - {type: text, text: '#volume', x: 170, y: 36, size: 9.5, color: secondary, bold: true}
         - {type: value, sensor: volume, x: 302, y: 36, size: 13, unit: ' %', align: right, unit_size: 8}
         - {type: bar, sensor: volume, x: 170, y: 54, w: 132, h: 4, min: 0, max: 100}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: clock, format: '%H:%M', x: 240.0, y: 128.0, size: 104, align: center, bold: true, spacing: 2}
+    - {type: rect, x: 200.0, y: 192.48000000000002, w: 80, h: 2, color: accent}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 217.44, size: 20, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 247.44, size: 16, align: center, color: text}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 302, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 302, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}
+  portrait:
+    - {type: clock, format: '%H:%M', x: 160.0, y: 182.4, size: 84, align: center, bold: true, spacing: 2}
+    - {type: rect, x: 120.0, y: 234.48000000000002, w: 80, h: 2, color: accent}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 254.64, size: 18, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 284.64, size: 16, align: center, color: text}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 462, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 462, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}

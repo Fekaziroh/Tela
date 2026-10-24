@@ -3,6 +3,7 @@
 # for texts and values "y" is the vertical CENTER.
 
 display:
+  mode: functional             # functional (sensors) | visual (a picture, photos, a GIF or the clock: section visual)
   port: auto                   # or "COM5"
   orientation: landscape_flipped   # landscape | landscape_flipped
   brightness: 40               # 0-100 (very high values can make the screen unstable)
@@ -18,7 +19,8 @@ display:
   off_end: "07:00"
 
 ui:
-  theme: auto                  # auto (follows Windows) | light | dark | preset:<name> | custom:<name>
+  theme: auto                  # auto (follows Windows) | light | dark | screen | preset:<name> | custom:<name>
+  style: default               # default (full window) | compact (a narrow window, menu at the bottom)
   language: auto               # auto (follows Windows) | pt | en | es | zh
   wizard_done: false           # the first-run assistant was finished
   reflow: true                 # layout editor: neighbour blocks follow when one is deleted or resized
@@ -33,6 +35,8 @@ theme:
   night: retro                 # theme at night (between night_start and night_end)
   night_start: "19:00"
   night_end: "07:00"
+  festive: false               # Halloween in October and Christmas in December, then your theme again
+  before_festive: ""           # (kept by Tela!) the theme to bring back after the festive month
 
 weather:                       # next to the date on the screen (Open-Meteo: only the city and its coordinates go online)
   enabled: true
@@ -52,6 +56,7 @@ eco:
 interval: 1.0                  # seconds between sensor reads
 
 fps:
+  show_game: false             # the game's name, small, under the FPS on the screen
   update: 0.2                  # seconds between FPS/volume updates on the screen
   average: 0.5                 # seconds averaged for the FPS
   source: auto                 # auto (PresentMon, or RTSS if it is open) | presentmon | rtss
@@ -86,6 +91,12 @@ background:
   image: ""                    # picture behind the panels (Appearance tab)
   dim: 40                      # % darker, so the numbers stay readable
   panel_opacity: 85            # % panel opacity over the picture
+
+visual:                        # Appearance › Screen mode › Visual
+  kind: clock                  # clock (the theme's Rest screen) | image | photos (one after the other) | gif
+  files: ""                    # pictures copied to the "visual" folder, separated by |
+  every: 15                    # photos: seconds each
+  clock: true                  # a small clock over the picture
 
 rest:
   enabled: false               # Rest: with the PC idle, a big clock with the date and the weather
@@ -139,6 +150,8 @@ animation:
   enabled: true
   duration: 0.6
   fps: 8
+  transition_theme: cascade    # theme change: cascade | eink | glitch | curtain | none
+  transition_summary: cascade  # game summary and Rest coming in and out: same choices
 
 data:
   source: auto                 # auto | embedded | web (LibreHardwareMonitor web server)

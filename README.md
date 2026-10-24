@@ -39,7 +39,8 @@ yourself, all set up from a clean window instead of config files.
   element (move, resize, rotate, font and size) and drag new ones from a palette; alignment guides, zoom,
   copy/paste/duplicate
 - **Screen themes** with different shapes, not just colors (Clean, Full, Cylinder, Lines, Retro, Aero, Arial, Aqua,
-  Clear, Serial), each in landscape and portrait; change any of them in the editor, save your own, export and import them as files;
+  Clear, Serial, Kitty, Cyber, Phantom, Tech, Rustic, Christmas, Halloween), each in landscape and portrait, each with
+  its own clock screen; change any of them in the editor, save your own, export and import them as files;
   a **community gallery** of themes shared by people, imported with one click
 - **Weather** next to the date (Open-Meteo: only the city name leaves the PC), editable screen texts
 - Landscape and portrait (and both flipped), screen colors, background picture
@@ -47,7 +48,9 @@ yourself, all set up from a clean window instead of config files.
   and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
 - **Presets** (Performance, Default, Custom) and **profiles** you can save, switch, export and import
-- Rest screen (a big clock with the date and the weather while the PC is idle), your own colors per block and element
+- Rest screen (the theme's clock with the date and the weather while the PC is idle), Visual mode (a picture,
+  photos, a GIF or the clock instead of the sensors), transitions to choose, festive themes, your own colors per
+  block and element, a compact window style
 - Temperature alerts, screen off at set hours, search in Settings, HWiNFO as an optional sensor source
 - Eco mode when you are away, automatic recovery, diagnostics report
 - Updates itself: a button lights up when a new version is out

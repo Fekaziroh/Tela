@@ -190,3 +190,19 @@ portrait:
         - {type: value, sensor: net_down, x: 139, y: 40.0, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}
         - {type: text, text: ↑, x: 12, y: 62.400000000000006, size: 12, color: secondary, font: arial, bold: true}
         - {type: value, sensor: net_up, x: 139, y: 62.400000000000006, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: clock, format: '%H:%M', x: 26, y: 115.19999999999999, size: 110, align: left, font: arial}
+    - {type: clock, format: '{weekday} %d/%m', x: 30, y: 187.2, size: 20, align: left, color: secondary, font: arial}
+    - {type: rect, x: 30, y: 207.2, w: 420, h: 1, color: track}
+    - {type: clock, format: '{weather_only}', x: 30, y: 231.2, size: 18, align: left, color: accent, font: arial}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 302, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: arial}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 302, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: arial}
+  portrait:
+    - {type: clock, format: '%H:%M', x: 26, y: 115.19999999999999, size: 92, align: left, font: arial}
+    - {type: clock, format: '{weekday} %d/%m', x: 30, y: 187.2, size: 20, align: left, color: secondary, font: arial}
+    - {type: rect, x: 30, y: 207.2, w: 260, h: 1, color: track}
+    - {type: clock, format: '{weather_only}', x: 30, y: 231.2, size: 18, align: left, color: accent, font: arial}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 462, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: arial}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 462, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: arial}

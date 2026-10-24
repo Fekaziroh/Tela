@@ -676,7 +676,7 @@ def summary_transitions_both_ways():
     calls = []
     e = engine.Engine(ROOT / config.DEFAULT, engine.Log(echo=False), demo=True, simulate="memory")
     orig = e._transition
-    e._transition = lambda target, pause=0.0: (calls.append(e.renderer.layout), orig(target, 0.0))
+    e._transition = lambda target, pause=0.0, **kw: (calls.append(e.renderer.layout), orig(target, 0.0, **kw))
     e.cfg.setdefault("session", {})["summary_seconds"] = 1
     e.start()
     try:
@@ -704,6 +704,22 @@ def theme_change_cascade_repaints_every_pixel():
     e._previous = target.copy()   # Tela! believes the screen already shows it: only "whole" fixes it
     e._transition(target, 0.0, whole=True)
     assert np.array_equal(np.asarray(e.screen.buffer), np.asarray(target))
+
+
+@test
+def every_transition_ends_on_the_new_screen():
+    from PIL import Image
+    import numpy as np
+    e = engine.Engine(ROOT / config.DEFAULT, engine.Log(echo=False), demo=True, simulate="memory")
+    e.screen.file = None
+    assert e._send_frame()
+    target = e.last_frame.copy()
+    for kind in engine.Engine.TRANSITIONS:
+        stale = Image.new("RGB", target.size, "#00ff00")
+        e.screen.buffer = stale.copy()
+        e._previous = stale.copy()
+        e._play(kind, target, whole=True)
+        assert np.array_equal(np.asarray(e.screen.buffer), np.asarray(target)), kind
 
 
 @test
@@ -805,6 +821,27 @@ def rest_screen_takes_over_when_idle_and_leaves_for_a_game():
     e._rest_preview_until = 0.0
     e._update_rest()                                      # demo: never idle on its own
     assert not e.collector.rest and e._send_frame() and e.renderer.layout != "rest"
+
+
+@test
+def visual_mode_shows_pictures_gifs_or_the_clock():
+    from PIL import Image
+    with tempfile.TemporaryDirectory() as d:
+        Image.new("RGB", (64, 40), "#ff0000").save(Path(d) / "a.png")
+        frames = [Image.new("RGB", (40, 40), c) for c in ("#00ff00", "#0000ff")]
+        frames[0].save(Path(d) / "b.gif", save_all=True, append_images=frames[1:], duration=100, loop=0)
+        for kind, files, layout_ok in (("image", "a.png", True), ("photos", "a.png|missing.png", True),
+                                       ("gif", "b.gif", True), ("clock", "", True)):
+            cfg = default_cfg("landscape")
+            cfg["display"]["mode"] = "visual"
+            cfg["visual"] = {"kind": kind, "files": files, "every": 5, "clock": True}
+            r = render.Renderer(cfg, 480, 320, base=d)
+            img = r.draw(FakeCollector(False, False))
+            assert img.size == (480, 320) and r.layout == "visual", kind
+            if kind == "image":
+                assert img.getpixel((10, 10))[0] > 200   # the red picture fills the screen
+            if kind == "gif":
+                assert r.animating
 
 
 @test
@@ -1152,7 +1189,7 @@ def cjk_titles_and_old_portrait_layouts():
 def themes_fit_and_draw_in_both_orientations():
     import themes
     ids = [t["id"] for t in themes.entries()]
-    assert ids[:5] == ["clean", "full", "cockpit", "lines", "retro"], ids
+    assert ids[:5] == ["clean", "full", "cockpit", "lines", "retro"] and len(ids) >= 19, ids
     fields = hardware.fields(hardware.build(hardware.DEMO_RAW))
     for tid in ids:
         for fam in layout.FAMILIES:
@@ -1167,11 +1204,15 @@ def themes_fit_and_draw_in_both_orientations():
             part = themes.load(tid).get(fam)
             if isinstance(part, dict) and part.get("art"):   # the theme's picture ships with the program
                 assert lay["art"] and Path(lay["art"]).is_file(), (tid, fam)
-            cfg["layout"] = {"art": lay["art"]}
+            assert lay["rest"], (tid, fam, "every built-in theme has its own Rest screen")
+            cfg["layout"] = {"art": lay["art"], "rest": lay["rest"]}
             r = render.Renderer(cfg, W, H, base=ROOT, fields=fields)
             for game in (True, False):
                 for media in (True, False):
                     assert r.draw(FakeCollector(game, media)).size == (W, H), (tid, fam)
+            rest = FakeCollector(False, False)
+            rest.rest = True
+            assert r.draw(rest).size == (W, H) and r.layout == "rest", (tid, fam)
 
 
 @test

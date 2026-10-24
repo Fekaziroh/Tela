@@ -21,7 +21,7 @@ from engine import HERE, VERSION, system_language
 from render import DEFAULT_COLORS, Renderer
 
 NOT_FOR_INTERVALS = {"fps", "volume"}
-UI_ONLY = {("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow"), ("ui", "unload_hidden"), ("ui", "guard")}
+UI_ONLY = {("ui", "style"), ("ui", "theme"), ("tray", "temp_icon"), ("ui", "reflow"), ("ui", "unload_hidden"), ("ui", "guard")}
 
 
 def _png_data_url(img):
@@ -622,6 +622,35 @@ class Api:
         self._settings.set("background", "image", rel)
         self._schedule_reload()
         return rel
+
+    def visual_pick(self, kind):
+        """Visual mode: choose the picture(s) or the GIF; they are copied next to the settings."""
+        paths = self._app.pick_images()
+        if not paths:
+            return None
+        if kind != "photos":
+            paths = paths[:1]
+        folder = config.DATA / "visual"
+        folder.mkdir(parents=True, exist_ok=True)
+        files = []
+        for p in paths:
+            src = Path(p)
+            try:
+                shutil.copy2(src, folder / src.name)
+                files.append(f"visual/{src.name}")
+            except OSError as e:
+                self._engine.log(f"Could not copy {src.name}: {e}")
+        if files:
+            self._settings.set_many([("visual", "files", "|".join(files)), ("visual", "kind", kind)])
+            self._schedule_reload()
+        return files
+
+    def set_window_style(self, style):
+        """Compact: a narrow window (fits beside a game); default: the full window."""
+        fn = getattr(self._app, "resize_window", None)
+        if fn:
+            fn(*((440, 820) if style == "compact" else (1180, 780)))
+        return True
 
     def set_autostart(self, on):
         try:

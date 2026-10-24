@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -459,10 +459,11 @@ class Engine(threading.Thread):
                 self._previous = None   # now and then the whole picture again: clears any pixel that went stale
             first = self._previous is None
             layout = self.renderer.layout
-            if wipe and not first:
-                self._transition(img, whole=True)   # another theme: block by block, every pixel sent (no leftovers)
+            anim = (self.cfg.get("animation") or {})
+            if wipe and not first:   # another theme: every pixel is sent again (no leftovers of the old one)
+                self._play(str(anim.get("transition_theme", "cascade")), img, whole=True)
             elif not first and self._prev_layout is not None and layout != self._prev_layout and self.renderer.anim_enabled:
-                self._transition(img)
+                self._play(str(anim.get("transition_summary", "cascade")), img)   # summary or Rest coming in/out
             else:
                 for x, y, w, h in changed_regions(img, self._previous):
                     self.screen.send_image(img.crop((x, y, x + w, y + h)), x, y)
@@ -493,6 +494,74 @@ class Engine(threading.Thread):
             self._wait(1)
             return False
         return True
+
+    TRANSITIONS = ("cascade", "eink", "glitch", "curtain", "none")
+
+    def _play(self, kind, target, whole=False):
+        """Settings › Transitions: how a new screen comes in (theme change; summary and Rest)."""
+        kind = kind if kind in self.TRANSITIONS else "cascade"
+        if kind == "cascade":
+            return self._transition(target, whole=whole)
+        if kind == "eink":
+            return self._fx_eink(target)
+        if kind == "glitch":
+            return self._fx_glitch(target)
+        if kind == "curtain":
+            return self._fx_curtain(target)
+        self._full(target)
+
+    def _full(self, img):
+        self.screen.send_image(img, 0, 0)
+        self.screen.end_frame()
+        self.last_frame = img
+        self.frame_no += 1
+
+    def _fx_frames(self, frames):
+        for img, pause in frames:
+            if self._halt.is_set():
+                break
+            self._full(img)
+            time.sleep(pause)
+
+    def _fx_eink(self, target):
+        """Like an e-ink reader's full refresh: the new picture in negative, black, white, then the picture with a
+        faint ghost of the old one, then clean."""
+        from PIL import Image, ImageChops
+        W, H = target.size
+        old = self._previous if self._previous is not None and self._previous.size == target.size else target
+        self._fx_frames([(ImageChops.invert(target), 0.06), (Image.new("RGB", (W, H), "#000000"), 0.05),
+                         (Image.new("RGB", (W, H), "#FFFFFF"), 0.05), (Image.blend(target, old, 0.12), 0.12)])
+        self._full(target)
+
+    def _fx_glitch(self, target):
+        """A few frames of rows sliding sideways, mixing the old and the new screen, then the new one."""
+        import numpy as np
+        from PIL import Image
+        old = self._previous if self._previous is not None and self._previous.size == target.size else target
+        a, b = np.asarray(old), np.asarray(target)
+        rng = np.random.default_rng()
+        frames = []
+        for k in range(3):
+            mix = (rng.random((a.shape[0], 1, 1)) < (k + 1) / 4)
+            img = np.where(mix, b, a).copy()
+            for _ in range(8):
+                y, h = int(rng.integers(0, a.shape[0] - 8)), int(rng.integers(2, 14))
+                img[y:y + h] = np.roll(img[y:y + h], int(rng.integers(-24, 24)), axis=1)
+            frames.append((Image.fromarray(img), 0.04))
+        self._fx_frames(frames)
+        self._full(target)
+
+    def _fx_curtain(self, target, step=32):
+        """The new screen slides down over the old one, a band at a time (only the bands are sent)."""
+        W, H = target.size
+        for y in range(0, H, step):
+            if self._halt.is_set():
+                break
+            self.screen.send_image(target.crop((0, y, W, min(H, y + step))), 0, y)
+            self.screen.end_frame()
+            time.sleep(0.02)
+        self.last_frame = target
+        self.frame_no += 1
 
     def _transition(self, target, pause=0.05, whole=False):
         """Screen change in cascade: each block of the target screen comes in at a time.

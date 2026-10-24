@@ -1,0 +1,180 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Tech, en: Tech, es: Tech, zh: Tech}
+order: 14
+tela: 1
+
+colors:
+  background: '#20241F'
+  panel: '#151813'
+  text: '#D9E0CF'
+  secondary: '#8C9A7E'
+  track: '#2F362B'
+  accent: '#9BC53D'
+  warn: '#E0B000'
+  crit: '#E5484D'
+
+landscape:
+  art: tech_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 34
+      items:
+        - {type: text, text: TELA! //, x: 10, y: 18, size: 12, color: accent, font: consolas, bold: true}
+        - {type: value, sensor: fps, x: 90, y: 18, size: 18, unit: ' FPS', font: consolas, bold: true, unit_size: 10, empty: ''}
+        - {type: clock, format: '%H:%M:%S', x: 468, y: 18, align: right, size: 18, bold: true, font: consolas}
+        - {type: media, x: 170, y: 3, w: 180, h: 28, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 38
+      w: 234
+      h: 160
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 160, title: '[ CPU ]', subtitle: '{cpu_name}', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: TEMP, x: 12, y: 44, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_temp, x: 222, y: 44, size: 26, unit: °C, align: right, font: consolas, bold: true, unit_size: 12}
+        - {type: bar, sensor: cpu_temp, x: 12, y: 62, w: 210, h: 6, min: 20, max: 95, color: accent, style: segments, gap: 2, cells: 16}
+        - {type: text, text: LOAD, x: 12, y: 84, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_load, x: 222, y: 84, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: bar, sensor: cpu_load, x: 12, y: 96, w: 210, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: text, text: CLOCK, x: 12, y: 118, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_clock, x: 222, y: 118, size: 15, unit: ' GHZ', align: right, font: consolas, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: POWER, x: 12, y: 140, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_power, x: 222, y: 140, size: 15, unit: ' W', align: right, font: consolas}
+    - id: gpu
+      name: GPU
+      x: 242
+      y: 38
+      w: 234
+      h: 160
+      items:
+        - {type: panel, x: 0, y: 0, w: 234, h: 160, title: '[ GPU ]', subtitle: '{gpu_name}', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: TEMP, x: 12, y: 44, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_temp, x: 222, y: 44, size: 26, unit: °C, align: right, font: consolas, bold: true, unit_size: 12}
+        - {type: bar, sensor: gpu_temp, x: 12, y: 62, w: 210, h: 6, min: 20, max: 95, color: accent, style: segments, gap: 2, cells: 16}
+        - {type: text, text: LOAD, x: 12, y: 84, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_load, x: 222, y: 84, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: bar, sensor: gpu_load, x: 12, y: 96, w: 210, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: text, text: CLOCK, x: 12, y: 118, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_clock, x: 222, y: 118, size: 15, unit: ' MHZ', align: right, font: consolas}
+        - {type: text, text: POWER, x: 12, y: 140, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_power, x: 222, y: 140, size: 15, unit: ' W', align: right, font: consolas}
+    - id: sys
+      name: SYS
+      x: 4
+      y: 202
+      w: 472
+      h: 114
+      items:
+        - {type: panel, x: 0, y: 0, w: 472, h: 114, title: '[ SYS ]', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: RAM, x: 12, y: 38, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: ram_pct, x: 120, y: 38, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: text, text: VRAM, x: 12, y: 58, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: vram_mb, x: 120, y: 58, size: 15, unit: ' GB', align: right, font: consolas, scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: DISK, x: 12, y: 78, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: disk1_act, x: 120, y: 78, size: 15, unit: ' %', align: right, font: consolas, ssd: true}
+        - {type: text, text: VOL, x: 12, y: 98, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: volume, x: 120, y: 98, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: text, text: NET DOWN, x: 250.0, y: 38, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: net_down, x: 460, y: 38, size: 15, unit: ' MB/S', align: right, font: consolas, format: '{:.1f}'}
+        - {type: text, text: NET UP, x: 250.0, y: 58, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: net_up, x: 460, y: 58, size: 15, unit: ' MB/S', align: right, font: consolas, format: '{:.1f}'}
+        - {type: text, text: SSD TEMP, x: 250.0, y: 78, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: ssd1_temp, x: 460, y: 78, size: 15, unit: ' °C', align: right, font: consolas}
+        - {type: text, text: HOTSPOT, x: 250.0, y: 98, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_hotspot, x: 460, y: 98, size: 15, unit: ' °C', align: right, font: consolas}
+        - {type: bar, sensor: ram_pct, x: 130, y: 35, w: 100, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: bar, sensor: disk1_act, x: 130, y: 75, w: 100, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: bar, sensor: volume, x: 130, y: 95, w: 100, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+
+portrait:
+  art: tech_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 62
+      items:
+        - {type: text, text: TELA! //, x: 10, y: 18, size: 12, color: accent, font: consolas, bold: true}
+        - {type: value, sensor: fps, x: 76, y: 18, size: 18, unit: ' FPS', font: consolas, bold: true, unit_size: 10, empty: ''}
+        - {type: clock, format: '%H:%M:%S', x: 308, y: 18, align: right, size: 18, bold: true, font: consolas}
+        - {type: media, x: 10, y: 36, w: 300, h: 24, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 4
+      y: 64
+      w: 312
+      h: 160
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 160, title: '[ CPU ]', subtitle: '{cpu_name}', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: TEMP, x: 12, y: 44, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_temp, x: 300, y: 44, size: 26, unit: °C, align: right, font: consolas, bold: true, unit_size: 12}
+        - {type: bar, sensor: cpu_temp, x: 12, y: 62, w: 288, h: 6, min: 20, max: 95, color: accent, style: segments, gap: 2, cells: 16}
+        - {type: text, text: LOAD, x: 12, y: 84, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_load, x: 300, y: 84, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: bar, sensor: cpu_load, x: 12, y: 96, w: 288, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: text, text: CLOCK, x: 12, y: 118, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_clock, x: 300, y: 118, size: 15, unit: ' GHZ', align: right, font: consolas, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: POWER, x: 12, y: 140, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: cpu_power, x: 300, y: 140, size: 15, unit: ' W', align: right, font: consolas}
+    - id: gpu
+      name: GPU
+      x: 4
+      y: 228
+      w: 312
+      h: 160
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 160, title: '[ GPU ]', subtitle: '{gpu_name}', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: TEMP, x: 12, y: 44, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_temp, x: 300, y: 44, size: 26, unit: °C, align: right, font: consolas, bold: true, unit_size: 12}
+        - {type: bar, sensor: gpu_temp, x: 12, y: 62, w: 288, h: 6, min: 20, max: 95, color: accent, style: segments, gap: 2, cells: 16}
+        - {type: text, text: LOAD, x: 12, y: 84, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_load, x: 300, y: 84, size: 15, unit: ' %', align: right, font: consolas}
+        - {type: bar, sensor: gpu_load, x: 12, y: 96, w: 288, h: 6, min: 0, max: 100, style: segments, gap: 2, cells: 16}
+        - {type: text, text: CLOCK, x: 12, y: 118, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_clock, x: 300, y: 118, size: 15, unit: ' MHZ', align: right, font: consolas}
+        - {type: text, text: POWER, x: 12, y: 140, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: gpu_power, x: 300, y: 140, size: 15, unit: ' W', align: right, font: consolas}
+    - id: sys
+      name: SYS
+      x: 4
+      y: 392
+      w: 312
+      h: 84
+      items:
+        - {type: panel, x: 0, y: 0, w: 312, h: 84, title: '[ SYS ]', border: accent@45, font: consolas, opacity: 0.88, radius: 2}
+        - {type: text, text: RAM, x: 12, y: 34, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: ram_pct, x: 152.0, y: 34, size: 13, unit: ' %', align: right, font: consolas}
+        - {type: text, text: VRAM, x: 12, y: 52, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: vram_mb, x: 152.0, y: 52, size: 13, unit: ' GB', align: right, font: consolas, scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: DISK, x: 12, y: 70, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: disk1_act, x: 152.0, y: 70, size: 13, unit: ' %', align: right, font: consolas, ssd: true}
+        - {type: text, text: DOWN, x: 170.0, y: 34, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: net_down, x: 300, y: 34, size: 13, unit: ' MB/S', align: right, font: consolas, format: '{:.1f}'}
+        - {type: text, text: UP, x: 170.0, y: 52, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: net_up, x: 300, y: 52, size: 13, unit: ' MB/S', align: right, font: consolas, format: '{:.1f}'}
+        - {type: text, text: SSD, x: 170.0, y: 70, size: 11, color: secondary, font: consolas}
+        - {type: value, sensor: ssd1_temp, x: 300, y: 70, size: 13, unit: ' °C', align: right, font: consolas}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 8, y: 8, w: 464, h: 304, title: '[ TIME ]', border: accent@45, opacity: 0.88, radius: 2, font: consolas}
+    - {type: clock, format: '%H:%M:%S', x: 240.0, y: 134.4, size: 64, align: center, bold: true, color: accent, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 184.4, size: 16, align: center, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 210.4, size: 14, align: center, font: consolas}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 292, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: consolas}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 292, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: consolas}
+  portrait:
+    - {type: panel, x: 8, y: 8, w: 304, h: 464, title: '[ TIME ]', border: accent@45, opacity: 0.88, radius: 2, font: consolas}
+    - {type: clock, format: '%H:%M:%S', x: 160.0, y: 182.4, size: 46, align: center, bold: true, color: accent, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 232.4, size: 16, align: center, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 258.4, size: 14, align: center, font: consolas}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 452, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: consolas}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 452, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: consolas}

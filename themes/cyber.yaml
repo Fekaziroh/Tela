@@ -1,0 +1,175 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Cyber, en: Cyber, es: Cyber, zh: Cyber}
+order: 12
+tela: 1
+
+colors:
+  background: '#07030A'
+  panel: '#0E0508'
+  text: '#FFE9EC'
+  secondary: '#B9707D'
+  track: '#3A0D16'
+  accent: '#FF2D4A'
+  warn: '#FFC14D'
+  crit: '#FFFFFF'
+
+landscape:
+  art: cyber_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 34
+      items:
+        - {type: text, text: ◢ TELA!, x: 10, y: 17, size: 13, color: accent, bold: true, when: no_fps}
+        - {type: value, sensor: fps, x: 10, y: 17, size: 18, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
+        - {type: clock, format: '%H:%M:%S', x: 470, y: 17, align: right, size: 18, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 150, y: 17, align: left, size: 10, color: secondary, when: no_media_any}
+        - {type: media, x: 140, y: 3, w: 190, h: 28, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 38
+      w: 231
+      h: 142
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 142, title: CPU //, subtitle: '{cpu_name}', border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: value, sensor: cpu_temp, x: 12, y: 52, size: 34, unit: °C, bold: true, unit_size: 12, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: bar, sensor: cpu_temp, x: 12, y: 70, w: 207, h: 8, min: 20, max: 95, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], cells: 24, style: segments, gap: 2}
+        - {type: text, text: '#load', x: 12, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 107.5, y: 92, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: cpu_load, x: 12, y: 102, w: 95.5, h: 5, min: 0, max: 100, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#power', x: 123.5, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 219, y: 92, size: 13, unit: ' W', align: right, unit_size: 8}
+        - {type: bar, sensor: cpu_power, x: 123.5, y: 102, w: 95.5, h: 5, min: 0, max: 300, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#clock', x: 12, y: 130, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 219, y: 130, size: 12, unit: ' GHz', align: right, unit_size: 7, scale: 0.001, format: '{:.2f}'}
+    - id: gpu
+      name: GPU
+      x: 243
+      y: 38
+      w: 231
+      h: 142
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 142, title: GPU //, subtitle: '{gpu_name}', border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: value, sensor: gpu_temp, x: 12, y: 52, size: 34, unit: °C, bold: true, unit_size: 12, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: bar, sensor: gpu_temp, x: 12, y: 70, w: 207, h: 8, min: 20, max: 95, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], cells: 24, style: segments, gap: 2}
+        - {type: text, text: '#load', x: 12, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 107.5, y: 92, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: gpu_load, x: 12, y: 102, w: 95.5, h: 5, min: 0, max: 100, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#power', x: 123.5, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 219, y: 92, size: 13, unit: ' W', align: right, unit_size: 8}
+        - {type: bar, sensor: gpu_power, x: 123.5, y: 102, w: 95.5, h: 5, min: 0, max: 300, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#clock', x: 12, y: 130, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 219, y: 130, size: 12, unit: ' MHz', align: right, unit_size: 7}
+    - id: sys
+      name: SYS
+      x: 6
+      y: 186
+      w: 468
+      h: 128
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 128, title: SYS //, border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: text, text: RAM, x: 12.0, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_pct, x: 152.0, y: 40, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: ram_pct, x: 12.0, y: 50, w: 140.0, h: 5, min: 0, max: 100, ssd: false, cells: 14, style: segments, gap: 2}
+        - {type: text, text: VRAM, x: 164.0, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: vram_mb, x: 304.0, y: 40, size: 13, unit: ' GB', align: right, unit_size: 8, scale: 0.001, format: '{:.1f}'}
+        - {type: bar, sensor: vram_mb, x: 164.0, y: 50, w: 140.0, h: 5, min: 0, max: 12288, ssd: false, cells: 14, style: segments, gap: 2}
+        - {type: text, text: '{disks_title}', x: 316.0, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: disk1_act, x: 456.0, y: 40, size: 13, unit: ' %', align: right, unit_size: 8, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 316.0, y: 50, w: 140.0, h: 5, min: 0, max: 100, ssd: true, cells: 14, style: segments, gap: 2}
+        - {type: text, text: '#network', x: 12, y: 78, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: net_down, x: 378, y: 78, size: 12, unit: ' ↓', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: value, sensor: net_up, x: 456, y: 78, size: 12, unit: ' ↑', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: graph, sensor: net_down, x: 12, y: 86, w: 444, h: 36, min: 0, max: 500, points: 90, fill_color: accent@14}
+
+portrait:
+  art: cyber_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 54
+      items:
+        - {type: text, text: ◢ TELA!, x: 10, y: 16, size: 12, color: accent, bold: true, when: no_fps}
+        - {type: value, sensor: fps, x: 10, y: 16, size: 16, unit: ' FPS', unit_size: 8, bold: true, empty: ''}
+        - {type: clock, format: '%H:%M:%S', x: 310, y: 16, align: right, size: 16, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 42, align: left, size: 10, color: secondary, when: no_media_any}
+        - {type: media, x: 10, y: 28, w: 300, h: 24, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 58
+      w: 308
+      h: 136
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 136, title: CPU //, subtitle: '{cpu_name}', border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: value, sensor: cpu_temp, x: 12, y: 52, size: 34, unit: °C, bold: true, unit_size: 12, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: bar, sensor: cpu_temp, x: 12, y: 70, w: 284, h: 8, min: 20, max: 95, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], cells: 24, style: segments, gap: 2}
+        - {type: text, text: '#load', x: 12, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 146.0, y: 92, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: cpu_load, x: 12, y: 102, w: 134.0, h: 5, min: 0, max: 100, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#power', x: 162.0, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 296, y: 92, size: 13, unit: ' W', align: right, unit_size: 8}
+        - {type: bar, sensor: cpu_power, x: 162.0, y: 102, w: 134.0, h: 5, min: 0, max: 300, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#clock', x: 12, y: 124, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 296, y: 124, size: 12, unit: ' GHz', align: right, unit_size: 7, scale: 0.001, format: '{:.2f}'}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 198
+      w: 308
+      h: 136
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 136, title: GPU //, subtitle: '{gpu_name}', border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: value, sensor: gpu_temp, x: 12, y: 52, size: 34, unit: °C, bold: true, unit_size: 12, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: bar, sensor: gpu_temp, x: 12, y: 70, w: 284, h: 8, min: 20, max: 95, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], cells: 24, style: segments, gap: 2}
+        - {type: text, text: '#load', x: 12, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 146.0, y: 92, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: gpu_load, x: 12, y: 102, w: 134.0, h: 5, min: 0, max: 100, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#power', x: 162.0, y: 92, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 296, y: 92, size: 13, unit: ' W', align: right, unit_size: 8}
+        - {type: bar, sensor: gpu_power, x: 162.0, y: 102, w: 134.0, h: 5, min: 0, max: 300, cells: 12, style: segments, gap: 2}
+        - {type: text, text: '#clock', x: 12, y: 124, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 296, y: 124, size: 12, unit: ' MHz', align: right, unit_size: 7}
+    - id: sys
+      name: SYS
+      x: 6
+      y: 338
+      w: 308
+      h: 138
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 138, title: SYS //, border: accent, radius: 0, opacity: 0.86, title_color: accent}
+        - {type: text, text: RAM, x: 12.0, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: ram_pct, x: 98.66666666666667, y: 40, size: 13, unit: ' %', align: right, unit_size: 8}
+        - {type: bar, sensor: ram_pct, x: 12.0, y: 50, w: 86.66666666666667, h: 5, min: 0, max: 100, ssd: false, cells: 14, style: segments, gap: 2}
+        - {type: text, text: VRAM, x: 110.66666666666667, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: vram_mb, x: 197.33333333333334, y: 40, size: 13, unit: ' GB', align: right, unit_size: 8, scale: 0.001, format: '{:.1f}'}
+        - {type: bar, sensor: vram_mb, x: 110.66666666666667, y: 50, w: 86.66666666666667, h: 5, min: 0, max: 12288, ssd: false, cells: 14, style: segments, gap: 2}
+        - {type: text, text: '{disks_title}', x: 209.33333333333334, y: 40, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: disk1_act, x: 296.0, y: 40, size: 13, unit: ' %', align: right, unit_size: 8, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 209.33333333333334, y: 50, w: 86.66666666666667, h: 5, min: 0, max: 100, ssd: true, cells: 14, style: segments, gap: 2}
+        - {type: text, text: '#network', x: 12, y: 78, size: 8.5, color: secondary, bold: true}
+        - {type: value, sensor: net_down, x: 218, y: 78, size: 12, unit: ' ↓', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: value, sensor: net_up, x: 296, y: 78, size: 12, unit: ' ↑', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: graph, sensor: net_down, x: 12, y: 86, w: 284, h: 46, min: 0, max: 500, points: 90, fill_color: accent@14}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: text, text: ◢ TELA!, x: 16, y: 22, size: 13, align: left, color: accent, bold: true}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 96.0, size: 92, align: center, bold: true}
+    - {type: clock, format: ':%S', x: 380.0, y: 114.0, size: 22, align: left, color: accent, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 160.0, size: 16, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 184.0, size: 14, align: center, color: accent}
+  portrait:
+    - {type: text, text: ◢ TELA!, x: 16, y: 22, size: 13, align: left, color: accent, bold: true}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 134.4, size: 70, align: center, bold: true}
+    - {type: clock, format: ':%S', x: 268.0, y: 152.4, size: 22, align: left, color: accent, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 190.4, size: 16, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 214.4, size: 14, align: center, color: accent}

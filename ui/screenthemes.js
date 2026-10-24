@@ -22,7 +22,16 @@ async function stThumbs() {
 const stCur = () => ST.list.find(x => x.id === ST.current) || null;
 const stName = id => (ST.list.find(x => x.id === id) || {}).name || id || "";
 
+function stHomeSelect() {   // Início › Tema: the same list, as a quick choice
+  const sel = $("#home-theme");
+  if (!sel || document.activeElement === sel) return;
+  sel.innerHTML = ST.list.map(th => `<option value="${esc(th.id)}">${esc(th.name)}</option>`).join("");
+  sel.value = ST.current || "";
+  if (!sel.dataset.bound) { sel.dataset.bound = "1"; sel.addEventListener("change", () => stApply(sel.value)); }
+}
+
 function stRender() {
+  stHomeSelect();
   const grid = $("#st-grid");
   if (!grid) return;
   grid.innerHTML = "";
@@ -92,7 +101,7 @@ async function stHover(id) {
 function stMirror() {   // the screen as it is now, while no theme is being previewed
   if (ST.hover && ST.hover !== ST.current) return;
   const c = $("#st-canvas");
-  if (c && S.tab === "look" && typeof copyFrame === "function") copyFrame(c);
+  if (c && S.tab === "screen" && typeof copyFrame === "function") copyFrame(c);
 }
 
 async function stApply(id) {
@@ -257,7 +266,7 @@ function bindScreenThemes() {
   $("#st-import").addEventListener("click", stImport);
   $("#st-export").addEventListener("click", stExport);
   $("#st-gallery").addEventListener("click", () => stGallery(false));
-  $("#st-notice-go").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); showTab("look"); });
+  $("#st-notice-go").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); showTab("screen"); });
   $("#st-notice-no").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); });
   document.addEventListener("tela-frame", stMirror);
 }
@@ -265,6 +274,6 @@ function bindScreenThemes() {
 // a .tela-theme opened with a double click in Explorer (Tela.exe --import-theme)
 async function stImported(id) {
   await stLoad();
-  showTab("look");
+  showTab("screen");
   toast(t("st.imported", { name: stName(id) }));
 }

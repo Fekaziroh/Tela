@@ -1,0 +1,218 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Natal, en: Christmas, es: Navidad, zh: 圣诞}
+order: 18
+tela: 1
+
+colors:
+  background: '#0B2A1A'
+  panel: '#5E0B16'
+  text: '#FFF4E6'
+  secondary: '#F2C6A0'
+  track: '#3D0910'
+  accent: '#FFD34E'
+  warn: '#FF9F43'
+  crit: '#FFFFFF'
+
+landscape:
+  art: xmas_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 22
+      w: 480
+      h: 34
+      items:
+        - {type: value, sensor: fps, x: 12, y: 17.0, size: 20, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
+        - {type: image, files: logos, x: 12, y: 9.0, w: 100, h: 16, when: no_fps}
+        - {type: clock, format: '%H:%M', x: 240, y: 17.0, align: center, size: 24, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 17.0, align: right, size: 10, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 296, y: 2.0, w: 172, h: 30, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 58
+      w: 231
+      h: 132
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 132, title: CPU, subtitle: '{cpu_name}', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: gauge, sensor: cpu_temp, cx: 58, cy: 79.2, radius: 40, thickness: 7, min: 20, max: 95, unit: °C, size: 24, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], track_color: '#3D0910'}
+        - {type: text, text: '#load', x: 112, y: 38.0, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 219, y: 38.0, size: 14, unit: ' %', align: right, unit_size: 8}
+        - {type: rect, x: 112, y: 51, w: 107, h: 1, color: track}
+        - {type: text, text: '#clock', x: 112, y: 63.294117647058826, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 219, y: 63.294117647058826, size: 14, unit: ' GHz', align: right, unit_size: 8, scale: 0.001, format: '{:.2f}'}
+        - {type: rect, x: 112, y: 76, w: 107, h: 1, color: track}
+        - {type: text, text: '#power', x: 112, y: 88.58823529411765, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 219, y: 88.58823529411765, size: 14, unit: ' W', align: right, unit_size: 8}
+        - {type: rect, x: 112, y: 101, w: 107, h: 1, color: track}
+        - {type: text, text: '#fan', x: 112, y: 113.88235294117646, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_fan, x: 219, y: 113.88235294117646, size: 14, unit: ' RPM', align: right, unit_size: 8}
+    - id: gpu
+      name: GPU
+      x: 243
+      y: 58
+      w: 231
+      h: 132
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 132, title: GPU, subtitle: '{gpu_name}', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: gauge, sensor: gpu_temp, cx: 58, cy: 79.2, radius: 40, thickness: 7, min: 20, max: 95, unit: °C, size: 24, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], track_color: '#3D0910'}
+        - {type: text, text: '#load', x: 112, y: 38.0, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 219, y: 38.0, size: 14, unit: ' %', align: right, unit_size: 8}
+        - {type: rect, x: 112, y: 51, w: 107, h: 1, color: track}
+        - {type: text, text: '#clock', x: 112, y: 63.294117647058826, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 219, y: 63.294117647058826, size: 14, unit: ' MHz', align: right, unit_size: 8}
+        - {type: rect, x: 112, y: 76, w: 107, h: 1, color: track}
+        - {type: text, text: '#power', x: 112, y: 88.58823529411765, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 219, y: 88.58823529411765, size: 14, unit: ' W', align: right, unit_size: 8}
+        - {type: rect, x: 112, y: 101, w: 107, h: 1, color: track}
+        - {type: text, text: '#fan', x: 112, y: 113.88235294117646, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_fan, x: 219, y: 113.88235294117646, size: 14, unit: ' RPM', align: right, unit_size: 8}
+    - id: ram
+      name: RAM
+      x: 12
+      y: 196
+      w: 96
+      h: 96
+      items:
+        - {type: gauge, sensor: ram_pct, cx: 48.0, cy: 48.0, radius: 45.0, thickness: 6, min: 0, max: 100, unit: '%', size: 19, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16'}
+        - {type: text, text: RAM, x: 48.0, y: 69.12, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: vram
+      name: VRAM
+      x: 122
+      y: 196
+      w: 96
+      h: 96
+      items:
+        - {type: gauge, sensor: vram_mb, cx: 48.0, cy: 48.0, radius: 45.0, thickness: 6, min: 0, max: 12288, unit: GB, size: 19, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16', scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: VRAM, x: 48.0, y: 69.12, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: disks
+      name: '{disks_title}'
+      x: 232
+      y: 196
+      w: 96
+      h: 96
+      items:
+        - {type: gauge, sensor: disk1_act, cx: 48.0, cy: 48.0, radius: 45.0, thickness: 6, min: 0, max: 100, unit: '%', size: 19, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16', ssd: true}
+        - {type: text, text: '{disks_title}', x: 48.0, y: 69.12, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: network
+      name: '#network'
+      x: 342
+      y: 200
+      w: 132
+      h: 88
+      items:
+        - {type: panel, x: 0, y: 0, w: 132, h: 88, title: '#network', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: text, text: ↓, x: 12, y: 44.0, size: 12, color: accent, bold: true}
+        - {type: value, sensor: net_down, x: 120, y: 44.0, size: 14, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: ↑, x: 12, y: 70.4, size: 12, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 120, y: 70.4, size: 14, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+
+portrait:
+  art: xmas_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 20
+      w: 320
+      h: 54
+      items:
+        - {type: value, sensor: fps, x: 10, y: 18, size: 18, unit: ' FPS', unit_size: 9, bold: true, empty: ''}
+        - {type: image, files: logos, x: 10, y: 10, w: 80, h: 15, when: no_fps}
+        - {type: clock, format: '%H:%M', x: 310, y: 18, align: right, size: 22, bold: true}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 40, align: left, size: 10, color: secondary, when: no_media_any, fade: true}
+        - {type: media, x: 10, y: 26, w: 300, h: 24, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 78
+      w: 308
+      h: 114
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 114, title: CPU, subtitle: '{cpu_name}', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: gauge, sensor: cpu_temp, cx: 62, cy: 66.11999999999999, radius: 38, thickness: 7, min: 20, max: 95, unit: °C, size: 24, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], track_color: '#3D0910'}
+        - {type: text, text: '#load', x: 128, y: 36.0, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_load, x: 296, y: 36.0, size: 14, unit: ' %', align: right, unit_size: 8}
+        - {type: rect, x: 128, y: 47, w: 168, h: 1, color: track}
+        - {type: text, text: '#clock', x: 128, y: 57.21212121212122, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_clock, x: 296, y: 57.21212121212122, size: 14, unit: ' GHz', align: right, unit_size: 8, scale: 0.001, format: '{:.2f}'}
+        - {type: rect, x: 128, y: 68, w: 168, h: 1, color: track}
+        - {type: text, text: '#power', x: 128, y: 78.42424242424244, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_power, x: 296, y: 78.42424242424244, size: 14, unit: ' W', align: right, unit_size: 8}
+        - {type: rect, x: 128, y: 89, w: 168, h: 1, color: track}
+        - {type: text, text: '#fan', x: 128, y: 99.63636363636364, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: cpu_fan, x: 296, y: 99.63636363636364, size: 14, unit: ' RPM', align: right, unit_size: 8}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 198
+      w: 308
+      h: 114
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 114, title: GPU, subtitle: '{gpu_name}', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: gauge, sensor: gpu_temp, cx: 62, cy: 66.11999999999999, radius: 38, thickness: 7, min: 20, max: 95, unit: °C, size: 24, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], track_color: '#3D0910'}
+        - {type: text, text: '#load', x: 128, y: 36.0, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_load, x: 296, y: 36.0, size: 14, unit: ' %', align: right, unit_size: 8}
+        - {type: rect, x: 128, y: 47, w: 168, h: 1, color: track}
+        - {type: text, text: '#clock', x: 128, y: 57.21212121212122, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_clock, x: 296, y: 57.21212121212122, size: 14, unit: ' MHz', align: right, unit_size: 8}
+        - {type: rect, x: 128, y: 68, w: 168, h: 1, color: track}
+        - {type: text, text: '#power', x: 128, y: 78.42424242424244, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_power, x: 296, y: 78.42424242424244, size: 14, unit: ' W', align: right, unit_size: 8}
+        - {type: rect, x: 128, y: 89, w: 168, h: 1, color: track}
+        - {type: text, text: '#fan', x: 128, y: 99.63636363636364, size: 9, color: secondary, bold: true}
+        - {type: value, sensor: gpu_fan, x: 296, y: 99.63636363636364, size: 14, unit: ' RPM', align: right, unit_size: 8}
+    - id: ram
+      name: RAM
+      x: 6
+      y: 318
+      w: 86
+      h: 86
+      items:
+        - {type: gauge, sensor: ram_pct, cx: 43.0, cy: 43.0, radius: 40.0, thickness: 6, min: 0, max: 100, unit: '%', size: 17, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16'}
+        - {type: text, text: RAM, x: 43.0, y: 61.92, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: vram
+      name: VRAM
+      x: 117.0
+      y: 318
+      w: 86
+      h: 86
+      items:
+        - {type: gauge, sensor: vram_mb, cx: 43.0, cy: 43.0, radius: 40.0, thickness: 6, min: 0, max: 12288, unit: GB, size: 17, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16', scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: VRAM, x: 43.0, y: 61.92, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: disks
+      name: '{disks_title}'
+      x: 228.0
+      y: 318
+      w: 86
+      h: 86
+      items:
+        - {type: gauge, sensor: disk1_act, cx: 43.0, cy: 43.0, radius: 40.0, thickness: 6, min: 0, max: 100, unit: '%', size: 17, start_angle: -90, end_angle: 270, offset_y: -4, fill: '#F4F9FF', gloss: 0.6, track_color: '#DDE8F3', text_color: '#5A0B16', ssd: true}
+        - {type: text, text: '{disks_title}', x: 43.0, y: 61.92, size: 8.5, color: secondary, align: center, bold: true, over: true}
+    - id: network
+      name: '#network'
+      x: 6
+      y: 408
+      w: 308
+      h: 40
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 40, title: '', border: '#FFD34E', color: '#6A0F1C', opacity: 0.9, radius: 14, shadow: 2, gradient: ['#8A1424', '#5A0B16'], gloss: 0.18}
+        - {type: text, text: '#network', x: 12, y: 20.0, size: 9, color: secondary, bold: true}
+        - {type: text, text: ↓, x: 104.72000000000001, y: 20.0, size: 12, color: accent, bold: true}
+        - {type: value, sensor: net_down, x: 190.96, y: 20.0, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: ↑, x: 203.28, y: 20.0, size: 12, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 296, y: 20.0, size: 13, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}'}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 90.0, y: 58, w: 300, h: 170, border: '#FFD34E', gradient: ['#8A1424', '#5A0B16'], gloss: 0.18, opacity: 0.92, radius: 16, shadow: 2}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 129.39999999999998, size: 64, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 175.39999999999998, size: 15, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 199.39999999999998, size: 13, align: center, color: accent}
+  portrait:
+    - {type: panel, x: 25.0, y: 110, w: 270, h: 190, border: '#FFD34E', gradient: ['#8A1424', '#5A0B16'], gloss: 0.18, opacity: 0.92, radius: 16, shadow: 2}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 189.8, size: 56, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 235.8, size: 15, align: center, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 259.8, size: 13, align: center, color: accent}

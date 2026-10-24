@@ -121,6 +121,15 @@ def art(tid, fam):
     return ""
 
 
+def clock_screen(tid, fam):
+    """The theme's own Rest screen ("clock: {landscape: [...], portrait: [...]}"): absolute widgets, or []."""
+    try:
+        items = (load(tid).get("clock") or {}).get(fam)
+    except (KeyError, ValueError, OSError, AttributeError):
+        return []
+    return [dict(w) for w in items if isinstance(w, dict) and isinstance(w.get("type"), str)] if isinstance(items, list) else []
+
+
 def sensors(tid):
     """Extra sensors a theme brings (added with "more sensors" in the editor)."""
     try:
@@ -245,6 +254,15 @@ def dump(data):
             out.append("      items:")
             for it in g.get("items") or []:
                 out.append(f"        - {_flow(it)}")
+    clock = data.get("clock")
+    if isinstance(clock, dict) and any(clock.get(f) for f in FAMILIES):
+        out.append("")
+        out.append("clock:   # the Rest screen (absolute positions)")
+        for fam in FAMILIES:
+            if clock.get(fam):
+                out.append(f"  {fam}:")
+                for it in clock[fam]:
+                    out.append(f"    - {_flow(it)}")
     return "\n".join(out) + "\n"
 
 
@@ -276,6 +294,10 @@ def validate(data):
         found = True
     if not found:
         raise ValueError("the theme has no layout")
+    if "clock" in data:   # the Rest screen: plain elements only, no pictures from the other PC
+        clock = data["clock"] if isinstance(data["clock"], dict) else {}
+        data["clock"] = {f: [it for it in clock.get(f) or [] if isinstance(it, dict) and isinstance(it.get("type"), str)
+                             and it["type"] != "image"] for f in FAMILIES if isinstance(clock.get(f), list)}
     if not isinstance(data.get("colors") or {}, dict):
         raise ValueError("damaged theme colors")
     for k, v in (data.get("sensors") or {}).items():
@@ -307,6 +329,8 @@ def snapshot(tid, colors_now=None, lang="en", new_name=None):
             out[fam]["art"] = part["art"]
     if extra:
         out["sensors"] = extra
+    if isinstance(data.get("clock"), dict):   # the theme's Rest screen
+        out["clock"] = copy.deepcopy(data["clock"])
     return out
 
 

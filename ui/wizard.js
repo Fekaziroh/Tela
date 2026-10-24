@@ -20,7 +20,7 @@ function wizRender() {
   body.className = "wiz";
   const st = (S.state || {}).status || {};
   if (W.step === 0) {
-    body.innerHTML = `<p class="hint">${t("wiz.lang")}</p><div class="wiz-langs"></div><p class="hint" style="margin-top:14px">${t("wiz.theme")}</p><div class="themes wiz-themes"></div>`;
+    body.innerHTML = `<p class="hint">${t("wiz.lang")}</p><div class="wiz-langs"></div><p class="hint" style="margin-top:14px">${t("wiz.theme")}</p><div class="themes wiz-themes"></div><p class="hint" style="margin-top:14px">${t("wiz.style")}</p><div class="seg wiz-style"><button data-v="default">${t("style.default")}</button><button data-v="compact">${t("style.compact")}</button></div>`;
     const langs = $(".wiz-langs", body);
     for (const l of ["auto", "pt", "en", "es", "zh"]) {
       const b = document.createElement("button");
@@ -39,6 +39,10 @@ function wizRender() {
       b.addEventListener("click", async () => { await setSetting("ui.theme", id, true); renderThemes(); wizRender(); });
       th.appendChild(b);
     }
+    $$(".wiz-style button", body).forEach(b => {
+      b.setAttribute("aria-pressed", String(((S.settings.ui || {}).style || "default") === b.dataset.v));
+      b.addEventListener("click", async () => { await setWindowStyle(b.dataset.v); wizRender(); });
+    });
   } else if (W.step === 1) {
     const [kind, text] = screenState(st);
     body.innerHTML = `<p class="hint">${t("wiz.screen")}</p><div class="pills">${pill(kind, t("pill.screen"), text)}</div>

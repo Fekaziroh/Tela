@@ -160,3 +160,21 @@ portrait:
         - {type: value, sensor: net_up, x: 300, y: 52, size: 13, unit: ' MB/S', align: right, font: consolas, format: '{:.1f}'}
         - {type: text, text: SSD, x: 170.0, y: 70, size: 11, color: secondary, font: consolas}
         - {type: value, sensor: ssd1_temp, x: 300, y: 70, size: 13, unit: ' °C', align: right, font: consolas}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 8, y: 8, w: 464, h: 304, title: '[ CLOCK ]', border: accent, font: consolas}
+    - {type: clock, format: '88:88:88', x: 240.0, y: 134.4, size: 64, align: center, bold: true, color: track, font: consolas}
+    - {type: clock, format: '%H:%M:%S', x: 240.0, y: 134.4, size: 64, align: center, bold: true, color: accent, over: true, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 195.2, size: 16, align: center, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 221.2, size: 14, align: center, color: accent, font: consolas}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 292, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: consolas}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 292, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: consolas}
+  portrait:
+    - {type: panel, x: 8, y: 8, w: 304, h: 464, title: '[ CLOCK ]', border: accent, font: consolas}
+    - {type: clock, format: '88:88:88', x: 160.0, y: 182.4, size: 46, align: center, bold: true, color: track, font: consolas}
+    - {type: clock, format: '%H:%M:%S', x: 160.0, y: 182.4, size: 46, align: center, bold: true, color: accent, over: true, font: consolas}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 226.1, size: 16, align: center, color: secondary, font: consolas}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 252.1, size: 14, align: center, color: accent, font: consolas}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 452, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: consolas}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 452, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: consolas}

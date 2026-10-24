@@ -1275,6 +1275,13 @@ class Collector:
         """Session shown on screen: the foreground game's, or the last one that was in front."""
         return self.sessions.get(self._front_pid) or self.sessions.get(self._last_pid)
 
+    @property
+    def game_name(self):
+        s = self.session
+        if s is not None:
+            return s.name
+        return "Demo" if self.demo and self.values.get("fps") is not None else None
+
     def make_summary(self, s, now=None):
         now = time.monotonic() if now is None else now
         return {

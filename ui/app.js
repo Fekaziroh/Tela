@@ -28,7 +28,7 @@ function applyTexts() {
   renderIntervals();
   renderNight();
   renderDisks();
-  if (S.tab === "settings") { renderWords(); pollWeather(); }
+  if (S.tab === "screen") { renderWords(); pollWeather(); }
   renderPorts();
   if (S.logos) renderLogos();
   if (S.tab === "layout" && E.lay) edRender();
@@ -67,6 +67,7 @@ async function setSetting(path, value, quiet) {
   if (path === "ui.language") setTimeout(renderWords, 1500);
   syncControls();
   refreshPreset();
+  applyWindowStyle();
 }
 function effectiveLang() {
   const l = (S.settings.ui || {}).language || "auto";
@@ -91,7 +92,14 @@ function syncControls() {
       el.value = v ?? "";
     }
   });
+  $$("#style-seg button").forEach(b => b.setAttribute("aria-pressed", String(((S.settings.ui || {}).style || "default") === b.dataset.v)));
   $("#rotate").setAttribute("aria-checked", String(String(getSetting("display.orientation") || "").endsWith("_flipped")));
+  const vis = getSetting("display.mode") === "visual";
+  $("#vis-sub").hidden = !vis;
+  const vk = getSetting("visual.kind") || "clock";
+  const vf = String(getSetting("visual.files") || "").split("|").filter(Boolean);
+  $("#vis-files").textContent = vk === "clock" ? t("vis.no_files") : (vf.length ? vf.map(f => f.split("/").pop()).join(", ") : t("vis.none"));
+  $("#vis-pick").disabled = vk === "clock";
   const ori = String(getSetting("display.orientation") || "landscape");
   $$("#home-orient button").forEach(b => b.setAttribute("aria-pressed", String(ori.startsWith(b.dataset.v))));
   $("#logos-auto").setAttribute("aria-checked", String(((S.settings.logos || {}).mode || "auto") === "auto"));
@@ -212,21 +220,40 @@ function bindControls() {
   $("[data-set='logos.color']").addEventListener("click", () => setTimeout(loadLogos, 300));
 }
 
+// ------------------------------------------------------------------ window style: default or compact
+async function setWindowStyle(style) {
+  await setSetting("ui.style", style, true);
+  applyWindowStyle();
+  try { await api.set_window_style(style); } catch (e) { /* browser mode: nothing to resize */ }
+}
+function applyWindowStyle() {
+  document.body.classList.toggle("compact", ((S.settings.ui || {}).style || "default") === "compact");
+  // the window's own animations follow the screen's switch (off in the Performance preset)
+  document.body.classList.toggle("calm", (S.settings.animation || {}).enabled === false);
+}
+
 // ------------------------------------------------------------------ tabs and language
+const TABS = ["home", "screen", "layout", "games", "sensors", "system"];
+const SEARCH_PANELS = ["screen", "games", "sensors", "system"];
 function showTab(name) {
   if (S.tab === "layout" && name !== "layout" && typeof clearSelection === "function") clearSelection();
   S.tab = name;
   $$("nav [role=tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   $$("[data-panel]").forEach(p => { p.hidden = p.dataset.panel !== name; });
   $("#title").textContent = t("tab." + name);
-  $(".lang").hidden = !["home", "settings"].includes(name);
+  $(".lang").hidden = !["home", "system"].includes(name);
+  $("#search-box").hidden = ["home", "layout"].includes(name);
+  $("#mini-wrap").hidden = ["home", "layout"].includes(name);
+  if (!$("#mini-wrap").hidden) copyFrame($("#mini-preview"));   // the last picture at once, not at the next frame
+  const q = $("#set-search");
+  if (q && q.value) { q.value = ""; searchSettings(""); }
   $("#main").scrollTop = 0;
   try { localStorage.setItem("tela.tab", name); } catch (e) { /* storage may be unavailable */ }
-  if (name === "look" && !S.logos) loadLogos();
-  if (name === "look") { stLoad(); stMirror(); }
+  if (name === "screen" && !S.logos) loadLogos();
+  if (name === "screen") { stLoad(); stMirror(); }
   if (name === "layout") edLoad();
-  if (name === "advanced") { pollUsage(); renderLog(true); }
-  if (name === "settings") { renderWords(); pollWeather(); }
+  if (name === "system") { pollUsage(); renderLog(true); }
+  if (name === "screen") { renderWords(); pollWeather(); }
 }
 function flagSvg(l) {
   const b = $(`#lang-menu [data-l="${l}"] svg`);
@@ -272,7 +299,7 @@ async function renderWords() {
 }
 async function pollWeather() {
   const el = $("#wx-status");
-  if (!el || S.tab !== "settings") return;
+  if (!el || S.tab !== "screen") return;
   let st;
   try { st = await api.weather_status(); } catch (e) { return; }
   const city = ((S.settings.weather || {}).city || "").trim();
@@ -521,7 +548,7 @@ function renderState(s, quick) {
   $("#preview-paused").hidden = s.preview !== false;
   if (s.disks && JSON.stringify(s.disks) !== JSON.stringify(S.init.disks)) { S.init.disks = s.disks; renderDisks(); }
   renderLastGame(s.last_game);
-  if (!quick || S.tab === "advanced") renderLog();
+  if (!quick || S.tab === "system") renderLog();
 }
 function renderLastGame(g) {
   const body = $("#last-body");
@@ -566,6 +593,7 @@ async function showFrame(dataUrl) {
   try { bmp = await createImageBitmap(new Blob([bytes], { type: "image/png" })); } catch (e) { return; }
   S.frameSize = `${bmp.width}×${bmp.height}`;
   const targets = [$("#preview")];
+  if (!$("#mini-wrap").hidden) targets.push($("#mini-preview"));
   if (!$("#stage-boxes .drag")) targets.push($("#stage-img"));
   for (const c of targets) {
     if (!c) continue;
@@ -595,7 +623,7 @@ async function poll() {
   setTimeout(poll, wait);
 }
 async function pollUsage() {
-  if (S.tab !== "advanced" || document.visibilityState !== "visible") return;
+  if (S.tab !== "system" || document.visibilityState !== "visible") return;
   try {
     const u = await api.usage();
     let cpu = 0, ram = 0;
@@ -715,12 +743,25 @@ async function start() {
   let tab = "home";
   try { tab = localStorage.getItem("tela.tab") || "home"; } catch (e) { /* ignore */ }
   syncControls();
-  showTab(["home", "layout", "look", "settings", "advanced"].includes(tab) ? tab : "home");
+  applyWindowStyle();
+  $$("#style-seg button").forEach(b => b.addEventListener("click", () => setWindowStyle(b.dataset.v)));
+  $$("#go-tabs [data-go]").forEach(b => b.addEventListener("click", () => showTab(b.dataset.go)));
+  tab = { look: "screen", settings: "system", advanced: "system" }[tab] || tab;   // names before 1.5.1
+  showTab(TABS.includes(tab) ? tab : "home");
   applyTexts();
   stLoad(false);
   poll();
   $("#wizard-btn").addEventListener("click", wizStart);
   bindHistory();
+  $("#vis-pick").addEventListener("click", async () => {
+    const kind = getSetting("visual.kind") || "image";
+    const files = await api.visual_pick(kind);
+    if (files && files.length) {
+      (S.settings.visual = S.settings.visual || {}).files = files.join("|");
+      S.settings.visual.kind = kind;
+      syncControls(); toast(t("toast.saved"));
+    }
+  });
   renderHistoryFolder();
   bindUpdate();
   bindPresets();
@@ -731,7 +772,8 @@ async function start() {
   if (S.init.recovered) setTimeout(showRecovered, 700);
   else if (wizNeeded()) setTimeout(wizStart, 800);
   else if (S.init.updated_from) setTimeout(() => { showWhatsNew(S.init.updated_from); api.news_seen(); }, 600);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "advanced") pollUsage(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.tab === "system") pollUsage(); });
+  $("#mini-wrap").addEventListener("click", () => showTab("home"));
 }
 
 function bridgeApi() {
@@ -751,12 +793,18 @@ if (!boot()) {
 
 // ------------------------------------------------------------------ search in Settings
 function searchSettings(q) {
+  // searches every settings card (Tela, Jogos, Sensores, Sistema) and shows the hits together
   const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const words = norm(q).split(/\s+/).filter(Boolean);
   const hit = el => { const tx = norm(el.textContent); return words.every(w => tx.includes(w)); };
   let any = false;
-  $$('[data-panel="settings"] .grid > .card').forEach(card => {
-    const parts = $$(":scope > .row, :scope > .sub, :scope > p, :scope > .presets, :scope > .profiles, :scope > .item-list, :scope > .btns, :scope > hr", card);
+  SEARCH_PANELS.forEach(name => {
+    const panel = $(`[data-panel="${name}"]`);
+    panel.hidden = words.length ? false : name !== S.tab;
+  });
+  $("#title").textContent = words.length ? t("search.title") : t("tab." + S.tab);
+  SEARCH_PANELS.forEach(name => $$(`[data-panel="${name}"] .grid > .card`).forEach(card => {
+    const parts = $$(":scope > .row, :scope > .sub, :scope > p, :scope > .presets, :scope > .profiles, :scope > .item-list, :scope > .btns, :scope > hr, :scope > .two, :scope > .field", card);
     if (!words.length) { card.hidden = false; parts.forEach(p => p.classList.remove("s-hide")); card.classList.remove("s-hit"); return; }
     const title = $("h3", card);
     const whole = title && hit(title);
@@ -765,6 +813,6 @@ function searchSettings(q) {
     card.hidden = !whole && !n;
     card.classList.toggle("s-hit", !card.hidden);
     if (!card.hidden) any = true;
-  });
+  }));
   $("#set-search-none").hidden = !words.length || any;
 }

@@ -175,3 +175,17 @@ portrait:
         - {type: panel, x: 0, y: 0, w: 154, h: 84, title: '{disks_title}', border: track}
         - {type: value, sensor: disk1_act, x: 144, y: 14, size: 13, unit: '%', align: right, bold: true, unit_size: 8, ssd: true}
         - {type: graph, sensor: disk1_act, x: 10, y: 28, w: 134, h: 48, min: 0, max: 100, points: 90, fill_color: accent@12}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: clock, format: '%H:%M', x: 24, y: 96.0, size: 92, align: left, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 28, y: 158.0, size: 18, align: left, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 28, y: 184.0, size: 15, align: left, color: accent}
+    - {type: graph, sensor: cpu_temp, x: 24, y: 198.4, w: 432, h: 76.8, min: 20, max: 95, points: 90, fill_color: accent@18}
+    - {type: text, text: CPU °C, x: 24, y: 308, size: 10, align: left, color: secondary, bold: true}
+  portrait:
+    - {type: clock, format: '%H:%M', x: 24, y: 96.0, size: 80, align: left, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 28, y: 158.0, size: 18, align: left, color: secondary}
+    - {type: clock, format: '{weather_only}', x: 28, y: 184.0, size: 15, align: left, color: accent}
+    - {type: graph, sensor: cpu_temp, x: 24, y: 268.8, w: 272, h: 124.80000000000001, min: 20, max: 95, points: 90, fill_color: accent@18}
+    - {type: text, text: CPU °C, x: 24, y: 468, size: 10, align: left, color: secondary, bold: true}

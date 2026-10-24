@@ -187,3 +187,19 @@ portrait:
         - {type: value, sensor: net_down, x: 150, y: 42, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}
         - {type: text, text: ↑, x: 166, y: 42, size: 13, color: secondary, bold: true}
         - {type: value, sensor: net_up, x: 294, y: 42, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 60.0, y: 50.0, w: 360, h: 200, border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 24, shadow: 2, palette: {panel: '#FF8FC0', accent: '#E8196F'}}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 134.0, size: 68, align: center, bold: true, font: verdana}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 182.0, size: 15, align: center, color: secondary, font: verdana}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 206.0, size: 13, align: center, font: verdana}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 302, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: verdana}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 302, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: verdana}
+  portrait:
+    - {type: panel, x: 20.0, y: 115.0, w: 280, h: 230, border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 24, shadow: 2, palette: {panel: '#FF8FC0', accent: '#E8196F'}}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 211.6, size: 60, align: center, bold: true, font: verdana}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 259.6, size: 15, align: center, color: secondary, font: verdana}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 283.6, size: 13, align: center, font: verdana}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 462, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary, font: verdana}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 462, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary, font: verdana}

@@ -89,7 +89,7 @@ def load(fam, user=True, theme=None):
     except (KeyError, ValueError, OSError, yaml.YAMLError):   # a theme that is gone or damaged: the program's layout
         theme, groups = themes.LEGACY, base.get("groups") or []
     out = {"size": base.get("size"), "sensors": sensors, "groups": groups, "custom": False, "theme": theme,
-           "art": themes.art(theme, fam)}
+           "art": themes.art(theme, fam), "rest": themes.clock_screen(theme, fam)}
     path = user_path(fam, theme)
     if user and path.exists():
         try:
@@ -189,7 +189,8 @@ def apply(cfg):
     cfg["sensors"] = lay.get("sensors") or {}
     cfg["widgets"] = flatten(lay.get("groups"))
     cfg["layout"] = {"family": fam, "size": lay.get("size"), "custom": lay.get("custom", False),
-                     "overlap": overlapping(lay.get("groups")), "theme": lay.get("theme"), "art": lay.get("art") or ""}
+                     "overlap": overlapping(lay.get("groups")), "theme": lay.get("theme"), "art": lay.get("art") or "",
+                     "rest": lay.get("rest") or []}
     return cfg
 
 

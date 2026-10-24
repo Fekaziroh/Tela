@@ -171,3 +171,21 @@ portrait:
       items:
         - {type: panel, x: 0, y: 0, w: 75, h: 108, title: '#volume'}
         - {type: gauge, sensor: volume, cx: 37.5, cy: 86, radius: 27.0, thickness: 5, min: 0, max: 100, unit: '%', size: 14, start_angle: 180, end_angle: 360}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: gauge, cx: 240.0, cy: 160.0, radius: 134.4, thickness: 10, start_angle: -90, end_angle: 270, size: 0, unit: '', track_color: accent@35}
+    - {type: gauge, cx: 240.0, cy: 160.0, radius: 116.4, thickness: 3, start_angle: -90, end_angle: 270, size: 0, unit: '', track_color: secondary@40}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 154.0, size: 62, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 198.0, size: 15, align: center, color: accent, bold: true}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 220.0, size: 12, align: center, color: secondary}
+    - {type: value, sensor: cpu_temp, x: 228.0, y: 304, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 252.0, y: 304, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}
+  portrait:
+    - {type: gauge, cx: 160.0, cy: 210.0, radius: 134.4, thickness: 10, start_angle: -90, end_angle: 270, size: 0, unit: '', track_color: accent@35}
+    - {type: gauge, cx: 160.0, cy: 210.0, radius: 116.4, thickness: 3, start_angle: -90, end_angle: 270, size: 0, unit: '', track_color: secondary@40}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 204.0, size: 58, align: center, bold: true}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 248.0, size: 15, align: center, color: accent, bold: true}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 270.0, size: 12, align: center, color: secondary}
+    - {type: value, sensor: cpu_temp, x: 148.0, y: 464, align: right, size: 13, unit: °, prefix: 'CPU ', color: secondary}
+    - {type: value, sensor: gpu_temp, x: 172.0, y: 464, align: left, size: 13, unit: °, prefix: 'GPU ', color: secondary}

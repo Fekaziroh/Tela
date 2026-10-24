@@ -184,3 +184,21 @@ portrait:
         - {type: text, text: '#network', x: 12, y: 116, size: 9, color: secondary, bold: true, font: verdana}
         - {type: value, sensor: net_down, x: 194.0, y: 116, size: 12, unit: ' ↓', align: right, unit_size: 7, format: '{:.1f}', font: verdana}
         - {type: value, sensor: net_up, x: 296, y: 116, size: 12, unit: ' ↑', align: right, unit_size: 7, format: '{:.1f}', font: verdana}
+
+clock:   # the Rest screen (absolute positions)
+  landscape:
+    - {type: panel, x: 20, y: 30, w: 440, h: 260, title: '', border: '#AEB6BF', color: '#FFFFFF', radius: 9, shadow: 2}
+    - {type: panel, x: 20, y: 30, w: 440, h: 24, title: '', gradient: ['#8EC5FF', '#2A73D9'], gloss: 0.55, radius: 9}
+    - {type: rect, x: 20, y: 44, w: 440, h: 10, color: '#2A73D9'}
+    - {type: text, text: Tela!, x: 32, y: 42, size: 10, align: left, color: '#FFFFFF', bold: true, font: verdana}
+    - {type: clock, format: '%H:%M', x: 240.0, y: 144.4, size: 70, align: center, bold: true, font: verdana}
+    - {type: clock, format: '{weekday} %d/%m', x: 240.0, y: 194.4, size: 15, align: center, color: secondary, font: verdana}
+    - {type: clock, format: '{weather_only}', x: 240.0, y: 218.4, size: 13, align: center, color: accent, font: verdana}
+  portrait:
+    - {type: panel, x: 20, y: 30, w: 280, h: 420, title: '', border: '#AEB6BF', color: '#FFFFFF', radius: 9, shadow: 2}
+    - {type: panel, x: 20, y: 30, w: 280, h: 24, title: '', gradient: ['#8EC5FF', '#2A73D9'], gloss: 0.55, radius: 9}
+    - {type: rect, x: 20, y: 44, w: 280, h: 10, color: '#2A73D9'}
+    - {type: text, text: Tela!, x: 32, y: 42, size: 10, align: left, color: '#FFFFFF', bold: true, font: verdana}
+    - {type: clock, format: '%H:%M', x: 160.0, y: 214.8, size: 60, align: center, bold: true, font: verdana}
+    - {type: clock, format: '{weekday} %d/%m', x: 160.0, y: 264.8, size: 15, align: center, color: secondary, font: verdana}
+    - {type: clock, format: '{weather_only}', x: 160.0, y: 288.8, size: 13, align: center, color: accent, font: verdana}

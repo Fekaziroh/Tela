@@ -28,24 +28,24 @@ TEXT = {
     "pt": {"hot": "{part} a {t} °C (limite {limit} °C).", "busy": "A tela está sendo usada por: {apps}. Use o menu deste ícone para fechar e a Tela! assumir.", "take": "Fechar {apps} e usar a tela",
            "usage": "└ {cpu}% CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
            "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
-           "pause": "Pausar (congelar a tela)", "release": "Liberar a tela para outro programa", "reconnect": "Reconectar a tela", "restart": "Reiniciar a Tela!", "unload": "Liberar memória da janela na bandeja", "recovered": "A Tela! parou de responder e foi reaberta sozinha.", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
+           "theme": "Tema da tela", "profile": "Perfil", "no_profiles": "Nenhum perfil salvo", "pause": "Pausar (congelar a tela)", "release": "Liberar a tela para outro programa", "reconnect": "Reconectar a tela", "restart": "Reiniciar a Tela!", "unload": "Liberar memória da janela na bandeja", "recovered": "A Tela! parou de responder e foi reaberta sozinha.", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
     "es": {"hot": "{part} a {t} °C (límite {limit} °C).", "busy": "La pantalla está en uso por: {apps}. Usa el menú de este icono para cerrarlo y que Tela! la use.", "take": "Cerrar {apps} y usar la pantalla",
            "usage": "└ {cpu}% CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
            "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
-           "pause": "Pausar (congelar la pantalla)", "release": "Liberar la pantalla para otro programa", "reconnect": "Reconectar la pantalla", "restart": "Reiniciar Tela!", "unload": "Liberar la memoria de la ventana en la bandeja", "recovered": "Tela! dejó de responder y se volvió a abrir sola.", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
+           "theme": "Tema de la pantalla", "profile": "Perfil", "no_profiles": "Ningún perfil guardado", "pause": "Pausar (congelar la pantalla)", "release": "Liberar la pantalla para otro programa", "reconnect": "Reconectar la pantalla", "restart": "Reiniciar Tela!", "unload": "Liberar la memoria de la ventana en la bandeja", "recovered": "Tela! dejó de responder y se volvió a abrir sola.", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
     "zh": {"hot": "{part} 温度 {t} °C（上限 {limit} °C）。", "busy": "屏幕正被以下程序使用：{apps}。可通过此图标菜单关闭它，让 Tela! 接管。", "take": "关闭 {apps} 并使用屏幕",
            "usage": "└ {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
            "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
-           "pause": "暂停（冻结屏幕）", "release": "释放屏幕给其他程序", "reconnect": "重新连接屏幕", "restart": "重启 Tela!", "unload": "在托盘中释放窗口内存", "recovered": "Tela! 停止响应，已自动重新打开。", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
+           "theme": "屏幕主题", "profile": "配置文件", "no_profiles": "没有已保存的配置文件", "pause": "暂停（冻结屏幕）", "release": "释放屏幕给其他程序", "reconnect": "重新连接屏幕", "restart": "重启 Tela!", "unload": "在托盘中释放窗口内存", "recovered": "Tela! 停止响应，已自动重新打开。", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
     "en": {"hot": "{part} at {t} °C (limit {limit} °C).", "busy": "The screen is being used by: {apps}. Use the menu of this icon to close it and let Tela! take over.", "take": "Close {apps} and use the screen",
            "usage": "└ {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
            "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
-           "pause": "Pause (freeze the screen)", "release": "Release the screen for another program", "reconnect": "Reconnect the screen", "restart": "Restart Tela!", "unload": "Free the window's memory in the tray", "recovered": "Tela! stopped responding and was reopened by itself.", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
+           "theme": "Screen theme", "profile": "Profile", "no_profiles": "No saved profiles", "pause": "Pause (freeze the screen)", "release": "Release the screen for another program", "reconnect": "Reconnect the screen", "restart": "Restart Tela!", "unload": "Free the window's memory in the tray", "recovered": "Tela! stopped responding and was reopened by itself.", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
                          "Close it and open this one?"},
 }
@@ -136,6 +136,7 @@ class App:
             self.log(f"Window component unavailable ({e}); opening in the browser instead")
             return False
         theme = str(((self.engine.cfg.get("ui") or {}).get("theme")) or "auto")
+        compact = str(((self.engine.cfg.get("ui") or {}).get("style")) or "default") == "compact"
         dark = theme == "dark" or (theme == "auto" and windows_uses_dark_theme())
         if theme == "screen":   # the window follows the screen colors: start on the screen's background
             bg = str((self.engine.cfg.get("colors") or {}).get("background") or "#000000")
@@ -148,8 +149,8 @@ class App:
             dark = theme not in ("preset:sand",)
         try:
             self.window = webview.create_window(
-                "Tela!", url=str(HERE / "ui" / "index.html"), js_api=self.api, width=1180, height=780,
-                min_size=(480, 560), hidden=self.start_hidden, background_color="#050506" if dark else "#F7F8FA",
+                "Tela!", url=str(HERE / "ui" / "index.html"), js_api=self.api, width=440 if compact else 1180,
+                height=820 if compact else 780, min_size=(400, 560), hidden=self.start_hidden, background_color="#050506" if dark else "#F7F8FA",
                 text_select=True)
             self.window.events.closing += self._on_closing
             self.window_kind = "webview2"
@@ -209,23 +210,42 @@ class App:
             pass
 
     def show_window(self):
+        """Opens the window. Called from the tray: the work runs on its own thread so the tray's callback
+        returns at once (opening an emptied page from the tray thread could freeze the window)."""
         self.visible = True
-        if self.window is not None and self._unloaded:
-            try:
-                self.window.load_url(str(HERE / "ui" / "index.html"))
-            except Exception:  # noqa: BLE001
-                pass
-            self._unloaded = False
         if self.window is not None:
-            self._webview_memory(low=False)
+            if getattr(self, "_showing", False):
+                return
+            self._showing = True
+            threading.Thread(target=self._show_now, name="show-window", daemon=True).start()
+        elif self.bridge is not None:
+            import webbrowser
+            webbrowser.open(self.bridge.url)
+
+    def resize_window(self, w, h):
+        if self.window is not None:
             try:
+                self.window.resize(int(w), int(h))
+            except Exception as e:  # noqa: BLE001
+                self.log(f"Could not resize the window: {e}")
+
+    def _show_now(self):
+        try:
+            try:   # the window first, then the page: the window answers while the page loads
                 self.window.show()
                 self.window.restore()
             except Exception:  # noqa: BLE001
                 pass
-        elif self.bridge is not None:
-            import webbrowser
-            webbrowser.open(self.bridge.url)
+            self._webview_memory(low=False)
+            if self._unloaded:
+                time.sleep(0.15)
+                try:
+                    self.window.load_url(str(HERE / "ui" / "index.html"))
+                except Exception as e:  # noqa: BLE001
+                    self.log(f"Could not load the window page: {e}")
+                self._unloaded = False
+        finally:
+            self._showing = False
 
     def _webview_memory(self, low):
         """Asks WebView2 to free memory while the window is in the tray (MemoryUsageTargetLevel, WebView2
@@ -240,7 +260,7 @@ class App:
 
             def apply():
                 core.MemoryUsageTargetLevel = Level.Low if low else Level.Normal
-            form.Invoke(Action(apply))
+            form.BeginInvoke(Action(apply))   # never waits for the window's thread
         except Exception:  # noqa: BLE001
             pass
 
@@ -375,6 +395,8 @@ class App:
                                     checked=lambda _i: self.engine.normal_brightness == v)
         return pystray.Menu(
             pystray.MenuItem(T["open"], lambda *_: self.show_window(), default=True),
+            pystray.MenuItem(T["theme"], pystray.Menu(self._tray_themes)),
+            pystray.MenuItem(T["profile"], pystray.Menu(self._tray_profiles)),
             pystray.MenuItem(T["brightness"], pystray.Menu(*(level(v) for v in (10, 25, 40, 50, 75, 100)))),
             pystray.MenuItem(T["last_summary"], lambda *_: self.engine.command("summary_last"),
                              enabled=lambda _i: bool(self.engine.last_summary)),
@@ -392,6 +414,29 @@ class App:
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(T["quit"], lambda *_: self.quit()),
         )
+
+    def _tray_themes(self):
+        """Tray › Screen theme: every theme, the one in use checked; a click switches at once."""
+        import pystray
+        import themes
+        cur = themes.current(self.engine.cfg)
+
+        def pick(tid):
+            return lambda *_: threading.Thread(target=self.api.theme_apply, args=(tid,), daemon=True).start()
+        for t in themes.entries(self.lang):
+            yield pystray.MenuItem(t["name"], pick(t["id"]), radio=True, checked=lambda _i, tid=t["id"]: tid == cur)
+
+    def _tray_profiles(self):
+        """Tray › Profile: the saved profiles (Settings › Profiles); a click loads one."""
+        import pystray
+        import profiles
+        items = profiles.entries()
+        if not items:
+            yield pystray.MenuItem(self.T["no_profiles"], None, enabled=False)
+            return
+        for p in items:
+            yield pystray.MenuItem(p["name"], lambda *_, n=p["name"]: threading.Thread(
+                target=self.api.profile_load, args=(n,), daemon=True).start())
 
     def _make_tray(self):
         try:
@@ -535,8 +580,39 @@ class App:
             self.engine = new
             new.start()
 
+    FESTIVE = {10: "halloween", 12: "xmas"}
+
+    def _theme_festive(self):
+        """Festive themes (option): Halloween in October, Christmas in December; then the user's theme comes back.
+        Returns True while a festive month holds the screen (the time-of-day schedule waits)."""
+        tc = self.engine.cfg.get("theme") or {}
+        season = self.FESTIVE.get(time.localtime().tm_mon) if tc.get("festive") else None
+        if season == getattr(self, "_season", "unset"):
+            return season is not None
+        self._season = season
+        try:
+            import themes
+            cur = themes.current(self.engine.cfg)
+            if season and themes.exists(season):
+                if cur != season:
+                    if cur not in self.FESTIVE.values():
+                        self.api.set("theme", "before_festive", cur)
+                    self.api.theme_apply(season)
+                    self.log(f"Festive theme: {season}")
+                return True
+            back = str(tc.get("before_festive") or "")
+            if cur in self.FESTIVE.values() and back and themes.exists(back):
+                self.api.theme_apply(back)
+                self.api.set("theme", "before_festive", "")
+                self.log("Festive theme over: back to " + back)
+        except Exception as e:  # noqa: BLE001
+            self.log(f"Festive theme failed: {e}")
+        return False
+
     def _theme_schedule(self):
         """Theme by the time of day: switches when the period changes (a theme chosen by hand stays until then)."""
+        if self._theme_festive():
+            return
         tc = self.engine.cfg.get("theme") or {}
         if not tc.get("schedule"):
             self._theme_period = None

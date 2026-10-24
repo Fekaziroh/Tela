@@ -130,6 +130,11 @@ class Renderer:
         bg = cfg.get("background") or {}
         self.bg_image = str(bg.get("image") or "")
         self.art = str((cfg.get("layout") or {}).get("art") or "")   # the theme's own picture behind the blocks
+        self.rest_widgets = list((cfg.get("layout") or {}).get("rest") or [])   # the theme's own Rest screen
+        self.show_game = bool((cfg.get("fps") or {}).get("show_game", False))   # the game's name under the FPS
+        vis = cfg.get("visual") or {}
+        # Visual mode (Appearance › Screen mode): a picture, photos, a GIF or the clock instead of the sensors
+        self.visual = vis if str((cfg.get("display") or {}).get("mode", "functional")).lower() == "visual" else None
         self.bg_dim = max(0.0, min(0.9, float(bg.get("dim", 40)) / 100))
         self.panel_opacity = max(0.2, min(1.0, float(bg.get("panel_opacity", 100)) / 100)) if self.bg_image else 1.0
         self.words = dict(SCREEN_TEXT.get(lang, SCREEN_TEXT["en"]))
@@ -1100,8 +1105,120 @@ class Renderer:
                     "color": "accent"})
         return lay
 
+    def _visual_files(self):
+        out = []
+        files = self.visual.get("files") or ""
+        for f in (files.split("|") if isinstance(files, str) else files):
+            if not str(f).strip():
+                continue
+            p = Path(str(f))
+            p = p if p.is_absolute() else self.base / p
+            if p.suffix.lower() in self.IMAGE_EXT and p.is_file():
+                out.append(p)
+        return out
+
+    def _fit(self, im):
+        """Fills the screen (cropping the excess), at the supersampled size."""
+        W, H = self.W * self.S, self.H * self.S
+        im = im.convert("RGB")
+        f = max(W / im.width, H / im.height)
+        im = im.resize((max(W, round(im.width * f)), max(H, round(im.height * f))), Image.LANCZOS)
+        left, top = (im.width - W) // 2, (im.height - H) // 2
+        return im.crop((left, top, left + W, top + H))
+
+    def _gif_frames(self, path):
+        """The GIF's frames at the screen's own size (memory: about 40 MB at most, ~90 frames)."""
+        key = ("gif", str(path), self.W, self.H)
+        if key not in self._images:
+            frames = []
+            limit = max(10, int(40e6 // (self.W * self.H * 3)))
+            S = self.S
+            try:
+                from PIL import ImageSequence
+                self.S = 1
+                with Image.open(path) as im:
+                    for fr in ImageSequence.Iterator(im):
+                        frames.append((self._fit(fr.convert("RGBA")), max(0.05, (fr.info.get("duration") or 100) / 1000)))
+                        if len(frames) >= limit:   # long GIFs: the first frames only
+                            break
+            except (OSError, ValueError):
+                frames = []
+            finally:
+                self.S = S
+            self._images[key] = frames
+        return self._images[key]
+
+    def _visual(self, col):
+        """Visual mode: (widgets, base picture). Clock = the theme's Rest screen; image, photos (one after the
+        other) and GIF fill the screen, optionally with the clock over them."""
+        S = self.S
+        kind = str(self.visual.get("kind", "clock")).lower()
+        files = self._visual_files()
+        img = None
+        if kind == "gif" and files:
+            frames = self._gif_frames(files[0])
+            if frames:
+                total = sum(d for _, d in frames)
+                t = time.monotonic() % total
+                for fr, d in frames:
+                    if t < d:
+                        img = fr.resize((self.W * S, self.H * S), Image.NEAREST) if S != 1 else fr.copy()
+                        self._wake(self._now + max(0.02, d - t))
+                        break
+                    t -= d
+                self.animating = True
+        elif kind in ("image", "photos") and files:
+            every = max(3.0, float(self.visual.get("every", 15)))
+            idx = int(time.time() // every) % len(files) if kind == "photos" else 0
+            key = ("visual", str(files[idx]), self.W, self.H, S)
+            if key not in self._images:
+                try:
+                    self._images[key] = self._fit(Image.open(files[idx]))
+                except (OSError, ValueError):
+                    self._images[key] = None
+            if self._images[key] is not None:
+                img = self._images[key].copy()
+            if kind == "photos" and len(files) > 1:
+                self._wake(self._now + every - time.time() % every)
+        if img is None:   # the clock (or no picture chosen yet)
+            img = Image.new("RGB", (self.W * S, self.H * S), self.color("background"))
+            self._paste_background(img)
+            return self._rest_layout(), img
+        if self.visual.get("clock", True):   # a small clock in a corner, over the picture
+            return [{"type": "panel", "x": self.W - 104, "y": self.H - 40, "w": 96, "h": 32, "color": "#000000",
+                     "opacity": 0.55, "radius": 10, "group": "visual"},
+                    {"type": "clock", "format": "%H:%M", "x": self.W - 56, "y": self.H - 24, "size": 18,
+                     "bold": True, "align": "center", "color": "#FFFFFF", "group": "visual"}], img
+        return [], img
+
+    def _game_name(self, d, col):
+        """Settings › FPS › Show the game's name: small, under the FPS of the theme, while a game is running."""
+        if col.value("fps") is None:
+            return
+        name = getattr(col, "game_name", None)
+        if not name:
+            return
+        fps = next((w for w in self.current_widgets if w.get("type") == "value" and w.get("sensor") == "fps"
+                    and self._visible(w, col)), None)
+        if fps is None:
+            return
+        size = float(fps.get("size", 14))
+        x, y = fps["x"], fps["y"] + size * 0.62 + 6
+        align = fps.get("align", "left")
+        below = [w["y"] for w in self.current_widgets if w.get("type") in ("panel", "network")
+                 and w.get("group") != fps.get("group") and w.get("y", 0) > fps["y"]]
+        below += [w["y"] + w["h"] for w in self.current_widgets if w.get("type") == "panel"   # a bar around the FPS
+                  and w.get("group") == fps.get("group") and w["y"] <= fps["y"] <= w["y"] + w["h"]]
+        if below and y + 6 > min(below):   # no room under the FPS: right after it, on the same line
+            width = sum(self._length(t, ft) for t, ft, _ in self._value_parts(fps, col.value("fps"))) / self.S
+            x = x + width + 8 if align == "left" else x - width - 8
+            y, name = fps["y"], str(name)[:16]
+        self._line(d, x, y, [(str(name)[:28], self.font(9.5), self.color("secondary"))], align)
+
     def _rest_layout(self):
         """Rest screen: a big clock, the date and the weather, in the theme's colors (and over its picture)."""
+        if getattr(self, "_rest_widgets", None) is None and self.rest_widgets:
+            self._rest_widgets = [dict(w, group="rest") for w in self.rest_widgets]
         if getattr(self, "_rest_widgets", None) is None:
             W, H = self.W, self.H
             land = W > H
@@ -1290,6 +1407,9 @@ class Renderer:
             self.layout = "summary"
             self.animating = True   # the countdown bar moves
             img = Image.new("RGB", (self.W * S, self.H * S), self.color("background"))
+        elif self.visual is not None:
+            widgets, img = self._visual(col)
+            self.layout = "visual"
         elif getattr(col, "rest", False):   # Rest: the PC is idle, a big clock with the date and the weather
             widgets = self._rest_layout()
             self.layout = "rest"
@@ -1316,6 +1436,8 @@ class Renderer:
                 self.animating = True
             else:
                 self._draw(w, d, col)
+        if self.show_game and self.layout == "normal":
+            self._game_name(d, col)
         self._first = False
         self.hires = img   # the supersampled frame: the window's sharp preview
         return img.reduce(S) if S != 1 else img   # box average of the supersampled frame (as sharp as LANCZOS, 10x faster)
