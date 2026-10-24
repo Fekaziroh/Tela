@@ -397,6 +397,14 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .st-preview .legend b{color:#e8e8ea;font-weight:600}
 .st-preview .btns{justify-content:flex-start}
 .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.swatch{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);font-size:12px}
+.swatch.custom{border-color:var(--accent)}
+.swatch label{position:relative;display:block;width:22px;height:22px;cursor:pointer}
+.swatch label i{position:absolute;inset:0;border-radius:5px;border:1px solid var(--line)}
+.swatch input[type=color]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+.swatch small{color:var(--muted)}
+.swatch .icon-btn{padding:0 2px}
 .gal{display:grid;gap:10px}
 .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:56vh;overflow:auto;padding:2px}
 .gal-item{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:8px;background:var(--panel2);min-width:0}

@@ -7,6 +7,54 @@
 // "withdrawn": true = taken back: the workflow removes its setups (no longer offered, not even to go back to).
 const CHANGELOG = [
  {
+  "v": "1.5.0",
+  "beta": true,
+  "pt": {
+   "new": [
+    "Cinco temas novos com fundo próprio: Aero, Arial, Aqua, Clear e Serial.",
+    "Descanso: com o PC parado, a tela mostra um relógio grande com a data e o clima e volta sozinha quando você mexe no PC.",
+    "Layout: cada bloco e cada elemento pode ter as suas próprias cores.",
+    "Prévia da janela mais nítida, com opção de qualidade normal."
+   ],
+   "perf": [
+    "A predefinição Performance economiza mais: entra antes no modo econômico e tira a linha de progresso da música."
+   ]
+  },
+  "en": {
+   "new": [
+    "Five new themes with their own backgrounds: Aero, Arial, Aqua, Clear and Serial.",
+    "Rest screen: with the PC idle, the screen shows a big clock with the date and the weather, and comes back when you use the PC.",
+    "Layout: every block and every element can have its own colors.",
+    "Sharper window preview, with a normal quality option."
+   ],
+   "perf": [
+    "The Performance preset saves more: eco mode starts sooner and the music progress line is off."
+   ]
+  },
+  "es": {
+   "new": [
+    "Cinco temas nuevos con fondo propio: Aero, Arial, Aqua, Clear y Serial.",
+    "Descanso: con el PC inactivo, la pantalla muestra un reloj grande con la fecha y el clima, y vuelve sola al usar el PC.",
+    "Layout: cada bloque y cada elemento puede tener sus propios colores.",
+    "Vista previa de la ventana más nítida, con opción de calidad normal."
+   ],
+   "perf": [
+    "La predefinición Performance ahorra más: el modo económico empieza antes y se quita la línea de progreso de la música."
+   ]
+  },
+  "zh": {
+   "new": [
+    "五个新主题，各有专属背景：Aero、Arial、Aqua、Clear 和 Serial。",
+    "休息屏幕：电脑闲置时显示大时钟、日期和天气，使用电脑后自动恢复。",
+    "布局：每个区块和每个元素都可以设置自己的颜色。",
+    "窗口预览更清晰，也可选择普通画质。"
+   ],
+   "perf": [
+    "“性能”预设更省资源：更早进入节能模式，并关闭音乐进度线。"
+   ]
+  }
+ },
+ {
   "v": "1.4.9",
   "beta": true,
   "pt": {

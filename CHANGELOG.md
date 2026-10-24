@@ -2,6 +2,19 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.5.0
+
+### New
+
+- Five new themes with their own backgrounds: Aero, Arial, Aqua, Clear and Serial.
+- Rest screen: with the PC idle, the screen shows a big clock with the date and the weather, and comes back when you use the PC.
+- Layout: every block and every element can have its own colors.
+- Sharper window preview, with a normal quality option.
+
+### Performance
+
+- The Performance preset saves more: eco mode starts sooner and the music progress line is off.
+
 ## Tela! 1.4.9
 
 ### New

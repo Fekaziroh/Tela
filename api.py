@@ -201,7 +201,12 @@ class Api:
         preview = bool((e.cfg.get("performance") or {}).get("preview", True)) or getattr(self, "_peek", 0) > time.time()
         out["preview"] = preview
         if preview and e.frame_no != since and e.last_frame is not None:
-            out["frame"] = _png_data_url(e.last_frame)
+            frame = e.last_frame
+            sharp = str((e.cfg.get("performance") or {}).get("preview_quality", "sharp")).lower() == "sharp"
+            hires = getattr(getattr(e, "renderer", None), "hires", None)
+            if sharp and hires is not None and getattr(e, "hires_no", -1) == e.frame_no and hires.size != frame.size:
+                frame = hires   # twice the screen's pixels: text and lines look crisp on big window sizes
+            out["frame"] = _png_data_url(frame)
         net = c.network_info() if c else {"state": None}
         out["network"] = {k: net.get(k) for k in ("state", "ms", "loss", "since", "gateway_ok", "level")}
         m = c.media_info() if c else None
@@ -448,7 +453,7 @@ class Api:
         lay = layout.load(fam, theme=tid)
         cfg.update(sensors=lay.get("sensors") or {}, widgets=layout.flatten(lay.get("groups")),
                    colors=themes.colors_for(tid) if tid != themes.current(self._cfg()) else e.cfg.get("colors"),
-                   animation={"enabled": False})
+                   animation={"enabled": False}, layout={"art": lay.get("art") or ""})
         W, H = (320, 480) if fam == "portrait" else (480, 320)
         r0 = getattr(e, "renderer", None)
         r = Renderer(cfg, W, H, ss=ss, base=config.DATA, fields=getattr(r0, "fields", None), lang=e.lang,
@@ -631,7 +636,7 @@ class Api:
 
     # ------------------------------------------------------------ commands
     def command(self, name, value=None):
-        allowed = {"pause", "release", "reconnect", "test", "summary_example", "summary_last", "reload"}
+        allowed = {"pause", "release", "reconnect", "test", "summary_example", "summary_last", "reload", "rest_preview"}
         if name not in allowed:
             return False
         if name == "pause":

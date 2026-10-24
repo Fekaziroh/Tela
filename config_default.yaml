@@ -87,6 +87,10 @@ background:
   dim: 40                      # % darker, so the numbers stay readable
   panel_opacity: 85            # % panel opacity over the picture
 
+rest:
+  enabled: false               # Rest: with the PC idle, a big clock with the date and the weather
+  idle_minutes: 10
+
 ssd:
   number: activity             # activity (number = activity, bar = used space) | space
   title: ""                    # title of the disks block; empty = automatic (SSD, HD or Disks)
@@ -110,6 +114,7 @@ history:
 performance:                   # the presets in Settings change these together with a few intervals
   quality: high                # high (2x supersampled, smoother edges) | normal (less CPU)
   preview: true                # live preview in the window (off = less CPU while the window is open)
+  preview_quality: sharp       # sharp (the supersampled picture) | normal (the screen's own pixels, less CPU)
 
 alerts:
   enabled: false               # a Windows notice when a temperature stays high (once, then quiet for a while)

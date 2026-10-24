@@ -105,6 +105,22 @@ def groups(tid, fam):
     return part["groups"]
 
 
+def art(tid, fam):
+    """Picture a theme draws behind its blocks ("art: <file>" in its landscape/portrait part), or ''.
+    Looked up in the program's themes/art folder, then in the user's themes/art folder."""
+    try:
+        part = load(tid).get(fam)
+    except (KeyError, ValueError, OSError):
+        return ""
+    name = part.get("art") if isinstance(part, dict) else None
+    if not name or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}", str(name)):
+        return ""
+    for d in (builtin_dir() / "art", user_dir() / "art"):
+        if (d / name).is_file():
+            return str(d / name)
+    return ""
+
+
 def sensors(tid):
     """Extra sensors a theme brings (added with "more sensors" in the editor)."""
     try:
@@ -220,6 +236,8 @@ def dump(data):
             out.append(f"{fam}: default")
             continue
         out.append(f"{fam}:")
+        if part.get("art"):
+            out.append(f"  art: {_flow(part['art'])}")
         out.append("  groups:")
         for g in part.get("groups") or []:
             head = {k: v for k, v in g.items() if k != "items"}
@@ -247,6 +265,9 @@ def validate(data):
             for k in ("x", "y", "w", "h"):
                 if not isinstance(g.get(k), (int, float)):
                     raise ValueError("damaged theme block")
+            if "colors" in g:   # the block's own colors: only #RRGGBB values
+                pal = g["colors"] if isinstance(g["colors"], dict) else {}
+                g["colors"] = {k: v for k, v in pal.items() if isinstance(k, str) and _hex(v)}
             for it in g["items"]:
                 if not isinstance(it, dict) or not isinstance(it.get("type"), str):
                     raise ValueError("damaged theme element")
@@ -281,6 +302,9 @@ def snapshot(tid, colors_now=None, lang="en", new_name=None):
             except (OSError, ValueError, yaml.YAMLError):
                 gs = None
         out[fam] = {"groups": copy.deepcopy(gs or groups(tid, fam))}
+        part = data.get(fam)
+        if isinstance(part, dict) and part.get("art"):   # the picture stays a file name (found in themes/art)
+            out[fam]["art"] = part["art"]
     if extra:
         out["sensors"] = extra
     return out

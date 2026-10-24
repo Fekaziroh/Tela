@@ -220,6 +220,7 @@ function edRender() {
   $("#ed-w").value = Math.round(g.w); $("#ed-h").value = Math.round(g.h);
   $("#ed-natural").hidden = !g.base || (g.base[0] === g.w && g.base[1] === g.h);
   $("#ed-pos").textContent = `x ${Math.round(g.x)} · y ${Math.round(g.y)} · ${Math.round(g.w)}×${Math.round(g.h)}`;
+  renderBlockColors(g);
   edRenderItems(g);
 }
 function itemLabel(it) {
@@ -308,6 +309,68 @@ function selectInput(it, key, options, labels) {
   return sel;
 }
 function pair(a, b) { const d = document.createElement("div"); d.className = "two"; d.append(a, b); return d; }
+// ------------------------------------------------------------------ colors (block palette and element colors)
+const BLOCK_COLOR_KEYS = ["panel", "text", "secondary", "accent", "track"];
+const ITEM_COLOR_KEYS = {
+  panel: [["color", "panel", "ed.c_fill"], ["border", null, "ed.c_border"], ["title_color", "secondary", "ed.c_title"]],
+  text: [["color", "text", "ed.c_color"]], clock: [["color", "text", "ed.c_color"]],
+  value: [["color", "text", "ed.c_color"], ["unit_color", "secondary", "ed.c_unit"]],
+  bar: [["color", "accent", "ed.c_color"], ["track_color", "track", "ed.c_track"]],
+  gauge: [["color", "accent", "ed.c_color"], ["track_color", "track", "ed.c_track"]],
+  graph: [["color", "accent", "ed.c_color"]], rect: [["color", "track", "ed.c_color"]],
+};
+function themeHex(name, palette) {
+  const all = { ...((S.init || {}).default_colors || {}), ...(S.settings.colors || {}), ...(palette || {}) };
+  let v = String(name || "");
+  if (v.includes("@")) v = v.split("@")[0];
+  v = all[v] || v;
+  return /^#[0-9a-f]{6}$/i.test(v) ? v.toUpperCase() : "#000000";
+}
+function swatch(label, hex, custom, onPick, onReset) {
+  const el = document.createElement("div");
+  el.className = "swatch" + (custom ? " custom" : "");
+  el.innerHTML = `<label title="${esc(label)}"><i style="background:${hex}"></i><input type="color" value="${hex}" aria-label="${esc(label)}"></label><small>${esc(label)}</small>${custom ? `<button class="icon-btn" title="${t("ed.c_reset")}">↺</button>` : ""}`;
+  const inp = $("input", el);
+  inp.addEventListener("input", () => { $("i", el).style.background = inp.value; });
+  inp.addEventListener("change", () => onPick(inp.value.toUpperCase()));
+  const r = $("button", el);
+  if (r) r.addEventListener("click", onReset);
+  return el;
+}
+function renderBlockColors(g) {
+  const box = $("#ed-colors");
+  if (!box) return;
+  box.innerHTML = "";
+  const pal = g.colors || {};
+  for (const k of BLOCK_COLOR_KEYS) {
+    box.appendChild(swatch(t("ed.bc_" + k), themeHex(k, pal), k in pal,
+      hex => edChange(() => { g.colors = { ...(g.colors || {}), [k]: hex }; }),
+      () => edChange(() => { delete g.colors[k]; if (!Object.keys(g.colors).length) delete g.colors; })));
+  }
+}
+// what an element had before its color was changed here: "↺" brings it back (the theme may name a color)
+const ORIGINAL_COLORS = new WeakMap();
+function itemColors(it, g) {
+  const keys = ITEM_COLOR_KEYS[it.type];
+  if (!keys) return null;
+  if (!ORIGINAL_COLORS.has(it)) ORIGINAL_COLORS.set(it, Object.fromEntries(keys.map(([k]) => [k, it[k]])));
+  const orig = ORIGINAL_COLORS.get(it);
+  const box = document.createElement("div");
+  box.className = "swatches";
+  for (const [k, def, label] of keys) {
+    const cur = it[k] ?? def;
+    if (cur == null) {   // e.g. a panel without a border: picking a color adds one
+      box.appendChild(swatch(t(label), "#000000", false, hex => edChange(() => { it[k] = hex; }), null));
+      continue;
+    }
+    const changed = /^#/.test(String(it[k] || "")) && it[k] !== orig[k];
+    box.appendChild(swatch(t(label), themeHex(cur, g && g.colors), changed,
+      hex => edChange(() => { it[k] = hex; }),
+      () => edChange(() => { if (orig[k] == null) delete it[k]; else it[k] = orig[k]; })));
+  }
+  return box;
+}
+
 function edItemFields(it) {
   const box = document.createElement("div");
   box.className = "fields";
@@ -351,6 +414,8 @@ function edItemFields(it) {
   box.append(pair(field("ed.pos_x", numInput(it, posX)), field("ed.pos_y", numInput(it, posY))));
   if ("w" in it) box.append(pair(field("ed.w", numInput(it, "w")), field("ed.h", numInput(it, "h"))));
   if ("radius" in it && it.type === "gauge") box.append(field("ed.radius", numInput(it, "radius")));
+  const colors = itemColors(it, selGroup());
+  if (colors) box.append(field("ed.colors", colors));
   const rot = document.createElement("div");
   rot.className = "rot";
   ROTATIONS.forEach(a => {

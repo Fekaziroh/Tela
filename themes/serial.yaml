@@ -1,0 +1,187 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Serial, en: Serial, es: Serial, zh: Serial}
+order: 10
+tela: 1
+
+colors:
+  background: '#0B0E13'
+  panel: '#0F131A'
+  text: '#D4D4D4'
+  secondary: '#6A9955'
+  track: '#3C4452'
+  accent: '#4FC1FF'
+  warn: '#DCDCAA'
+  crit: '#F44747'
+
+landscape:
+  art: serial_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 32
+      items:
+        - {type: text, text: $ tela --watch, x: 10, y: 16, size: 12, color: secondary, when: no_fps, font: consolas}
+        - {type: text, text: fps =, x: 10, y: 16, size: 12, color: accent, when: fps, font: consolas}
+        - {type: value, sensor: fps, x: 60, y: 16, size: 16, bold: true, empty: '', font: consolas}
+        - {type: clock, format: '%H:%M:%S', x: 470, y: 16, align: right, size: 16, bold: true, font: consolas}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 180, y: 16, align: left, size: 10, color: secondary, when: no_media_any, font: consolas}
+        - {type: media, x: 170, y: 2, w: 200, h: 28, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 34
+      w: 468
+      h: 90
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 90, title: // cpu, subtitle: '{cpu_name}', border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: cpu.temp, x: 14, y: 38, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 38, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_temp, x: 118, y: 38, size: 13, unit: ' °C', unit_size: 10, font: consolas, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: bar, sensor: cpu_temp, x: 236, y: 38, w: 156, h: 6, min: 20, max: 95, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: cpu.load, x: 14, y: 58, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 58, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_load, x: 118, y: 58, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: cpu_load, x: 236, y: 58, w: 156, h: 6, min: 0, max: 100, style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: cpu.clock, x: 14, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_clock, x: 118, y: 78, size: 13, unit: ' GHz', unit_size: 10, font: consolas, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: cpu.power, x: 236, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 326, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_power, x: 340, y: 78, size: 13, unit: ' W', unit_size: 10, font: consolas}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 128
+      w: 468
+      h: 90
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 90, title: // gpu, subtitle: '{gpu_name}', border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: gpu.temp, x: 14, y: 38, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 38, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_temp, x: 118, y: 38, size: 13, unit: ' °C', unit_size: 10, font: consolas, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: bar, sensor: gpu_temp, x: 236, y: 38, w: 156, h: 6, min: 20, max: 95, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: gpu.load, x: 14, y: 58, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 58, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_load, x: 118, y: 58, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: gpu_load, x: 236, y: 58, w: 156, h: 6, min: 0, max: 100, style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: gpu.clock, x: 14, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_clock, x: 118, y: 78, size: 13, unit: ' MHz', unit_size: 10, font: consolas}
+        - {type: text, text: gpu.power, x: 236, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 326, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_power, x: 340, y: 78, size: 13, unit: ' W', unit_size: 10, font: consolas}
+    - id: sys
+      name: SYS
+      x: 6
+      y: 222
+      w: 468
+      h: 92
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 92, title: // sys, border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: ram, x: 14, y: 38, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 38, size: 12, color: track, font: consolas}
+        - {type: value, sensor: ram_pct, x: 118, y: 38, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: ram_pct, x: 236, y: 38, w: 156, h: 6, min: 0, max: 100, style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: disk, x: 14, y: 58, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 58, size: 12, color: track, font: consolas}
+        - {type: value, sensor: disk1_act, x: 118, y: 58, size: 13, unit: ' %', unit_size: 10, font: consolas, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 236, y: 58, w: 156, h: 6, min: 0, max: 100, ssd: true, style: ascii, cells: 26, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: vram, x: 14, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: vram_mb, x: 118, y: 78, size: 13, unit: ' GB', unit_size: 10, font: consolas, scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: vol, x: 236, y: 78, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 326, y: 78, size: 12, color: track, font: consolas}
+        - {type: value, sensor: volume, x: 340, y: 78, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: text, text: net, x: 330, y: 16, size: 12, color: accent, font: consolas}
+        - {type: value, sensor: net_down, x: 368, y: 16, size: 12, unit: ↓, unit_size: 10, format: '{:.1f}', font: consolas}
+        - {type: value, sensor: net_up, x: 460, y: 16, size: 12, unit: ↑, align: right, unit_size: 10, format: '{:.1f}', font: consolas}
+
+portrait:
+  art: serial_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 50
+      items:
+        - {type: text, text: $ tela --watch, x: 10, y: 14, size: 11, color: secondary, when: no_fps, font: consolas}
+        - {type: text, text: fps =, x: 10, y: 14, size: 11, color: accent, when: fps, font: consolas}
+        - {type: value, sensor: fps, x: 56, y: 14, size: 14, bold: true, empty: '', font: consolas}
+        - {type: clock, format: '%H:%M:%S', x: 310, y: 14, align: right, size: 15, bold: true, font: consolas}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 38, align: left, size: 10, color: secondary, when: no_media_any, font: consolas}
+        - {type: media, x: 10, y: 26, w: 300, h: 24, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 52
+      w: 308
+      h: 138
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 138, title: // cpu, subtitle: '{cpu_name}', border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: cpu.temp, x: 12, y: 36, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 36, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_temp, x: 118, y: 36, size: 13, unit: ' °C', unit_size: 10, font: consolas, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: bar, sensor: cpu_temp, x: 12, y: 54, w: 228, h: 6, min: 20, max: 95, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: cpu.load, x: 12, y: 74, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 74, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_load, x: 118, y: 74, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: cpu_load, x: 12, y: 92, w: 228, h: 6, min: 0, max: 100, style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: cpu.clock, x: 12, y: 112, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 112, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_clock, x: 118, y: 112, size: 13, unit: ' GHz', unit_size: 10, font: consolas, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: cpu.power, x: 12, y: 128, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 128, size: 12, color: track, font: consolas}
+        - {type: value, sensor: cpu_power, x: 118, y: 128, size: 13, unit: ' W', unit_size: 10, font: consolas}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 194
+      w: 308
+      h: 138
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 138, title: // gpu, subtitle: '{gpu_name}', border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: gpu.temp, x: 12, y: 36, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 36, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_temp, x: 118, y: 36, size: 13, unit: ' °C', unit_size: 10, font: consolas, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: bar, sensor: gpu_temp, x: 12, y: 54, w: 228, h: 6, min: 20, max: 95, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: gpu.load, x: 12, y: 74, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 74, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_load, x: 118, y: 74, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: gpu_load, x: 12, y: 92, w: 228, h: 6, min: 0, max: 100, style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: gpu.clock, x: 12, y: 112, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 112, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_clock, x: 118, y: 112, size: 13, unit: ' MHz', unit_size: 10, font: consolas}
+        - {type: text, text: gpu.power, x: 12, y: 128, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 128, size: 12, color: track, font: consolas}
+        - {type: value, sensor: gpu_power, x: 118, y: 128, size: 13, unit: ' W', unit_size: 10, font: consolas}
+    - id: sys
+      name: SYS
+      x: 6
+      y: 336
+      w: 308
+      h: 140
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 140, title: // sys, border: track, title_color: secondary, font: consolas, radius: 4}
+        - {type: text, text: ram, x: 12, y: 36, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 36, size: 12, color: track, font: consolas}
+        - {type: value, sensor: ram_pct, x: 118, y: 36, size: 13, unit: ' %', unit_size: 10, font: consolas}
+        - {type: bar, sensor: ram_pct, x: 12, y: 52, w: 228, h: 6, min: 0, max: 100, style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: disk, x: 12, y: 70, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 70, size: 12, color: track, font: consolas}
+        - {type: value, sensor: disk1_act, x: 118, y: 70, size: 13, unit: ' %', unit_size: 10, font: consolas, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 12, y: 86, w: 228, h: 6, min: 0, max: 100, ssd: true, style: ascii, cells: 38, size: 10, font: consolas, chars: '#.'}
+        - {type: text, text: vram, x: 12, y: 102, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 102, size: 12, color: track, font: consolas}
+        - {type: value, sensor: vram_mb, x: 118, y: 102, size: 13, unit: ' GB', unit_size: 10, font: consolas, scale: 0.001, format: '{:.1f}'}
+        - {type: text, text: net.down, x: 12, y: 118, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 118, size: 12, color: track, font: consolas}
+        - {type: value, sensor: net_down, x: 118, y: 118, size: 13, unit: ' Mb/s', unit_size: 10, font: consolas, format: '{:.1f}'}
+        - {type: text, text: net.up, x: 12, y: 134, size: 12, color: accent, font: consolas}
+        - {type: text, text: '=', x: 104, y: 134, size: 12, color: track, font: consolas}
+        - {type: value, sensor: net_up, x: 118, y: 134, size: 13, unit: ' Mb/s', unit_size: 10, font: consolas, format: '{:.1f}'}

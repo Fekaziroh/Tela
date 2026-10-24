@@ -88,7 +88,8 @@ def load(fam, user=True, theme=None):
         groups = copy.deepcopy(themes.groups(theme, fam))
     except (KeyError, ValueError, OSError, yaml.YAMLError):   # a theme that is gone or damaged: the program's layout
         theme, groups = themes.LEGACY, base.get("groups") or []
-    out = {"size": base.get("size"), "sensors": sensors, "groups": groups, "custom": False, "theme": theme}
+    out = {"size": base.get("size"), "sensors": sensors, "groups": groups, "custom": False, "theme": theme,
+           "art": themes.art(theme, fam)}
     path = user_path(fam, theme)
     if user and path.exists():
         try:
@@ -156,6 +157,8 @@ def flatten(groups):
                 continue
             w = copy.deepcopy(it)
             w["group"] = g["id"]
+            if isinstance(g.get("colors"), dict) and g["colors"]:   # the block's own colors (Layout editor)
+                w["palette"] = g["colors"]
             for key in POSITION:
                 if key in w:
                     w[key] = gx + float(w[key]) * sx
@@ -186,7 +189,7 @@ def apply(cfg):
     cfg["sensors"] = lay.get("sensors") or {}
     cfg["widgets"] = flatten(lay.get("groups"))
     cfg["layout"] = {"family": fam, "size": lay.get("size"), "custom": lay.get("custom", False),
-                     "overlap": overlapping(lay.get("groups")), "theme": lay.get("theme")}
+                     "overlap": overlapping(lay.get("groups")), "theme": lay.get("theme"), "art": lay.get("art") or ""}
     return cfg
 
 

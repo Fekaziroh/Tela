@@ -5,7 +5,7 @@ import re
 import time
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageFont
 
 from media import progress as media_progress
 
@@ -129,6 +129,7 @@ class Renderer:
         self.logo_dirs = [Path(p) for p in (logo_dirs or [self.base / "logos"])]
         bg = cfg.get("background") or {}
         self.bg_image = str(bg.get("image") or "")
+        self.art = str((cfg.get("layout") or {}).get("art") or "")   # the theme's own picture behind the blocks
         self.bg_dim = max(0.0, min(0.9, float(bg.get("dim", 40)) / 100))
         self.panel_opacity = max(0.2, min(1.0, float(bg.get("panel_opacity", 100)) / 100)) if self.bg_image else 1.0
         self.words = dict(SCREEN_TEXT.get(lang, SCREEN_TEXT["en"]))
@@ -161,6 +162,7 @@ class Renderer:
             self.font_lists = {k: CJK_FONTS[k] + v for k, v in self.font_lists.items()}
         self._fonts = {}
         self._family = None      # font family of the element being drawn (layout editor choice)
+        self._palette = None     # colors of the block being drawn (Layout editor: the block's own colors)
         self._font_meta = {}     # id(font) -> (size, bold), to find the same size in another script
         self._glyphs = {}
         self._measure = {}
@@ -202,17 +204,23 @@ class Renderer:
             return default
 
     # ------------------------------------------------------------ helpers
+    def _named(self, name):
+        pal = self._palette
+        if pal and name in pal:
+            return pal[name]
+        return self.colors.get(name, name)
+
     def color(self, c, default="text"):
         c = default if c is None else c
         if isinstance(c, str) and "@" in c:   # "accent@18" = the accent at 18% over the panel color
             name, _, pct = c.partition("@")
             try:
                 a = max(0.0, min(1.0, float(pct) / 100))
-                top, under = ImageColor.getrgb(self.colors.get(name, name)), ImageColor.getrgb(self.colors.get("panel"))
+                top, under = ImageColor.getrgb(self._named(name)), ImageColor.getrgb(self._named("panel"))
                 return "#%02X%02X%02X" % tuple(round(u + (t - u) * a) for t, u in zip(top, under))
             except (ValueError, TypeError):
-                return self.colors.get(name, name)
-        return self.colors.get(c, c)
+                return self._named(name)
+        return self._named(c)
 
     def font(self, size, bold=False):
         fam = self._family if self._family in FONT_FAMILIES else None
@@ -420,8 +428,17 @@ class Renderer:
         border = w.get("border")
         fill = self.color(w.get("color"), "panel")
         opacity = self.panel_opacity if w.get("color") is None else 1.0
+        if w.get("opacity") is not None and not self.bg_image:   # the theme's own translucency over its picture
+            opacity = max(0.0, min(1.0, float(w["opacity"])))
         box = [x * S, y * S, (x + wd) * S - 1, (y + h) * S - 1]
-        if opacity < 0.999:   # translucent panels over a background image
+        radius = w.get("radius", 6 * k) * S
+        if w.get("shadow"):   # soft shadow under the panel
+            self._shadow(box, radius, float(w["shadow"]) * k)
+        if w.get("gradient") or w.get("gloss"):
+            self._fancy_panel(box, radius, w, fill, opacity)
+            if border:
+                d.rounded_rectangle(box, radius=radius, outline=self.color(border), width=S)
+        elif opacity < 0.999:   # translucent panels over a background image
             layer = Image.new("L", self._frame.size, 0)
             ImageDraw.Draw(layer).rounded_rectangle(box, radius=w.get("radius", 6 * k) * S, fill=int(255 * opacity))
             self._frame.paste(Image.new("RGB", self._frame.size, fill), (0, 0), layer)
@@ -437,6 +454,49 @@ class Renderer:
                 (self._txt(w.get("title", "")), self.font(size, True), self.color(w.get("title_color"), "secondary")),
                 (("  " if w.get("title") and sub else "") + sub, self.font(size), self.color("text")),
             ])
+
+    def _shadow(self, box, radius, px):
+        S = self.S
+        off = max(1, int(px * S))
+        pad = off * 3
+        x0, y0 = int(box[0]) - pad, int(box[1]) - pad
+        bw, bh = int(box[2] - box[0]) + 2 * pad, int(box[3] - box[1]) + 2 * pad + off
+        mask = Image.new("L", (bw, bh), 0)
+        ImageDraw.Draw(mask).rounded_rectangle([pad, pad + off, bw - pad, bh - pad], radius=radius, fill=90)
+        mask = mask.filter(ImageFilter.GaussianBlur(off))
+        self._frame.paste(Image.new("RGB", (bw, bh), "#000000"), (x0, y0), mask)
+
+    def _fancy_panel(self, box, radius, w, fill, opacity):
+        """Panel with a vertical gradient ("gradient": [top, bottom]) and/or a glossy highlight on its upper part
+        ("gloss": 0..1), like the glass buttons of the 2000s."""
+        x0, y0, x1, y1 = (int(v) for v in box)
+        bw, bh = max(1, x1 - x0 + 1), max(1, y1 - y0 + 1)
+        g = w.get("gradient")
+        if g:
+            top, bottom = (ImageColor.getrgb(self.color(c)) for c in (g + g)[:2])
+            col_ = Image.new("RGB", (1, 256))
+            col_.putdata([tuple(round(a + (b - a) * i / 255) for a, b in zip(top, bottom)) for i in range(256)])
+            body = col_.resize((bw, bh), Image.BILINEAR)
+        else:
+            body = Image.new("RGB", (bw, bh), fill)
+        shape = Image.new("L", (bw, bh), 0)
+        ImageDraw.Draw(shape).rounded_rectangle([0, 0, bw - 1, bh - 1], radius=radius, fill=int(255 * opacity))
+        self._frame.paste(body, (x0, y0), shape)
+        gloss = float(w.get("gloss") or 0)
+        if gloss > 0:
+            S = self.S
+            gh = max(2, int(bh * 0.46))
+            ramp = Image.new("L", (1, 256))
+            ramp.putdata([int(255 * gloss * (1 - i / 255) ** 1.6) for i in range(256)])
+            ramp = ramp.resize((bw, gh), Image.BILINEAR)
+            hl = Image.new("L", (bw, bh), 0)
+            hl.paste(ramp, (0, 0))
+            inner = Image.new("L", (bw, bh), 0)
+            inset = max(1, S)
+            ImageDraw.Draw(inner).rounded_rectangle([inset, inset, bw - 1 - inset, gh + radius], radius=max(0, radius - inset),
+                                                    fill=255)
+            hl = ImageChops.multiply(hl, inner)
+            self._frame.paste(Image.new("RGB", (bw, bh), "#FFFFFF"), (x0, y0), hl)
 
     def _w_network(self, d, w, col):
         """Network panel with 3 states: normal (ping in the title), unstable (orange border, loss) and down."""
@@ -658,6 +718,8 @@ class Renderer:
         fmt = w.get("format", "%H:%M").replace("{weekday}", self.words["weekdays"][now.weekday()])
         if "{weather}" in fmt:
             fmt = fmt.replace("{weather}", self.weather_text(col).replace("%", "%%"))
+        if "{weather_only}" in fmt:   # the weather alone, without the " · " that joins it to the date
+            fmt = fmt.replace("{weather_only}", self.weather_text(col).removeprefix(" · ").replace("%", "%%"))
         self._line(d, w["x"], w["y"], [(now.strftime(fmt), self.font(w.get("size", 24), w.get("bold", False)),
                                         self.color(w.get("color"), "text"))], w.get("align", "left"),
                    w.get("spacing", 0))
@@ -666,12 +728,39 @@ class Renderer:
         S = self.S
         v = col.value(w.get("sensor"))
         x, y, wd, h = w["x"], w["y"], w["w"], w.get("h", 4)
-        r = h / 2 * S
-        d.rounded_rectangle([x * S, y * S, (x + wd) * S, (y + h) * S], radius=r, fill=self.color(w.get("track_color"), "track"))
         f = self._fraction(w, self._smooth(w, v))
+        c = self._alert_color(w, v, self.color(w.get("color"), "accent"))
+        track = self.color(w.get("track_color"), "track")
+        style = str(w.get("style") or "")
+        if style == "ascii":   # [#######.....] in a fixed-width font
+            cells = int(w.get("cells") or 12)
+            n = int(round(f * cells))
+            ft = self.font(w.get("size", h * 1.6), w.get("bold", False))
+            chars = str(w.get("chars") or "#.")
+            full, empty = chars[0], chars[1] if len(chars) > 1 else " "
+            br = w.get("brackets", "[]")
+            self._line(d, x, y + h / 2, [(br[:1], ft, track), (full * n, ft, c), (empty * (cells - n), ft, track),
+                                         (br[1:2], ft, track)])
+            return
+        if style == "segments":   # separate blocks, like an old level meter
+            cells = int(w.get("cells") or 10)
+            gap = float(w.get("gap", 2))
+            cw = (wd - gap * (cells - 1)) / cells
+            n = f * cells
+            for i in range(cells):
+                x0 = x + i * (cw + gap)
+                d.rectangle([x0 * S, y * S, (x0 + cw) * S - 1, (y + h) * S - 1], fill=c if i < n - 0.25 else track)
+            return
+        r = (w.get("radius", h / 2)) * S
+        d.rounded_rectangle([x * S, y * S, (x + wd) * S, (y + h) * S], radius=r, fill=track)
         if f > 0:
-            c = self._alert_color(w, v, self.color(w.get("color"), "accent"))
             d.rounded_rectangle([x * S, y * S, (x + max(h, wd * f)) * S, (y + h) * S], radius=r, fill=c)
+        if w.get("gloss"):   # a light streak on the upper half (glass look)
+            x0, y0 = int(x * S), int(y * S)
+            bw, bh = max(1, int(wd * S)), max(1, int(h * 0.5 * S))
+            hl = Image.new("L", (bw, bh), 0)
+            ImageDraw.Draw(hl).rounded_rectangle([S, S // 2, bw - 1 - S, bh - 1], radius=r / 2, fill=int(255 * float(w["gloss"])))
+            self._frame.paste(Image.new("RGB", (bw, bh), "#FFFFFF"), (x0, y0), hl)
 
     def _w_gauge(self, d, w, col):
         S = self.S
@@ -689,10 +778,25 @@ class Renderer:
             e = th * S / 2
             d.ellipse([px - e, py - e, px + e, py + e], fill=c)
 
+        if w.get("fill") or w.get("gloss"):   # a filled disc inside the ring ("bubble"), maybe with a glass shine
+            inner = [box[0] + tw, box[1] + tw, box[2] - tw, box[3] - tw]
+            if w.get("fill"):
+                d.ellipse(inner, fill=self.color(w["fill"]))
+            if w.get("gloss"):
+                ix0, iy0, ix1, iy1 = (int(v) for v in inner)
+                bw, bh = max(2, ix1 - ix0), max(2, iy1 - iy0)
+                key = ("shine", bw, bh, w["gloss"])
+                hl = self._images.get(key)
+                if hl is None:
+                    hl = Image.new("L", (bw, bh), 0)
+                    ImageDraw.Draw(hl).ellipse([bw * 0.16, bh * 0.05, bw * 0.84, bh * 0.5], fill=int(255 * float(w["gloss"])))
+                    hl = self._images[key] = hl.filter(ImageFilter.GaussianBlur(max(1, bw // 40)))
+                self._frame.paste(Image.new("RGB", (bw, bh), "#FFFFFF"), (ix0, iy0), hl)
         track = self.color(w.get("track_color"), "track")
         d.arc(box, a0, a1, fill=track, width=tw)
-        cap(a0, track)
-        cap(a1, track)
+        if (a1 - a0) % 360:
+            cap(a0, track)
+            cap(a1, track)
         f = self._fraction(w, self._smooth(w, v))
         if f > 0:
             c = self._alert_color(w, v, self.color(w.get("color"), "accent"))
@@ -996,6 +1100,27 @@ class Renderer:
                     "color": "accent"})
         return lay
 
+    def _rest_layout(self):
+        """Rest screen: a big clock, the date and the weather, in the theme's colors (and over its picture)."""
+        if getattr(self, "_rest_widgets", None) is None:
+            W, H = self.W, self.H
+            land = W > H
+            cy = H * (0.40 if land else 0.38)
+            big = 104 if land else 84
+            self._rest_widgets = [
+                {"type": "clock", "format": "%H:%M", "x": W / 2, "y": cy, "align": "center", "size": big, "bold": True,
+                 "spacing": 2},
+                {"type": "clock", "format": "{weekday} %d/%m", "x": W / 2, "y": cy + big * 0.66, "align": "center",
+                 "size": 20 if land else 18, "color": "secondary"},
+                {"type": "clock", "format": "{weather_only}", "x": W / 2, "y": cy + big * 0.66 + 30, "align": "center",
+                 "size": 17 if land else 15, "color": "accent"},
+                {"type": "value", "sensor": "cpu_temp", "x": W / 2 - 12, "y": H - 18, "align": "right", "size": 13,
+                 "unit": "°", "prefix": "CPU ", "color": "secondary"},
+                {"type": "value", "sensor": "gpu_temp", "x": W / 2 + 12, "y": H - 18, "align": "left", "size": 13,
+                 "unit": "°", "prefix": "GPU ", "color": "secondary"},
+            ]
+        return self._rest_widgets
+
     def transition_steps(self):
         """Blocks of the target screen, in the order they come in: top, panels (top to bottom, left to right)
         and, in the summary, the graph revealed in slices from left to right."""
@@ -1045,8 +1170,9 @@ class Renderer:
         fn = getattr(self, "_w_" + str(w.get("type")), None)
         if fn is None:
             raise ValueError(f"unknown widget type: {w.get('type')!r}")
-        before = self._family
+        before, before_pal = self._family, self._palette
         self._family = w.get("font")
+        self._palette = w.get("palette")
         try:
             rot = float(w.get("rotate") or 0) % 360
             if not rot:
@@ -1067,7 +1193,7 @@ class Renderer:
             turned = layer.rotate(-rot, resample=Image.BICUBIC, center=(cx, cy))
             base.paste(turned, (0, 0), turned)
         finally:
-            self._family = before
+            self._family, self._palette = before, before_pal
 
     def _center(self, w, box):
         """Rotation center in frame pixels: the element's box when it has one, else what was drawn."""
@@ -1108,8 +1234,13 @@ class Renderer:
         return self._static.copy()
 
     def _paste_background(self, img):
-        """Background image, cropped to fill the screen and darkened so the numbers stay readable."""
+        """Background image, cropped to fill the screen and darkened so the numbers stay readable.
+        Without one, the theme's own picture (made for the screen size, not darkened)."""
         if not self.bg_image:
+            if self.art:
+                art = self._load_art()
+                if art is not None:
+                    img.paste(art)
             return
         try:
             path = Path(self.bg_image)
@@ -1127,8 +1258,23 @@ class Renderer:
             im = Image.blend(im, Image.new("RGB", im.size, self.color("background")), self.bg_dim)
         img.paste(im)
 
+    def _load_art(self):
+        key = ("art", self.art, self.W, self.H, self.S)
+        if key not in self._images:
+            try:
+                im = Image.open(self.art).convert("RGB")
+                f = max(self.W * self.S / im.width, self.H * self.S / im.height)
+                im = im.resize((max(self.W * self.S, round(im.width * f)), max(self.H * self.S, round(im.height * f))),
+                               Image.LANCZOS)
+                left, top = (im.width - self.W * self.S) // 2, (im.height - self.H * self.S) // 2
+                self._images[key] = im.crop((left, top, left + self.W * self.S, top + self.H * self.S))
+            except (OSError, ValueError):
+                self._images[key] = None
+        return self._images[key]
+
     def _is_static(self, w):
-        return self.cache_static and w.get("type") in STATIC_TYPES and not w.get("when")
+        # "over": drawn after the moving elements (a label on top of a filled gauge)
+        return self.cache_static and w.get("type") in STATIC_TYPES and not w.get("when") and not w.get("over")
 
     def draw(self, col):
         S = self.S
@@ -1144,6 +1290,11 @@ class Renderer:
             self.layout = "summary"
             self.animating = True   # the countdown bar moves
             img = Image.new("RGB", (self.W * S, self.H * S), self.color("background"))
+        elif getattr(col, "rest", False):   # Rest: the PC is idle, a big clock with the date and the weather
+            widgets = self._rest_layout()
+            self.layout = "rest"
+            img = Image.new("RGB", (self.W * S, self.H * S), self.color("background"))
+            self._paste_background(img)
         else:
             img = self._static_layer()
         self._frame = img
@@ -1166,4 +1317,5 @@ class Renderer:
             else:
                 self._draw(w, d, col)
         self._first = False
+        self.hires = img   # the supersampled frame: the window's sharp preview
         return img.reduce(S) if S != 1 else img   # box average of the supersampled frame (as sharp as LANCZOS, 10x faster)

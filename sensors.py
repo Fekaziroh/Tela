@@ -1133,6 +1133,7 @@ class Collector:
         self.sessions = {}            # pid -> Session (one per open program)
         self._front_pid = None
         self._last_pid = None
+        self.rest = False             # the Rest screen is on (set by the engine)
         self.summary = None           # summary data while it is on screen
         self.last_summary = None      # the latest one, for "show again"
         self.events = []              # messages for the activity log

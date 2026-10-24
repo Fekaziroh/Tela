@@ -29,7 +29,7 @@ DATA = _data_folder()
 # sections whose simple values belong to the user; the screen layout always comes from the new version
 USER_SECTIONS = ("display", "colors", "data", "animation", "fps", "session", "network", "ssd", "logos", "media",
                  "ui", "tray", "eco", "background", "custom_colors", "history",
-                 "updates", "performance", "alerts", "theme", "weather", "texts")
+                 "updates", "performance", "alerts", "theme", "weather", "texts", "rest")
 
 
 def load(path):

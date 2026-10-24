@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.9"
+VERSION = "1.5.0"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -201,6 +201,10 @@ class Engine(threading.Thread):
         self.eco_after = max(0.5, float(ecfg.get("idle_minutes", 5))) * 60
         self.eco_interval = max(self.interval, float(ecfg.get("interval", 3)))
         self.eco = False
+        rcfg = cfg.get("rest") or {}
+        self.rest_enabled = bool(rcfg.get("enabled", False))
+        self.rest_after = max(1.0, float(rcfg.get("idle_minutes", 10))) * 60
+        self.rest = False
 
     # ------------------------------------------------------------ last game (kept on disk)
     @staticmethod
@@ -360,6 +364,9 @@ class Engine(threading.Thread):
                                               duration=r.get("duration") or "", max=r.get("max") or {},
                                               icon=str(icon) if icon else None)
                 self.log(f"Showing the summary of {r.get('name')}")
+        elif name == "rest_preview":   # Settings › Rest › See how it looks
+            self._rest_preview_until = time.monotonic() + 10
+            self._update_rest()
         elif name == "summary_last":
             r = self.collector.last_summary
             if r:
@@ -436,6 +443,7 @@ class Engine(threading.Thread):
             return False
         self.last_frame = img
         self.frame_no += 1
+        self.hires_no = self.frame_no   # renderer.hires matches this frame (transitions send pieces after it)
         try:
             if not self.connected:
                 self.screen.connect()
@@ -563,11 +571,28 @@ class Engine(threading.Thread):
             self.renderer.anim_enabled = anim and not want
             self.log("Eco mode on (you are away)" if want else "Eco mode off")
 
+    _rest_preview_until = 0.0
+
+    def _update_rest(self):
+        """Rest: with the PC idle (no game), the screen shows a big clock, the date and the weather; any use of
+        the PC brings the theme back. Settings › Rest (next to the screen-off options)."""
+        c = self.collector
+        now = time.monotonic()
+        preview = now < self._rest_preview_until
+        want = preview or (self.rest_enabled and not self.demo and not c.in_game() and not c.summary
+                           and idle_seconds() >= self.rest_after)
+        if want != self.rest:
+            self.rest = want
+            if not preview:
+                self.log("Rest screen on (the PC is idle)" if want else "Rest screen off")
+        c.rest = want
+
     def _cycle(self, state):
         t0 = time.monotonic()
         self.beat = t0
         self._read_sensors(state)
         self._update_eco()
+        self._update_rest()
         self._apply_brightness()
         next_read = t0 + (self.eco_interval if self.eco else self.interval)
         # between reads: frames only while something moves or a change is due

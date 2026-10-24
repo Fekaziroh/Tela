@@ -1,0 +1,189 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Clear, en: Clear, es: Clear, zh: Clear}
+order: 9
+tela: 1
+
+colors:
+  background: '#F4F6FB'
+  panel: '#FFFFFF'
+  text: '#2B2140'
+  secondary: '#5E5672'
+  track: '#FFFFFF'
+  accent: '#E8196F'
+  warn: '#F08A00'
+  crit: '#D7263D'
+
+landscape:
+  art: clear_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 40
+      items:
+        - {type: value, sensor: fps, x: 12, y: 20, size: 22, unit: ' FPS', unit_size: 10, bold: true, empty: '', font: verdana}
+        - {type: image, files: logos, x: 12, y: 11, w: 100, h: 18, when: no_fps}
+        - {type: clock, format: '%H:%M', x: 240, y: 20, align: center, size: 26, bold: true, font: verdana}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 468, y: 20, align: right, size: 10, color: secondary, when: no_media_any, fade: true, font: verdana}
+        - {type: media, x: 298, y: 4, w: 172, h: 32, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 42
+      w: 231
+      h: 146
+      colors: {panel: '#FF8FC0', accent: '#E8196F', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 146, title: CPU, subtitle: '{cpu_name}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: gauge, sensor: cpu_temp, cx: 60, cy: 90, radius: 42, thickness: 9, min: 20, max: 95, unit: °C, size: 24, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], gloss: 0.35, font: verdana}
+        - {type: text, text: '#load', x: 116, y: 44, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_load, x: 217, y: 44, size: 14, unit: ' %', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#clock', x: 116, y: 70, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_clock, x: 217, y: 70, size: 14, unit: ' GHz', align: right, unit_size: 8, font: verdana, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: '#power', x: 116, y: 96, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_power, x: 217, y: 96, size: 14, unit: ' W', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#fan', x: 116, y: 122, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_fan, x: 217, y: 122, size: 14, unit: ' RPM', align: right, unit_size: 8, font: verdana}
+    - id: gpu
+      name: GPU
+      x: 243
+      y: 42
+      w: 231
+      h: 146
+      colors: {panel: '#7FE3C2', accent: '#079E74', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 231, h: 146, title: GPU, subtitle: '{gpu_name}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: gauge, sensor: gpu_temp, cx: 60, cy: 90, radius: 42, thickness: 9, min: 20, max: 95, unit: °C, size: 24, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], gloss: 0.35, font: verdana}
+        - {type: text, text: '#load', x: 116, y: 44, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_load, x: 217, y: 44, size: 14, unit: ' %', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#clock', x: 116, y: 70, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_clock, x: 217, y: 70, size: 14, unit: ' MHz', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#power', x: 116, y: 96, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_power, x: 217, y: 96, size: 14, unit: ' W', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#fan', x: 116, y: 122, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_fan, x: 217, y: 122, size: 14, unit: ' RPM', align: right, unit_size: 8, font: verdana}
+    - id: ram
+      name: RAM
+      x: 6
+      y: 194
+      w: 152
+      h: 120
+      colors: {panel: '#FFE07A', accent: '#D19300', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 120, title: RAM, subtitle: '{ram_desc}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: value, sensor: ram_pct, x: 76.0, y: 69.6, size: 26, unit: '%', align: center, unit_size: 11, bold: true, font: verdana}
+        - {type: bar, sensor: ram_pct, x: 14, y: 102, w: 124, h: 8, min: 0, max: 100, gloss: 0.5, ssd: false}
+    - id: disks
+      name: '{disks_title}'
+      x: 164
+      y: 194
+      w: 152
+      h: 120
+      colors: {panel: '#94C6FF', accent: '#1F6FD6', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 120, title: '{disks_title}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: value, sensor: disk1_act, x: 76.0, y: 69.6, size: 26, unit: '%', align: center, unit_size: 11, bold: true, font: verdana, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 14, y: 102, w: 124, h: 8, min: 0, max: 100, gloss: 0.5, ssd: true}
+    - id: network
+      name: '#network'
+      x: 322
+      y: 194
+      w: 152
+      h: 120
+      colors: {panel: '#CDAFFF', accent: '#6E3FF2', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 120, title: '#network', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: text, text: ↓, x: 14, y: 60.0, size: 13, color: accent, bold: true}
+        - {type: value, sensor: net_down, x: 138, y: 60.0, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}
+        - {type: text, text: ↑, x: 14, y: 93.60000000000001, size: 13, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 138, y: 93.60000000000001, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}
+
+portrait:
+  art: clear_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 58
+      items:
+        - {type: value, sensor: fps, x: 10, y: 18, size: 20, unit: ' FPS', unit_size: 9, bold: true, empty: '', font: verdana}
+        - {type: image, files: logos, x: 10, y: 10, w: 80, h: 15, when: no_fps}
+        - {type: clock, format: '%H:%M', x: 310, y: 18, align: right, size: 24, bold: true, font: verdana}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 10, y: 44, align: left, size: 10, color: secondary, when: no_media_any, fade: true, font: verdana}
+        - {type: media, x: 10, y: 32, w: 300, h: 24, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 62
+      w: 308
+      h: 128
+      colors: {panel: '#FF8FC0', accent: '#E8196F', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 128, title: CPU, subtitle: '{cpu_name}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: gauge, sensor: cpu_temp, cx: 64, cy: 78, radius: 40, thickness: 9, min: 20, max: 95, unit: °C, size: 24, max_sensor: cpu_temp_max, alerts: [{above: 75, color: warn}, {above: 85, color: crit}], gloss: 0.35, font: verdana}
+        - {type: text, text: '#load', x: 130, y: 40, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_load, x: 294, y: 40, size: 14, unit: ' %', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#clock', x: 130, y: 64, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_clock, x: 294, y: 64, size: 14, unit: ' GHz', align: right, unit_size: 8, font: verdana, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: '#power', x: 130, y: 88, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_power, x: 294, y: 88, size: 14, unit: ' W', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#fan', x: 130, y: 112, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: cpu_fan, x: 294, y: 112, size: 14, unit: ' RPM', align: right, unit_size: 8, font: verdana}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 196
+      w: 308
+      h: 128
+      colors: {panel: '#7FE3C2', accent: '#079E74', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 128, title: GPU, subtitle: '{gpu_name}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: gauge, sensor: gpu_temp, cx: 64, cy: 78, radius: 40, thickness: 9, min: 20, max: 95, unit: °C, size: 24, max_sensor: gpu_temp_max, alerts: [{above: 70, color: warn}, {above: 80, color: crit}], gloss: 0.35, font: verdana}
+        - {type: text, text: '#load', x: 130, y: 40, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_load, x: 294, y: 40, size: 14, unit: ' %', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#clock', x: 130, y: 64, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_clock, x: 294, y: 64, size: 14, unit: ' MHz', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#power', x: 130, y: 88, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_power, x: 294, y: 88, size: 14, unit: ' W', align: right, unit_size: 8, font: verdana}
+        - {type: text, text: '#fan', x: 130, y: 112, size: 9, color: secondary, bold: true, font: verdana}
+        - {type: value, sensor: gpu_fan, x: 294, y: 112, size: 14, unit: ' RPM', align: right, unit_size: 8, font: verdana}
+    - id: ram
+      name: RAM
+      x: 6
+      y: 330
+      w: 151
+      h: 78
+      colors: {panel: '#FFE07A', accent: '#D19300', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 78, title: RAM, border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: value, sensor: ram_pct, x: 75.5, y: 45.239999999999995, size: 20, unit: '%', align: center, unit_size: 11, bold: true, font: verdana}
+        - {type: bar, sensor: ram_pct, x: 14, y: 60, w: 123, h: 8, min: 0, max: 100, gloss: 0.5, ssd: false}
+    - id: disks
+      name: '{disks_title}'
+      x: 163
+      y: 330
+      w: 151
+      h: 78
+      colors: {panel: '#94C6FF', accent: '#1F6FD6', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 78, title: '{disks_title}', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: value, sensor: disk1_act, x: 75.5, y: 45.239999999999995, size: 20, unit: '%', align: center, unit_size: 11, bold: true, font: verdana, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 14, y: 60, w: 123, h: 8, min: 0, max: 100, gloss: 0.5, ssd: true}
+    - id: network
+      name: '#network'
+      x: 6
+      y: 414
+      w: 308
+      h: 62
+      colors: {panel: '#CDAFFF', accent: '#6E3FF2', track: '#FFFFFF'}
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 62, title: '#network', border: '#FFFFFF', opacity: 0.6, gloss: 0.6, radius: 18, shadow: 2, font: verdana}
+        - {type: text, text: ↓, x: 14, y: 42, size: 13, color: accent, bold: true}
+        - {type: value, sensor: net_down, x: 150, y: 42, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}
+        - {type: text, text: ↑, x: 166, y: 42, size: 13, color: secondary, bold: true}
+        - {type: value, sensor: net_up, x: 294, y: 42, size: 15, unit: ' Mb/s', align: right, unit_size: 8, format: '{:.1f}', font: verdana}

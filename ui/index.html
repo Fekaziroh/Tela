@@ -98,6 +98,7 @@
               <label><span data-i18n="ed.h"></span> <input class="num" type="number" id="ed-h" min="10"></label>
             </div>
             <div class="btns"><button class="btn" id="ed-natural" data-i18n="ed.natural"></button><button class="btn" id="ed-add-item" data-i18n="ed.add_item"></button></div>
+            <div class="field"><label data-i18n="ed.block_colors"></label><div class="swatches" id="ed-colors"></div></div>
             <h3 data-i18n="ed.items" style="margin-top:4px"></h3>
             <div class="items-ed" id="ed-items"></div>
           </div>
@@ -178,6 +179,8 @@
           <div class="row"><span class="lbl" data-i18n="set.off_exit"></span><button class="sw" role="switch" data-set="display.off_on_exit" data-label="set.off_exit"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.off_lock"></span><button class="sw" role="switch" data-set="display.off_on_lock" data-label="set.off_lock"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.off_monitor"></span><button class="sw" role="switch" data-set="display.off_with_monitor" data-label="set.off_monitor"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="set.rest"></span><small data-i18n="set.rest_hint"></small></span><button class="sw" role="switch" data-set="rest.enabled" data-label="set.rest"></button></div>
+          <div class="row"><span class="lbl" data-i18n="set.rest_after"></span><span class="inline"><input class="num" type="number" min="1" max="240" step="1" data-set="rest.idle_minutes"><span data-i18n="min"></span><button class="btn" data-cmd="rest_preview" data-i18n="set.summary_try"></button></span></div>
           <div class="row"><span class="lbl"><span data-i18n="set.tray_icon"></span><small data-i18n="set.tray_icon_desc"></small></span>
             <div class="seg" data-set="tray.temp_icon"><button data-v="none" data-i18n="tray.none"></button><button data-v="cpu" data-i18n="tray.cpu"></button><button data-v="gpu" data-i18n="tray.gpu"></button></div></div>
           <div class="row"><span class="lbl"><span data-i18n="set.unload"></span><small data-i18n="set.unload_hint"></small></span><button class="sw" role="switch" data-set="ui.unload_hidden" data-label="set.unload"></button></div>
@@ -211,6 +214,7 @@
           <div class="row"><span class="lbl"><span data-i18n="set.fps_avg"></span><small data-i18n="set.fps_avg_desc"></small></span><span class="inline"><input class="num" type="number" min="0.2" max="2" step="0.1" data-set="fps.average"><span data-i18n="s"></span></span></div>
           <div class="row"><span class="lbl"><span data-i18n="pre.quality"></span><small data-i18n="pre.quality_d"></small></span><div class="seg" data-set="performance.quality"><button data-v="high" data-i18n="pre.q_high"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
           <div class="row"><span class="lbl" data-i18n="pre.preview"></span><button class="sw" role="switch" data-set="performance.preview" data-label="pre.preview"></button></div>
+          <div class="row"><span class="lbl"><span data-i18n="pre.pq"></span><small data-i18n="pre.pq_d"></small></span><div class="seg" data-set="performance.preview_quality"><button data-v="sharp" data-i18n="pre.pq_sharp"></button><button data-v="normal" data-i18n="pre.q_normal"></button></div></div>
           <div class="row"><span class="lbl"><span data-i18n="set.anim"></span><small data-i18n="set.anim_desc"></small></span><button class="sw" role="switch" data-set="animation.enabled" data-label="set.anim"></button></div>
           <div class="row"><span class="lbl"><span data-i18n="set.eco"></span><small data-i18n="set.eco_desc"></small></span><button class="sw" role="switch" data-set="eco.enabled" data-label="set.eco"></button></div>
           <div class="row"><span class="lbl" data-i18n="set.eco_after"></span><span class="inline"><input class="num" type="number" min="1" max="120" step="1" data-set="eco.idle_minutes"><span data-i18n="min"></span></span></div>

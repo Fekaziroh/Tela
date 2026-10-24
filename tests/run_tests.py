@@ -607,7 +607,7 @@ def old_folder_removal_is_guarded():
 def setup_script_sources_exist():
     iss = (ROOT / "installer" / "Tela.iss").read_text(encoding="utf-8")
     for src in re.findall(r'Source: "\{#Root\}\\([^"]+)"', iss):
-        path = ROOT / src.replace("\\", "/").replace("/*.yaml", "").replace("/*", "")
+        path = ROOT / src.replace("\\", "/").split("/*")[0]
         assert path.exists(), src
     assert "AppId={{" in iss and "--autostart on" in iss and "--quit" in iss and "PawnIO" in iss
     wf = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
@@ -794,6 +794,17 @@ def game_history_saves_lists_prunes_and_exports():
     assert f["name"] == "Forza" and f["count"] == 2 and f["ids"] == ["b", "a"] and f["seconds"] == 4000
     assert abs(f["fps_avg"] - 110) < 1e-9 and f["fps_1low"] == 90 and f["best_avg"] == 120 and f["max"]["cpu"] == 75
     assert rows[1]["name"] == "Hades" and rows[1]["fps_avg"] is None
+
+
+@test
+def rest_screen_takes_over_when_idle_and_leaves_for_a_game():
+    e = engine.Engine(ROOT / config.DEFAULT, engine.Log(echo=False), demo=True, simulate="memory")
+    e.screen.file = None
+    e._on_command("rest_preview", None)
+    assert e.collector.rest and e._send_frame() and e.renderer.layout == "rest"
+    e._rest_preview_until = 0.0
+    e._update_rest()                                      # demo: never idle on its own
+    assert not e.collector.rest and e._send_frame() and e.renderer.layout != "rest"
 
 
 @test
@@ -1153,6 +1164,10 @@ def themes_fit_and_draw_in_both_orientations():
             cfg = default_cfg(fam)
             cfg["widgets"] = layout.flatten(lay["groups"])
             cfg["colors"] = themes.colors(tid)
+            part = themes.load(tid).get(fam)
+            if isinstance(part, dict) and part.get("art"):   # the theme's picture ships with the program
+                assert lay["art"] and Path(lay["art"]).is_file(), (tid, fam)
+            cfg["layout"] = {"art": lay["art"]}
             r = render.Renderer(cfg, W, H, base=ROOT, fields=fields)
             for game in (True, False):
                 for media in (True, False):

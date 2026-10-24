@@ -1,0 +1,192 @@
+# Built-in Tela! screen theme (replaced by every update; your changes are kept apart).
+
+name: {pt: Arial, en: Arial, es: Arial, zh: Arial}
+order: 7
+tela: 1
+
+colors:
+  background: '#E9F0F6'
+  panel: '#F7F9FB'
+  text: '#1F2933'
+  secondary: '#66727F'
+  track: '#D3DAE2'
+  accent: '#3D7CC9'
+  warn: '#E08A00'
+  crit: '#D93025'
+
+landscape:
+  art: arial_l.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 480
+      h: 66
+      items:
+        - {type: clock, format: '%H:%M', x: 14, y: 28, align: left, size: 40, font: arial}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 16, y: 56, align: left, size: 10.5, color: secondary, font: arial}
+        - {type: value, sensor: fps, x: 466, y: 28, size: 26, unit: ' FPS', align: right, unit_size: 11, bold: true, empty: '', font: arial, when: no_media_any}
+        - {type: value, sensor: fps, x: 286, y: 28, size: 22, unit: ' FPS', align: right, unit_size: 10, bold: true, empty: '', font: arial, when: media_any}
+        - {type: image, files: logos, x: 350, y: 18, w: 114, h: 22, when: [no_fps, no_media_any], align: right}
+        - {type: media, x: 296, y: 10, w: 172, h: 34, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 68
+      w: 468
+      h: 80
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 80, title: CPU, subtitle: '{cpu_name}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: cpu_temp, x: 16, y: 50, size: 32, unit: °C, font: arial, unit_size: 12, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: text, text: '#temp', x: 18, y: 70, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: text, text: '#load', x: 150, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_load, x: 150, y: 52, size: 17, unit: ' %', font: arial, unit_size: 9}
+        - {type: text, text: '#clock', x: 262, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_clock, x: 262, y: 52, size: 17, unit: ' GHz', font: arial, unit_size: 9, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: '#power', x: 370, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_power, x: 370, y: 52, size: 17, unit: ' W', font: arial, unit_size: 9}
+        - {type: bar, sensor: cpu_load, x: 150, y: 66, w: 304, h: 3, min: 0, max: 100}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 152
+      w: 468
+      h: 80
+      items:
+        - {type: panel, x: 0, y: 0, w: 468, h: 80, title: GPU, subtitle: '{gpu_name}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: gpu_temp, x: 16, y: 50, size: 32, unit: °C, font: arial, unit_size: 12, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: text, text: '#temp', x: 18, y: 70, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: text, text: '#load', x: 150, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_load, x: 150, y: 52, size: 17, unit: ' %', font: arial, unit_size: 9}
+        - {type: text, text: '#clock', x: 262, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_clock, x: 262, y: 52, size: 17, unit: ' MHz', font: arial, unit_size: 9}
+        - {type: text, text: '#power', x: 370, y: 34, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_power, x: 370, y: 52, size: 17, unit: ' W', font: arial, unit_size: 9}
+        - {type: bar, sensor: gpu_load, x: 150, y: 66, w: 304, h: 3, min: 0, max: 100}
+    - id: ram
+      name: RAM
+      x: 6
+      y: 236
+      w: 152
+      h: 78
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 78, title: RAM, subtitle: '{ram_desc}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: ram_pct, x: 12, y: 52, size: 22, unit: ' %', font: arial, unit_size: 10}
+        - {type: bar, sensor: ram_pct, x: 12, y: 66, w: 128, h: 3, min: 0, max: 100, ssd: false}
+    - id: disks
+      name: '{disks_title}'
+      x: 164
+      y: 236
+      w: 152
+      h: 78
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 78, title: '{disks_title}', subtitle: '{disk1_name}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: disk1_act, x: 12, y: 52, size: 22, unit: ' %', font: arial, unit_size: 10, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 12, y: 66, w: 128, h: 3, min: 0, max: 100, ssd: true}
+    - id: network
+      name: '#network'
+      x: 322
+      y: 236
+      w: 152
+      h: 78
+      items:
+        - {type: panel, x: 0, y: 0, w: 152, h: 78, title: '#network', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: text, text: ↓, x: 12, y: 39.0, size: 12, color: accent, font: arial, bold: true}
+        - {type: value, sensor: net_down, x: 140, y: 39.0, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: ↑, x: 12, y: 60.84, size: 12, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: net_up, x: 140, y: 60.84, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}
+
+portrait:
+  art: arial_p.png
+  groups:
+    - id: top
+      name: '#top'
+      x: 0
+      y: 0
+      w: 320
+      h: 72
+      items:
+        - {type: clock, format: '%H:%M', x: 12, y: 26, align: left, size: 36, font: arial}
+        - {type: clock, format: '{weekday} %d/%m{weather}', x: 14, y: 54, align: left, size: 10, color: secondary, when: no_media_any, font: arial}
+        - {type: value, sensor: fps, x: 308, y: 26, size: 22, unit: ' FPS', align: right, unit_size: 10, bold: true, empty: '', font: arial}
+        - {type: image, files: logos, x: 208, y: 16, w: 100, h: 18, when: no_fps, align: right}
+        - {type: media, x: 10, y: 42, w: 300, h: 28, when: media_any, fade: true}
+    - id: cpu
+      name: CPU
+      x: 6
+      y: 76
+      w: 308
+      h: 112
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 112, title: CPU, subtitle: '{cpu_name}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: cpu_temp, x: 16, y: 54, size: 34, unit: °C, font: arial, unit_size: 12, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: text, text: '#temp', x: 18, y: 76, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: bar, sensor: cpu_temp, x: 16, y: 92, w: 120, h: 3, min: 20, max: 95, alerts: [{above: 75, color: warn}, {above: 85, color: crit}]}
+        - {type: text, text: '#load', x: 160, y: 40, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_load, x: 294, y: 40, size: 15, unit: ' %', align: right, font: arial, unit_size: 8}
+        - {type: text, text: '#clock', x: 160, y: 64, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_clock, x: 294, y: 64, size: 15, unit: ' GHz', align: right, font: arial, unit_size: 8, scale: 0.001, format: '{:.2f}'}
+        - {type: text, text: '#power', x: 160, y: 88, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: cpu_power, x: 294, y: 88, size: 15, unit: ' W', align: right, font: arial, unit_size: 8}
+        - {type: bar, sensor: cpu_load, x: 160, y: 100, w: 134, h: 3, min: 0, max: 100}
+    - id: gpu
+      name: GPU
+      x: 6
+      y: 194
+      w: 308
+      h: 112
+      items:
+        - {type: panel, x: 0, y: 0, w: 308, h: 112, title: GPU, subtitle: '{gpu_name}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: gpu_temp, x: 16, y: 54, size: 34, unit: °C, font: arial, unit_size: 12, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: text, text: '#temp', x: 18, y: 76, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: bar, sensor: gpu_temp, x: 16, y: 92, w: 120, h: 3, min: 20, max: 95, alerts: [{above: 70, color: warn}, {above: 80, color: crit}]}
+        - {type: text, text: '#load', x: 160, y: 40, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_load, x: 294, y: 40, size: 15, unit: ' %', align: right, font: arial, unit_size: 8}
+        - {type: text, text: '#clock', x: 160, y: 64, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_clock, x: 294, y: 64, size: 15, unit: ' MHz', align: right, font: arial, unit_size: 8}
+        - {type: text, text: '#power', x: 160, y: 88, size: 8.5, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: gpu_power, x: 294, y: 88, size: 15, unit: ' W', align: right, font: arial, unit_size: 8}
+        - {type: bar, sensor: gpu_load, x: 160, y: 100, w: 134, h: 3, min: 0, max: 100}
+    - id: ram
+      name: RAM
+      x: 6
+      y: 312
+      w: 151
+      h: 78
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 78, title: RAM, border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: ram_pct, x: 12, y: 52, size: 22, unit: ' %', font: arial, unit_size: 10}
+        - {type: bar, sensor: ram_pct, x: 12, y: 66, w: 127, h: 3, min: 0, max: 100, ssd: false}
+    - id: disks
+      name: '{disks_title}'
+      x: 163
+      y: 312
+      w: 151
+      h: 78
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 78, title: '{disks_title}', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: disk1_act, x: 12, y: 52, size: 22, unit: ' %', font: arial, unit_size: 10, ssd: true}
+        - {type: bar, sensor: disk1_act, x: 12, y: 66, w: 127, h: 3, min: 0, max: 100, ssd: true}
+    - id: vram
+      name: VRAM
+      x: 6
+      y: 396
+      w: 151
+      h: 80
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 80, title: VRAM, border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: value, sensor: vram_mb, x: 12, y: 54, size: 22, unit: ' GB', font: arial, unit_size: 10, scale: 0.001, format: '{:.1f}'}
+        - {type: bar, sensor: vram_mb, x: 12, y: 68, w: 127, h: 3, min: 0, max: 12288}
+    - id: network
+      name: '#network'
+      x: 163
+      y: 396
+      w: 151
+      h: 80
+      items:
+        - {type: panel, x: 0, y: 0, w: 151, h: 80, title: '#network', border: '#C3CCD6', gradient: ['#FFFFFF', '#E2E8EF'], opacity: 0.92, radius: 10, shadow: 1, font: arial}
+        - {type: text, text: ↓, x: 12, y: 40.0, size: 12, color: accent, font: arial, bold: true}
+        - {type: value, sensor: net_down, x: 139, y: 40.0, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}
+        - {type: text, text: ↑, x: 12, y: 62.400000000000006, size: 12, color: secondary, font: arial, bold: true}
+        - {type: value, sensor: net_up, x: 139, y: 62.400000000000006, size: 15, unit: ' Mb/s', align: right, font: arial, unit_size: 8, format: '{:.1f}'}

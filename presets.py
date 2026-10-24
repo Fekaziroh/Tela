@@ -8,23 +8,29 @@ PRESETS = {
     "default": {
         ("performance", "quality"): "high",      # 2x supersampled drawing
         ("performance", "preview"): True,        # live preview in the window
+        ("performance", "preview_quality"): "sharp",   # preview with the supersampled frame
         (None, "interval"): 1.0,
         ("animation", "enabled"): True,
         ("fps", "update"): 0.2,
         ("network", "ping_interval"): 2,
         ("data", "disk_interval"): 2,
         ("eco", "enabled"): True,
+        ("eco", "idle_minutes"): 5,
+        ("media", "progress"): True,
         ("ui", "unload_hidden"): False,
     },
     "performance": {
         ("performance", "quality"): "normal",
         ("performance", "preview"): False,
+        ("performance", "preview_quality"): "normal",
         (None, "interval"): 2.0,
         ("animation", "enabled"): False,
         ("fps", "update"): 0.5,
         ("network", "ping_interval"): 5,
         ("data", "disk_interval"): 5,
         ("eco", "enabled"): True,
+        ("eco", "idle_minutes"): 2,              # slows down sooner when you step away
+        ("media", "progress"): False,            # the moving progress line redraws the screen every second
         ("ui", "unload_hidden"): True,
     },
 }
