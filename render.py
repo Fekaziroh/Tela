@@ -290,12 +290,17 @@ class Renderer:
         if mask.size[0] and mask.size[1]:
             d.draw.draw_bitmap((int(round(x)) + ox, int(round(y)) + oy), mask, d._getink(fill)[0])
 
-    def _line(self, d, x, y, parts, align="left"):
-        """Draws several (text, font, color) runs on the same baseline, vertically centered on y."""
+    def _line(self, d, x, y, parts, align="left", spacing=0):
+        """Draws several (text, font, color) runs on the same baseline, vertically centered on y.
+        spacing: extra pixels between letters (big clocks, where bold digits touch)."""
         parts = [(t, self._script_font(t, ft), c) for t, ft, c in parts if t]
         if not parts:
             return
-        lengths = [self._length(t, ft) for t, ft, _ in parts]
+        if spacing:
+            parts = [(ch, ft, c) for t, ft, c in parts for ch in t]
+        lengths = [self._length(t, ft) + spacing * self.S for t, ft, _ in parts]
+        if spacing:
+            lengths[-1] -= spacing * self.S
         base = self._baseline(parts, y)
         cx = x * self.S
         if align == "right":
@@ -654,7 +659,8 @@ class Renderer:
         if "{weather}" in fmt:
             fmt = fmt.replace("{weather}", self.weather_text(col).replace("%", "%%"))
         self._line(d, w["x"], w["y"], [(now.strftime(fmt), self.font(w.get("size", 24), w.get("bold", False)),
-                                        self.color(w.get("color"), "text"))], w.get("align", "left"))
+                                        self.color(w.get("color"), "text"))], w.get("align", "left"),
+                   w.get("spacing", 0))
 
     def _w_bar(self, d, w, col):
         S = self.S
@@ -940,6 +946,11 @@ class Renderer:
             {"type": "text", "text": T["summary"], "x": 12, "y": 14, "size": 10, "color": "secondary", "bold": True},
             {"type": "text", "text": r["name"][:28 if land else 22], "x": 12, "y": 40, "size": 22 if land else 19, "bold": True},
         ]
+        if r.get("icon"):   # the game's own icon before its name
+            ih = 24 if land else 21
+            lay.append({"type": "image", "file": r["icon"], "x": 12, "y": 40 - ih / 2, "w": ih, "h": ih})
+            lay[-2]["x"] = 12 + ih + 7
+            lay[-2]["text"] = r["name"][:26 if land else 19]
         if show("show_duration") and r.get("duration"):
             lay.insert(1, {"type": "text", "text": r["duration"], "x": W - 12, "y": 14, "size": 10, "color": "secondary",
                            "align": "right"})

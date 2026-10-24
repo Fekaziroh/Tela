@@ -188,7 +188,8 @@ function stRestore() {
     } }] });
 }
 async function stImport() {
-  const r = await api.theme_import();
+  let r;
+  try { r = await api.theme_import(); } catch (e) { toast(t("st.import_error")); return; }
   if (!r) return;
   if (r.error) { toast(t("st.import_error")); return; }
   ST.list = r.themes;
@@ -196,8 +197,53 @@ async function stImport() {
   toast(t("st.imported", { name: stName(r.imported) }));
 }
 async function stExport() {
-  const path = await api.theme_export(null);
+  let path;
+  try { path = await api.theme_export(null); } catch (e) { toast(t("st.export_error")); return; }
   if (path) toast(t("st.exported"));
+}
+
+// community gallery: themes shared by people (repository's "gallery" branch), imported with one click
+async function stGallery(force) {
+  const body = document.createElement("div");
+  body.className = "gal";
+  body.innerHTML = `<p class="hint">${t("gal.loading")}</p>`;
+  let share = "";
+  openModal({ title: t("gal.title"), desc: t("gal.desc"), body, buttons: [
+    { label: t("gal.share"), onClick: () => { if (share) api.open_url(share); return false; } },
+    { label: t("modal.close"), primary: true }] });
+  const r = await api.gallery_list(!!force);
+  share = r.share || "";
+  if (r.error) {
+    body.innerHTML = `<p class="hint">${t("gal.offline")}</p>`;
+    const again = document.createElement("button");
+    again.className = "btn"; again.textContent = t("gal.retry");
+    again.addEventListener("click", () => stGallery(true));
+    body.appendChild(again);
+    return;
+  }
+  if (!r.items.length) { body.innerHTML = `<p class="hint">${t("gal.empty")}</p>`; return; }
+  body.innerHTML = `<div class="gal-grid"></div>`;
+  const grid = $(".gal-grid", body);
+  for (const it of r.items) {
+    const card = document.createElement("div");
+    card.className = "gal-item";
+    card.innerHTML = `${it.picture ? `<img src="${it.picture}" alt="">` : `<div class="gal-none"></div>`}
+      <div class="gal-meta"><b>${esc(it.name)}</b><small>${it.author ? esc(t("gal.by", { name: it.author })) : ""}</small></div>
+      <div class="btns">${it.link ? `<button class="btn" data-a="post">${t("gal.post")}</button>` : ""}<button class="btn pri" data-a="get">${t("gal.import")}</button></div>`;
+    const get = $("[data-a=get]", card);
+    get.addEventListener("click", async () => {
+      get.disabled = true; get.textContent = t("gal.importing");
+      const res = await api.gallery_import(it.id).catch(() => ({ error: true }));
+      if (!res || res.error) { get.disabled = false; get.textContent = t("gal.import"); toast(t("st.import_error")); return; }
+      ST.list = res.themes;
+      stRender(); stThumbs();
+      get.textContent = t("gal.imported");
+      toast(t("st.imported", { name: stName(res.imported) }));
+    });
+    const post = $("[data-a=post]", card);
+    if (post) post.addEventListener("click", () => api.open_url(it.link));
+    grid.appendChild(card);
+  }
 }
 
 function stNotice() {
@@ -210,6 +256,7 @@ function bindScreenThemes() {
   $("#st-new").addEventListener("click", stNew);
   $("#st-import").addEventListener("click", stImport);
   $("#st-export").addEventListener("click", stExport);
+  $("#st-gallery").addEventListener("click", () => stGallery(false));
   $("#st-notice-go").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); showTab("look"); });
   $("#st-notice-no").addEventListener("click", () => { ST.notice = false; stNotice(); api.theme_notice_seen(); });
   document.addEventListener("tela-frame", stMirror);

@@ -140,6 +140,7 @@ data:
   lhm_url: http://localhost:8085/data.json
   disk_interval: 2
   controllers: false           # also read fan/AIO controllers (Corsair, NZXT...)
+  hwinfo: false                # also read HWiNFO (its "Shared Memory Support" on): its main values win
   net_interface:               # empty = all adapters
 
 fonts:

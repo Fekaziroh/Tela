@@ -22,7 +22,7 @@ from hardware import DEMO_RAW, Detector, build, fields as hw_fields, summary as 
 from render import SCREEN_TEXT, Renderer
 from sensors import Collector, idle_seconds
 
-VERSION = "1.4.8"
+VERSION = "1.4.9"
 HERE = config.HERE
 DATA = config.DATA
 
@@ -354,8 +354,11 @@ class Engine(threading.Thread):
             if r:
                 now = time.monotonic()
                 total = float((self.cfg.get("session") or {}).get("summary_seconds", 15))
+                import gameicons
+                icon = gameicons.find(r.get("name"))
                 self.collector.summary = dict(r, start=now, expires=now + 3 + total, total=total,
-                                              duration=r.get("duration") or "", max=r.get("max") or {})
+                                              duration=r.get("duration") or "", max=r.get("max") or {},
+                                              icon=str(icon) if icon else None)
                 self.log(f"Showing the summary of {r.get('name')}")
         elif name == "summary_last":
             r = self.collector.last_summary
@@ -412,7 +415,7 @@ class Engine(threading.Thread):
             "sleeping": sorted(self._sleep), "eco": self.eco,
             "port": getattr(self.screen, "port_in_use", None), "demo": st.get("demo", False),
             "lhm_error": st.get("lhm"), "fps": st.get("fps"), "source": st.get("source"),
-            "admin": st.get("admin"), "embedded_error": st.get("embedded_error"),
+            "admin": st.get("admin"), "embedded_error": st.get("embedded_error"), "hwinfo": st.get("hwinfo"),
         }
 
     def value(self, name):
@@ -439,17 +442,18 @@ class Engine(threading.Thread):
                 self.connected, self._previous, self._last_error, self.screen_error = True, None, None, None
                 self.log(f"Screen connected ({self.screen.port_in_use})")
             t0 = time.monotonic()
-            if self._wipe:
-                from PIL import Image
+            wipe = self._wipe
+            if wipe:
                 self._wipe = False
-                self.screen.send_image(Image.new("RGB", (self.screen.width, self.screen.height), "#000000"), 0, 0)
-                self.screen.end_frame()
-                self._previous = None
+                if self._previous is None or not self.renderer.anim_enabled:
+                    self._previous = None   # no animation: the whole new picture at once
             elif t0 - self._full_at > self.REFRESH_EVERY and not self.collector.in_game():
                 self._previous = None   # now and then the whole picture again: clears any pixel that went stale
             first = self._previous is None
             layout = self.renderer.layout
-            if not first and self._prev_layout is not None and layout != self._prev_layout and self.renderer.anim_enabled:
+            if wipe and not first:
+                self._transition(img, whole=True)   # another theme: block by block, every pixel sent (no leftovers)
+            elif not first and self._prev_layout is not None and layout != self._prev_layout and self.renderer.anim_enabled:
                 self._transition(img)
             else:
                 for x, y, w, h in changed_regions(img, self._previous):
@@ -482,15 +486,23 @@ class Engine(threading.Thread):
             return False
         return True
 
-    def _transition(self, target, pause=0.05):
-        """Screen change in cascade: each block of the target screen comes in at a time."""
+    def _transition(self, target, pause=0.05, whole=False):
+        """Screen change in cascade: each block of the target screen comes in at a time.
+        whole: every pixel of each block is sent, and then the gaps between blocks (a theme change: nothing of the
+        previous theme may stay on the screen)."""
+        from PIL import Image
         current = self._previous.copy()
+        covered = Image.new("RGB", target.size, "#000000") if whole else None
         for rects in self.renderer.transition_steps():
             for x, y, w, h in rects:
                 if w <= 0 or h <= 0:
                     continue
                 piece = target.crop((x, y, x + w, y + h))
                 current.paste(piece, (x, y))
+                if whole:
+                    covered.paste((255, 255, 255), (x, y, x + w, y + h))
+                    self.screen.send_image(piece, x, y)
+                    continue
                 for rx, ry, rw, rh in changed_regions(piece, self._previous.crop((x, y, x + w, y + h))):
                     self.screen.send_image(piece.crop((rx, ry, rx + rw, ry + rh)), x + rx, y + ry)
             self.screen.end_frame()
@@ -499,7 +511,8 @@ class Engine(threading.Thread):
             if self._halt.is_set():
                 break
             time.sleep(pause)
-        for x, y, w, h in changed_regions(target, current):   # what is left (gaps between panels)
+        rest = changed_regions(Image.new("RGB", target.size, "#ffffff"), covered) if whole else changed_regions(target, current)
+        for x, y, w, h in rest:   # what is left (gaps between panels)
             self.screen.send_image(target.crop((x, y, x + w, y + h)), x, y)
         self.screen.end_frame()
         self.last_frame = target

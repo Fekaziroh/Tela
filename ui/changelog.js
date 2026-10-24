@@ -7,6 +7,70 @@
 // "withdrawn": true = taken back: the workflow removes its setups (no longer offered, not even to go back to).
 const CHANGELOG = [
  {
+  "v": "1.4.9",
+  "beta": true,
+  "pt": {
+   "new": [
+    "Galeria da comunidade em Aparência: temas feitos por outras pessoas, importados com um clique.",
+    "Histórico: médias por jogo e comparação entre duas partidas, com os gráficos de FPS juntos.",
+    "O ícone do jogo aparece no resumo da partida e no histórico.",
+    "Novo tema da janela \"Cores da tela\": a janela acompanha as cores do tema da tela.",
+    "Opção de ler os sensores também do HWiNFO, para quem já usa (Avançado).",
+    "O instalador explica para que serve cada componente que ele instala."
+   ],
+   "fix": [
+    "Ao trocar de tema, a tela nova entra bloco por bloco, sem a tela preta.",
+    "Importar e Exportar temas e perfis voltaram a funcionar.",
+    "Tema Clean: os números do relógio ficaram mais espaçados e a música não encosta mais no clima."
+   ]
+  },
+  "en": {
+   "new": [
+    "Community gallery in Appearance: themes made by other people, imported with one click.",
+    "History: averages per game and a comparison of two games, with their FPS graphs together.",
+    "The game's icon shows in the game summary and in the history.",
+    "New window theme \"Screen colors\": the window follows the colors of the screen theme.",
+    "Option to also read the sensors from HWiNFO, for those who already use it (Advanced).",
+    "The setup explains what each component it installs is for."
+   ],
+   "fix": [
+    "Switching themes, the new screen comes in block by block, without the black screen.",
+    "Importing and exporting themes and profiles works again.",
+    "Clean theme: the clock digits have more room and the music no longer touches the weather."
+   ]
+  },
+  "es": {
+   "new": [
+    "Galería de la comunidad en Apariencia: temas hechos por otras personas, importados con un clic.",
+    "Historial: medias por juego y comparación entre dos partidas, con sus gráficos de FPS juntos.",
+    "El icono del juego aparece en el resumen de la partida y en el historial.",
+    "Nuevo tema de ventana \"Colores de la pantalla\": la ventana sigue los colores del tema de la pantalla.",
+    "Opción de leer los sensores también de HWiNFO, para quien ya lo usa (Avanzado).",
+    "El instalador explica para qué sirve cada componente que instala."
+   ],
+   "fix": [
+    "Al cambiar de tema, la pantalla nueva entra bloque por bloque, sin la pantalla negra.",
+    "Importar y exportar temas y perfiles vuelve a funcionar.",
+    "Tema Clean: los números del reloj tienen más espacio y la música ya no toca el clima."
+   ]
+  },
+  "zh": {
+   "new": [
+    "外观中新增社区主题库：其他人制作的主题，一键导入。",
+    "历史记录：按游戏统计平均值，并可对比两局，FPS 曲线叠在一起显示。",
+    "游戏图标会显示在游戏总结和历史记录中。",
+    "新的窗口主题“屏幕配色”：窗口跟随屏幕主题的颜色。",
+    "可选择同时从 HWiNFO 读取传感器（高级），适合已在使用它的用户。",
+    "安装程序会说明它安装的每个组件的用途。"
+   ],
+   "fix": [
+    "切换主题时，新画面逐块进入，不再先黑屏。",
+    "主题和配置文件的导入与导出恢复正常。",
+    "Clean 主题：时钟数字间距更宽，音乐不再紧贴天气。"
+   ]
+  }
+ },
+ {
   "v": "1.4.8",
   "beta": true,
   "pt": {

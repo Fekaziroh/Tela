@@ -325,11 +325,6 @@ class Api:
         self._schedule_reload()
         return True
 
-    def reset_colors(self):
-        self._settings.set_many([("colors", k, v) for k, v in DEFAULT_COLORS.items()])
-        self._schedule_reload()
-        return DEFAULT_COLORS
-
     SCREEN_THEMES = {
         "dark": dict(DEFAULT_COLORS),
         "light": {"background": "#D9DEE4", "panel": "#F5F7F9", "text": "#111418", "secondary": "#5B6470", "track": "#C5CBD3",
@@ -574,6 +569,38 @@ class Api:
         out["imported"] = tid
         return out
 
+    def gallery_list(self, force=False):
+        """Community gallery: the shared themes with their pictures."""
+        import gallery
+        try:
+            items = gallery.items(bool(force))
+        except Exception as e:  # noqa: BLE001 — offline, GitHub down, a broken list
+            self._engine.log(f"Gallery: {e}")
+            return {"error": True, "share": gallery.SHARE_URL}
+        return {"items": [dict(it, picture=gallery.picture(it)) for it in items], "share": gallery.SHARE_URL}
+
+    def gallery_import(self, gid):
+        import gallery
+        import shutil
+        import themes
+        it = next((x for x in gallery.items() if x["id"] == gid), None)
+        if it is None:
+            return {"error": "missing"}
+        tmp = None
+        try:
+            tmp = gallery.download(it)
+            tid = themes.import_file(tmp)
+        except Exception as e:  # noqa: BLE001
+            self._engine.log(f"Gallery import of {gid}: {e}")
+            return {"error": str(e)}
+        finally:
+            if tmp is not None:
+                shutil.rmtree(tmp.parent, ignore_errors=True)
+        self._engine.log(f"Theme imported from the gallery: {it['name']}")
+        out = self.theme_list()
+        out["imported"] = tid
+        return out
+
     def pick_background(self):
         paths = self._app.pick_images()
         if not paths:
@@ -655,8 +682,16 @@ class Api:
     # ------------------------------------------------------------ game history
     def history_list(self):
         import history
+        import gameicons
         cfg = self._cfg()
-        return {"games": history.entries(cfg), "folder": str(history.folder(cfg))}
+        games = history.entries(cfg)
+        icons = {}
+        for g in games:
+            n = g.get("name") or ""
+            if n not in icons:
+                icons[n] = gameicons.data_url(n)
+        return {"games": games, "per_game": history.per_game(games), "icons": {k: v for k, v in icons.items() if v},
+                "folder": str(history.folder(cfg))}
 
     def history_get(self, gid):
         import history

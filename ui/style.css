@@ -258,7 +258,7 @@ details.items[open] summary::before{transform:rotate(90deg)}
 hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .hist{display:grid;gap:10px}
 .hist-list{display:grid;gap:4px;max-height:52vh;overflow:auto}
-.hist-row{all:unset;cursor:pointer;display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto;gap:6px 14px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--panel2);font-size:13px}
+.hist-row{all:unset;cursor:pointer;display:grid;grid-template-columns:22px minmax(0,1.4fr) auto auto auto;gap:6px 14px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--panel2);font-size:13px}
 .hist-row:hover,.hist-row:focus-visible{outline:1px solid var(--accent)}
 .hist-row b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hist-row span{color:var(--muted);white-space:nowrap}
@@ -266,7 +266,28 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .stats.six{grid-template-columns:repeat(3,1fr)}
 .hist-game h4{margin:14px 0 6px;font:600 11px var(--f-mono);letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 .hist-graph{display:block;width:100%;border-radius:8px;background:var(--panel2)}
-@media (max-width:640px){.hist-row{grid-template-columns:1fr auto}.hist-row span:nth-of-type(2){display:none}}
+.hist-row.per{grid-template-columns:22px minmax(0,1.4fr) auto auto}
+.hist-row.pick{outline:1px dashed var(--line)}
+.hist-row.on{outline:2px solid var(--accent);background:var(--panel)}
+.hist-ico{width:20px;height:20px;border-radius:4px;object-fit:contain}
+.hist-ico.none{display:inline-block;background:var(--line);opacity:.5}
+.hist-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hist-top .txt{flex:1 1 160px;min-width:0}
+.hist-cmp-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.hist-cmp .cmp-heads{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 8px;align-items:center}
+.hist-cmp .dot{width:10px;height:10px;border-radius:50%}
+.hist-cmp .dot.a{background:var(--accent)}.hist-cmp .dot.b{background:var(--warn)}
+.cmp-h{display:flex;gap:8px;align-items:center;min-width:0}
+.cmp-h span{display:grid;min-width:0}.cmp-h b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp-h small{color:var(--muted);font-size:11px}
+.cmp-t{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.cmp-t th{text-align:left;font:600 11px var(--f-mono);letter-spacing:.06em;color:var(--muted);padding:6px 4px}
+.cmp-t td{text-align:right;padding:6px 4px;font-variant-numeric:tabular-nums;border-top:1px solid var(--line)}
+.cmp-t th{border-top:1px solid var(--line)}
+.cmp-t tr.cmp-k td,.cmp-t tr.cmp-k th{border-top:0;color:var(--muted);padding-bottom:2px}
+.cmp-t .dot{display:inline-block}
+.cmp-t em{font-style:normal;color:var(--muted)}.cmp-t em.up{color:var(--ok)}.cmp-t em.down{color:var(--crit)}
+@media (max-width:640px){.hist-row{grid-template-columns:22px 1fr auto}.hist-row span:nth-of-type(1),.hist-row span:nth-of-type(2){display:none}.hist-row.per span:nth-of-type(2){display:inline}}
 
 .upd{all:unset;margin-left:auto;display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:6px;cursor:pointer;
   font:500 11px var(--f-mono);color:var(--dim);position:relative}
@@ -376,6 +397,13 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:2px 0}
 .st-preview .legend b{color:#e8e8ea;font-weight:600}
 .st-preview .btns{justify-content:flex-start}
 .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gal{display:grid;gap:10px}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:56vh;overflow:auto;padding:2px}
+.gal-item{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:8px;background:var(--panel2);min-width:0}
+.gal-item img,.gal-none{width:100%;aspect-ratio:3/2;object-fit:contain;border-radius:6px;background:#000;display:block}
+.gal-meta{display:grid;min-width:0}.gal-meta b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gal-meta small{color:var(--muted);font-size:11px}
+.gal-item .btns{justify-content:flex-end}
 .st-item{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:7px;display:grid;gap:6px;background:var(--panel2);position:relative;min-width:0}
 .st-item[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
 .st-item:focus-visible{outline:2px solid var(--accent)}

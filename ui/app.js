@@ -298,10 +298,11 @@ function renderColors() {
       const custom = await api.set_screen_color(k, input.value.toUpperCase());
       S.settings.custom_colors = custom;
       S.settings.colors = { ...custom };
-      renderScreenThemes(); toast(t("toast.saved"));
+      renderScreenThemes(); followScreenColors(); toast(t("toast.saved"));
     });
     box.appendChild(el);
   }
+  followScreenColors();
 }
 const SCREEN_THEME_KEYS = ["dark", "light", "red", "ice"];
 function renderScreenThemes() {
@@ -484,6 +485,8 @@ function renderState(s, quick) {
   else if (st.source === "embedded") pills.push(st.lhm_error ? pill("err", t("pill.sensors"), t("st.sensor_error"), st.lhm_error)
     : st.admin ? pill("ok", t("pill.sensors"), t("st.embedded")) : pill("warn", t("pill.sensors"), t("st.no_admin")));
   else if (st.source) pills.push(st.lhm_error ? pill("err", t("pill.sensors"), t("st.web_error"), st.lhm_error) : pill("ok", t("pill.sensors"), t("st.web")));
+  if (st.hwinfo) pills.push(st.hwinfo.error ? pill("warn", "HWiNFO", t("st.hwinfo_off"), st.hwinfo.error)
+    : pill("ok", "HWiNFO", t("st.hwinfo_on", { n: st.hwinfo.count })));
   const f = st.fps || {};
   if (st.demo) pills.push(pill("ok", t("pill.fps"), t("st.fps_game", { fps: "120", app: "Demo" })));
   else if (f.fps) pills.push(pill("ok", t("pill.fps"), t("st.fps_game", { fps: Math.round(f.fps), app: f.app || "" })));

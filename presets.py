@@ -54,6 +54,3 @@ def items(name):
     """[(section, key, value)] to write for a preset."""
     return [(s, k, v) for (s, k), v in PRESETS[name].items()]
 
-
-def managed(section, key):
-    return any((section or None, key) in p for p in PRESETS.values())

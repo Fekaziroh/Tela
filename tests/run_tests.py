@@ -692,6 +692,21 @@ def summary_transitions_both_ways():
 
 
 @test
+def theme_change_cascade_repaints_every_pixel():
+    from PIL import Image
+    import numpy as np
+    e = engine.Engine(ROOT / config.DEFAULT, engine.Log(echo=False), demo=True, simulate="memory")
+    e.screen.file = None
+    assert e._send_frame()
+    target = e.last_frame.copy()
+    stale = Image.new("RGB", target.size, "#ff0000")   # whatever the screen showed before, even what Tela! did not know
+    e.screen.buffer = stale.copy()
+    e._previous = target.copy()   # Tela! believes the screen already shows it: only "whole" fixes it
+    e._transition(target, 0.0, whole=True)
+    assert np.array_equal(np.asarray(e.screen.buffer), np.asarray(target))
+
+
+@test
 def paused_media_lingers_then_fades():
     from media import Media
     m = DemoMedia()
@@ -770,6 +785,96 @@ def game_history_saves_lists_prunes_and_exports():
         with tempfile.TemporaryDirectory() as d2:
             assert history.move(cfg, d2) == 2 and len(list(Path(d2).glob("*.json"))) == 2
         assert history.save({"history": {"save": False, "folder": d}}, {"name": "x"}) is None
+    # per game: grouped by name (any case), averages weighted by time played, best and hottest kept
+    rows = history.per_game([
+        {"id": "b", "name": "Forza", "seconds": 3000, "fps_avg": 120, "fps_1low": 90, "max": {"cpu": 70}, "ended_at": 2},
+        {"id": "a", "name": "forza", "seconds": 1000, "fps_avg": 80, "fps_1low": None, "max": {"cpu": 75}, "ended_at": 1},
+        {"id": "c", "name": "Hades", "seconds": 600, "fps_avg": None, "max": {}, "ended_at": 3}])
+    f = rows[0]
+    assert f["name"] == "Forza" and f["count"] == 2 and f["ids"] == ["b", "a"] and f["seconds"] == 4000
+    assert abs(f["fps_avg"] - 110) < 1e-9 and f["fps_1low"] == 90 and f["best_avg"] == 120 and f["max"]["cpu"] == 75
+    assert rows[1]["name"] == "Hades" and rows[1]["fps_avg"] is None
+
+
+@test
+def gallery_lists_and_imports_themes():
+    import http.server
+    import threading
+    import gallery
+    import themes
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        (root / "themes").mkdir()
+        (root / "pictures").mkdir()
+        (root / "themes" / "mine.tela-theme").write_text(
+            (ROOT / "themes" / "clean.yaml").read_text(encoding="utf-8").replace("name: {pt: Clean, en: Clean, es: Clean, zh: Clean}",
+                                                                               "name: Gallery test"), encoding="utf-8")
+        (root / "pictures" / "mine.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 20)
+        (root / "index.json").write_text(json.dumps({"themes": [
+            {"file": "mine.tela-theme", "picture": "mine.png", "name": "Gallery test", "author": "me"},
+            {"file": "../evil.tela-theme", "name": "x"},                                   # skipped: leaves the folder
+            {"file": "ok.tela-theme", "link": "https://elsewhere.example/x", "name": "y"}]}), encoding="utf-8")
+
+        class Quiet(http.server.SimpleHTTPRequestHandler):
+            def __init__(self, *a, **k):
+                super().__init__(*a, directory=d, **k)
+
+            def log_message(self, *a):
+                pass
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Quiet)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        old = gallery.BASE
+        gallery.BASE = f"http://127.0.0.1:{srv.server_address[1]}/"
+        try:
+            items = gallery.items(force=True)
+            assert [i["id"] for i in items] == ["mine", "ok"] and items[1]["link"] == ""
+            assert gallery.picture(items[0]).startswith("data:image/png;base64,")
+            tmp = gallery.download(items[0])
+            tid = themes.import_file(tmp)
+            assert themes.name(themes.load(tid)) == "Gallery test"
+            themes.delete(tid)
+        finally:
+            gallery.BASE = old
+            gallery._cache.update(at=0.0, items=None)
+            srv.shutdown()
+
+
+@test
+def hwinfo_shared_memory_is_read():
+    import hwinfo
+    sensors_ = [("CPU [#0]: AMD Ryzen 7 5800X3D: Enhanced", ""), ("GPU [#0]: AMD Radeon RX 6750 XT", "")]
+    readings = [(1, 0, "CPU (Tctl/Tdie)", "°C", 63.5), (7, 0, "Total CPU Usage", "%", 12.0),
+                (6, 0, "Core Clocks (avg)", "GHz", 4.2), (5, 0, "CPU Package Power", "W", 61.0),
+                (1, 1, "GPU Temperature", "°F", 122.0), (1, 1, "GPU Hot Spot Temperature", "°C", 70.0),
+                (7, 1, "GPU Utilization", "%", 97.0), (3, 1, "GPU Fan", "RPM", 1500.0)]
+    s_size, r_size = 264, 400                     # newer versions have bigger elements: the sizes come from the header
+    s_off = hwinfo.HEADER.size
+    r_off = s_off + s_size * len(sensors_)
+    buf = bytearray(r_off + r_size * len(readings))
+    hwinfo.HEADER.pack_into(buf, 0, b"HWiS", 2, 1, 0, s_off, s_size, len(sensors_), r_off, r_size, len(readings))
+    for i, (name, user) in enumerate(sensors_):
+        hwinfo.SENSOR_NAME.pack_into(buf, s_off + i * s_size, i, 0, name.encode("latin-1"), user.encode())
+    for i, (kind, sidx, label, unit, v) in enumerate(readings):
+        hwinfo.READING.pack_into(buf, r_off + i * r_size, kind, sidx, i, label.encode("latin-1"), b"",
+                                 unit.encode("latin-1"), v, v, v, v)
+    got = hwinfo.pick(hwinfo.parse(bytes(buf)))
+    assert got["cpu_temp"] == 63.5 and got["cpu_load"] == 12.0 and got["cpu_clock"] == 4200.0
+    assert got["cpu_power"] == 61.0 and abs(got["gpu_temp"] - 50.0) < 1e-9 and got["gpu_hotspot"] == 70.0
+    assert got["gpu_load"] == 97.0 and got["gpu_fan"] == 1500.0 and "gpu_power" not in got and "cpu_fan" not in got
+    buf[0:4] = b"DEAD"
+    try:
+        hwinfo.parse(bytes(buf))
+        raise AssertionError("a closed HWiNFO must not be read")
+    except ValueError:
+        pass
+
+
+@test
+def game_icon_names_are_safe():
+    import gameicons
+    p = gameicons.path_for("Forza Horizon 5: Edição/../x")
+    assert p.parent == gameicons.folder() and p.suffix == ".png" and ".." not in p.name
+    assert gameicons.data_url("no such game here") == ""
 
 
 @test

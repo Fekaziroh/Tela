@@ -26,24 +26,24 @@ from updater import Updater
 
 TEXT = {
     "pt": {"hot": "{part} a {t} °C (limite {limit} °C).", "busy": "A tela está sendo usada por: {apps}. Use o menu deste ícone para fechar e a Tela! assumir.", "take": "Fechar {apps} e usar a tela",
-           "usage": "Tela! usando {cpu}% de CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
+           "usage": "└ {cpu}% CPU · {ram} MB", "update": "Atualizar para a {v}", "update_ready": "Nova versão da Tela! ({v}). Use Atualizar no menu deste ícone ou o botão na janela.",
            "open": "Abrir Tela!", "brightness": "Brilho", "last_summary": "Ver último resumo de jogo",
            "pause": "Pausar (congelar a tela)", "release": "Liberar a tela para outro programa", "reconnect": "Reconectar a tela", "restart": "Reiniciar a Tela!", "unload": "Liberar memória da janela na bandeja", "recovered": "A Tela! parou de responder e foi reaberta sozinha.", "quit": "Sair", "in_tray": "A Tela! continua rodando aqui na bandeja.",
            "other_copy": "Outra cópia da Tela! (ou uma versão antiga, como a TelaV3) já está aberta:\n\n{folders}\n\n"
                          "Fechar ela e abrir esta?"},
     "es": {"hot": "{part} a {t} °C (límite {limit} °C).", "busy": "La pantalla está en uso por: {apps}. Usa el menú de este icono para cerrarlo y que Tela! la use.", "take": "Cerrar {apps} y usar la pantalla",
-           "usage": "Tela! usa {cpu}% de CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
+           "usage": "└ {cpu}% CPU · {ram} MB", "update": "Actualizar a {v}", "update_ready": "Nueva versión de Tela! ({v}). Usa Actualizar en el menú de este icono o el botón de la ventana.",
            "open": "Abrir Tela!", "brightness": "Brillo", "last_summary": "Ver el último resumen de partida",
            "pause": "Pausar (congelar la pantalla)", "release": "Liberar la pantalla para otro programa", "reconnect": "Reconectar la pantalla", "restart": "Reiniciar Tela!", "unload": "Liberar la memoria de la ventana en la bandeja", "recovered": "Tela! dejó de responder y se volvió a abrir sola.", "quit": "Salir", "in_tray": "Tela! sigue funcionando aquí en la bandeja.",
            "other_copy": "Ya hay otra copia de Tela! abierta (o una versión antigua, como TelaV3):\n\n{folders}\n\n"
                          "¿Cerrarla y abrir esta?"},
     "zh": {"hot": "{part} 温度 {t} °C（上限 {limit} °C）。", "busy": "屏幕正被以下程序使用：{apps}。可通过此图标菜单关闭它，让 Tela! 接管。", "take": "关闭 {apps} 并使用屏幕",
-           "usage": "Tela! 占用 {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
+           "usage": "└ {cpu}% CPU · {ram} MB", "update": "更新到 {v}", "update_ready": "Tela! 有新版本（{v}）。使用此图标菜单中的“更新”或窗口中的按钮。",
            "open": "打开 Tela!", "brightness": "亮度", "last_summary": "查看上一局总结",
            "pause": "暂停（冻结屏幕）", "release": "释放屏幕给其他程序", "reconnect": "重新连接屏幕", "restart": "重启 Tela!", "unload": "在托盘中释放窗口内存", "recovered": "Tela! 停止响应，已自动重新打开。", "quit": "退出", "in_tray": "Tela! 仍在托盘中运行。",
            "other_copy": "已有另一个 Tela!（或旧版本，例如 TelaV3）正在运行：\n\n{folders}\n\n关闭它并打开这个吗？"},
     "en": {"hot": "{part} at {t} °C (limit {limit} °C).", "busy": "The screen is being used by: {apps}. Use the menu of this icon to close it and let Tela! take over.", "take": "Close {apps} and use the screen",
-           "usage": "Tela! using {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
+           "usage": "└ {cpu}% CPU · {ram} MB", "update": "Update to {v}", "update_ready": "New Tela! version ({v}). Use Update in this icon's menu or the button in the window.",
            "open": "Open Tela!", "brightness": "Brightness", "last_summary": "Show last game summary",
            "pause": "Pause (freeze the screen)", "release": "Release the screen for another program", "reconnect": "Reconnect the screen", "restart": "Restart Tela!", "unload": "Free the window's memory in the tray", "recovered": "Tela! stopped responding and was reopened by itself.", "quit": "Quit", "in_tray": "Tela! keeps running here in the tray.",
            "other_copy": "Another copy of Tela! (or an old version such as TelaV3) is already running:\n\n{folders}\n\n"
@@ -137,6 +137,15 @@ class App:
             return False
         theme = str(((self.engine.cfg.get("ui") or {}).get("theme")) or "auto")
         dark = theme == "dark" or (theme == "auto" and windows_uses_dark_theme())
+        if theme == "screen":   # the window follows the screen colors: start on the screen's background
+            bg = str((self.engine.cfg.get("colors") or {}).get("background") or "#000000")
+            try:
+                r, g, b = (int(bg[i:i + 2], 16) for i in (1, 3, 5))
+                dark = 0.2126 * r + 0.7152 * g + 0.0722 * b < 128
+            except ValueError:
+                dark = True
+        elif theme.startswith("preset:"):
+            dark = theme not in ("preset:sand",)
         try:
             self.window = webview.create_window(
                 "Tela!", url=str(HERE / "ui" / "index.html"), js_api=self.api, width=1180, height=780,
@@ -248,6 +257,41 @@ class App:
         except Exception:  # noqa: BLE001
             pass
 
+    def _native_dialog(self, save, label, ext, name=None):
+        """Windows file dialog owned by the window. pywebview's own dialog refuses filters such as
+        "Tela! theme (*.tela-theme)" ("!" and "-" are not allowed there), which left Import/Export doing nothing."""
+        import clr  # type: ignore
+        clr.AddReference("System.Windows.Forms")
+        from System import Action  # type: ignore
+        from System.Windows.Forms import DialogResult, OpenFileDialog, SaveFileDialog  # type: ignore
+        form = self.window.native
+        out = []
+
+        def run():
+            d = SaveFileDialog() if save else OpenFileDialog()
+            d.Filter = f"{label} (*.{ext})|*.{ext}"
+            if save:
+                d.FileName = name or ""
+                d.DefaultExt = ext
+                d.AddExtension = True
+            if d.ShowDialog(form) == DialogResult.OK:
+                out.append(str(d.FileName))
+        if form.InvokeRequired:
+            form.Invoke(Action(run))
+        else:
+            run()
+        return out[0] if out else None
+
+    def _file_dialog(self, save, label, ext, name, ps_code, **kw):
+        if self.window is not None and winsys.WINDOWS:
+            try:
+                return self._native_dialog(save, label, ext, name)
+            except Exception as e:  # noqa: BLE001 — fall back to pywebview's dialog with a plain filter
+                self.log(f"File dialog: {e}")
+            safe = re.sub(r"[^\w ]+", " ", label).strip() or "Files"
+            kw["file_types"] = (f"{safe} (*.{ext})",) if re.fullmatch(r"\w+", ext) else (f"{safe} (*.*)",)
+        return self._dialog("SAVE" if save else "OPEN", ps_code, **kw)
+
     def _dialog(self, kind_name, ps_code, **kw):
         if self.window is not None:
             import webview
@@ -263,15 +307,16 @@ class App:
         return None
 
     def pick_save_path(self, name, label="CSV", ext="csv"):
-        return self._dialog("SAVE", "$d=New-Object System.Windows.Forms.SaveFileDialog; "
-                            f"$d.FileName='{name}'; $d.Filter='{label}|*.{ext}'; "
-                            "if($d.ShowDialog() -eq 'OK'){ $d.FileName }",
-                            save_filename=name, file_types=(f"{label} (*.{ext})",))
+        ps_name = name.replace("'", "''")
+        return self._file_dialog(True, label, ext, name, "$d=New-Object System.Windows.Forms.SaveFileDialog; "
+                                 f"$d.FileName='{ps_name}'; $d.Filter='{label}|*.{ext}'; "
+                                 "if($d.ShowDialog() -eq 'OK'){ $d.FileName }",
+                                 save_filename=name, file_types=(f"{label} (*.{ext})",))
 
     def pick_open_path(self, label, ext):
-        return self._dialog("OPEN", "$d=New-Object System.Windows.Forms.OpenFileDialog; "
-                            f"$d.Filter='{label}|*.{ext}'; if($d.ShowDialog() -eq 'OK'){{ $d.FileName }}",
-                            file_types=(f"{label} (*.{ext})",))
+        return self._file_dialog(False, label, ext, None, "$d=New-Object System.Windows.Forms.OpenFileDialog; "
+                                 f"$d.Filter='{label}|*.{ext}'; if($d.ShowDialog() -eq 'OK'){{ $d.FileName }}",
+                                 file_types=(f"{label} (*.{ext})",))
 
     def pick_folder(self):
         return self._dialog("FOLDER", "$d=New-Object System.Windows.Forms.FolderBrowserDialog; "

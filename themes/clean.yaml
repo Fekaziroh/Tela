@@ -25,10 +25,10 @@ landscape:
       items:
         - {type: image, files: logos, pick: 0, when: no_fps, x: 12, y: 13, w: 120, h: 22}
         - {type: value, sensor: fps, x: 12, y: 26, size: 26, unit: ' FPS', unit_size: 12, bold: true, empty: ''}
-        - {type: clock, format: '%H:%M', x: 240, y: 22, align: center, size: 28, bold: true}
+        - {type: clock, format: '%H:%M', x: 240, y: 22, align: center, size: 28, bold: true, spacing: 1.5}
         - {type: clock, format: '{weekday} %d/%m{weather}', x: 240, y: 44, align: center, size: 9.5, color: secondary}
         - {type: image, files: logos, pick: 1, when: no_media_any, align: right, x: 348, y: 13, w: 120, h: 22}
-        - {type: media, x: 322, y: 10, w: 150, h: 32, when: media_any, fade: true}
+        - {type: media, x: 340, y: 10, w: 134, h: 32, when: media_any, fade: true}
     - id: cpu
       name: CPU
       x: 4
@@ -123,7 +123,7 @@ portrait:
       items:
         - {type: image, files: logos, pick: 0, when: no_fps, x: 10, y: 12, w: 80, h: 16}
         - {type: value, sensor: fps, x: 10, y: 20, size: 20, unit: ' FPS', unit_size: 10, bold: true, empty: ''}
-        - {type: clock, format: '%H:%M', x: 160, y: 22, align: center, size: 26, bold: true}
+        - {type: clock, format: '%H:%M', x: 160, y: 22, align: center, size: 26, bold: true, spacing: 1.5}
         - {type: clock, format: '{weekday} %d/%m{weather}', x: 160, y: 46, align: center, size: 10, color: secondary, when: no_media_any}
         - {type: image, files: logos, pick: 1, when: no_media_any, align: right, x: 230, y: 12, w: 80, h: 16}
         - {type: media, x: 10, y: 38, w: 300, h: 26, when: media_any, fade: true}

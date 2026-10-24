@@ -26,9 +26,32 @@ function mixHex(a, b, f) {
 }
 function systemDark() { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
 
+// "Screen colors": the window takes the colors of the screen theme in use (and follows when they change)
+function screenThemeColors() {
+  const c = { ...((S.init || {}).default_colors || {}), ...((S.settings || {}).colors || {}) };
+  const hex = (v, d) => (/^#[0-9a-f]{6}$/i.test(String(v || "")) ? String(v).toLowerCase() : d);
+  const bg = hex(c.background, "#000000"), fg = hex(c.text, "#ffffff");
+  let panel = hex(c.panel, mixHex(bg, fg, 0.06));
+  if (panel === bg) panel = mixHex(bg, fg, 0.06);
+  let accent = hex(c.accent, fg);
+  if (Math.abs(hexLum(accent) - hexLum(panel)) < 0.08) accent = fg;   // an accent the window could not show
+  return { bg, win: mixHex(bg, panel, 0.5), panel, panel2: mixHex(panel, fg, 0.05),
+           line: mixHex(panel, hex(c.track, fg), 0.6), fg, muted: hex(c.secondary, mixHex(fg, bg, 0.45)), accent };
+}
+
+let followed = "";
+function followScreenColors() {
+  if ((S.settings.ui || {}).theme !== "screen" || themeDraft) return;
+  const key = JSON.stringify(screenThemeColors());
+  if (key === followed) return;
+  followed = key;
+  applyTheme(); renderThemes();
+}
+
 function themeColors(id) {
   id = id || "auto";
   if (id === "auto") return null;
+  if (id === "screen") return screenThemeColors();
   if (id === "light") return THEME_PRESETS.light;
   if (id === "dark") return THEME_PRESETS.black;
   if (id.startsWith("preset:")) return THEME_PRESETS[id.slice(7)] || null;
@@ -64,7 +87,8 @@ function renderThemes() {
   const box = $("#themes");
   if (!box) return;
   const cur = (S.settings.ui || {}).theme || "auto";
-  const tiles = [["auto", t("theme.auto"), null], ["light", t("theme.light"), THEME_PRESETS.light], ["dark", t("theme.dark"), THEME_PRESETS.black]];
+  const tiles = [["auto", t("theme.auto"), null], ["light", t("theme.light"), THEME_PRESETS.light], ["dark", t("theme.dark"), THEME_PRESETS.black],
+    ["screen", t("theme.screen"), screenThemeColors()]];
   for (const k of ["graphite", "red", "green", "purple", "ice", "sand"]) tiles.push(["preset:" + k, t("theme." + k), THEME_PRESETS[k]]);
   for (const th of S.themes || []) tiles.push(["custom:" + th.name, th.name, th.colors]);
   box.innerHTML = "";

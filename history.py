@@ -65,6 +65,41 @@ def entries(cfg):
     return out
 
 
+def per_game(games):
+    """One line per game name (from entries()): sessions, time played, averages weighted by time, best and hottest."""
+    out = {}
+    for g in games:   # newest first: the first one names the group and gives "last played"
+        key = str(g.get("name") or "?").strip().lower()
+        a = out.get(key)
+        if a is None:
+            a = out[key] = {"name": g.get("name") or "?", "count": 0, "seconds": 0.0, "last": g.get("ended_at"),
+                            "ids": [], "_w": {"fps_avg": [0.0, 0.0], "fps_1low": [0.0, 0.0]},
+                            "best_avg": None, "max": {}}
+        sec = float(g.get("seconds") or 0) or 1.0
+        a["count"] += 1
+        a["seconds"] += float(g.get("seconds") or 0)
+        a["ids"].append(g.get("id"))
+        for k in ("fps_avg", "fps_1low"):
+            v = g.get(k)
+            if v is not None:
+                a["_w"][k][0] += float(v) * sec
+                a["_w"][k][1] += sec
+        v = g.get("fps_avg")
+        if v is not None and (a["best_avg"] is None or v > a["best_avg"]):
+            a["best_avg"] = v
+        for k, v in (g.get("max") or {}).items():
+            if v is not None and (a["max"].get(k) is None or v > a["max"][k]):
+                a["max"][k] = v
+    rows = []
+    for a in out.values():
+        w = a.pop("_w")
+        for k, (total, sec) in w.items():
+            a[k] = total / sec if sec else None
+        rows.append(a)
+    rows.sort(key=lambda a: (-a["seconds"], a["name"].lower()))
+    return rows
+
+
 def get(cfg, gid):
     p = folder(cfg) / f"{Path(gid).name}.json"
     return _read(p) if p.exists() else None

@@ -1,9 +1,9 @@
-; Tela! setup (Inno Setup 6). Built by .github/workflows/release.yml or build.ps1:
+﻿; Tela! setup (Inno Setup 6). Built by .github/workflows/release.yml or build.ps1:
 ;   ISCC /DAppVersion=1.4.0 /DPawnIOUrl=<url> installer\Tela.iss
 ; Expects build\dist\Tela (PyInstaller), build\components\lhm and build\components\presentmon, build\tela.ico.
 
 #ifndef AppVersion
-  #define AppVersion "1.4.8"
+  #define AppVersion "1.4.9"
 #endif
 #ifndef PawnIOUrl
   #define PawnIOUrl ""
@@ -55,6 +55,21 @@ es.InstallingWebView2=Instalando Microsoft WebView2...
 en.InstallingPawnIO=Installing PawnIO...
 pt.InstallingPawnIO=Instalando o PawnIO...
 es.InstallingPawnIO=Instalando PawnIO...
+en.CompTitle=What gets installed
+pt.CompTitle=O que vai ser instalado
+es.CompTitle=Qué se va a instalar
+en.CompDesc=Tela! uses free components. The setup downloads only the ones missing on this PC.
+pt.CompDesc=A Tela! usa componentes gratuitos. O instalador baixa só os que faltam neste PC.
+es.CompDesc=Tela! usa componentes gratuitos. El instalador descarga solo los que faltan en este PC.
+en.CompIntro=Besides Tela! itself, this PC needs:
+pt.CompIntro=Além da própria Tela!, este PC precisa de:
+es.CompIntro=Además de Tela!, este PC necesita:
+en.CompWebView2=• Microsoft WebView2: the engine that draws the Tela! window, the same one the Edge browser uses. It already comes with Windows 11 and most copies of Windows 10.
+pt.CompWebView2=• Microsoft WebView2: o motor que desenha a janela da Tela!, o mesmo do navegador Edge. Já vem no Windows 11 e na maioria dos Windows 10.
+es.CompWebView2=• Microsoft WebView2: el motor que dibuja la ventana de Tela!, el mismo del navegador Edge. Ya viene con Windows 11 y con la mayoría de los Windows 10.
+en.CompPawnIO=• PawnIO: a small driver that lets Tela! read the temperatures, clocks and fans of the processor and the motherboard. Without it those values stay blank. You can uncheck it on the next page and install it later.
+pt.CompPawnIO=• PawnIO: um driver pequeno que deixa a Tela! ler temperaturas, clocks e ventoinhas do processador e da placa-mãe. Sem ele esses valores ficam em branco. Dá para desmarcar na próxima página e instalar depois.
+es.CompPawnIO=• PawnIO: un driver pequeño que permite a Tela! leer temperaturas, frecuencias y ventiladores del procesador y de la placa base. Sin él esos valores quedan en blanco. Puedes desmarcarlo en la página siguiente e instalarlo después.
 en.OpenTela=Open Tela!
 pt.OpenTela=Abrir a Tela!
 es.OpenTela=Abrir Tela!
@@ -122,6 +137,7 @@ Filename: "{sys}\taskkill.exe"; Parameters: "/f /im PresentMon.exe"; RunOnceId: 
 [Code]
 var
   DownloadPage: TDownloadWizardPage;
+  InfoPage: TOutputMsgWizardPage;
 
 function NeedsPawnIO: Boolean;
 begin
@@ -170,8 +186,22 @@ begin
 end;
 
 procedure InitializeWizard;
+var
+  Msg: String;
 begin
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  { first install (or a component still missing): say in plain words what each component is for }
+  Msg := CustomMessage('CompIntro');
+  if not HasWebView2 then
+    Msg := Msg + #13#10#13#10 + CustomMessage('CompWebView2');
+  if NeedsPawnIO then
+    Msg := Msg + #13#10#13#10 + CustomMessage('CompPawnIO');
+  InfoPage := CreateOutputMsgPage(wpSelectDir, CustomMessage('CompTitle'), CustomMessage('CompDesc'), Msg);
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := (InfoPage <> nil) and (PageID = InfoPage.ID) and HasWebView2 and (not NeedsPawnIO);
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;

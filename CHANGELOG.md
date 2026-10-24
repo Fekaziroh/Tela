@@ -2,6 +2,23 @@
 
 Every version of Tela!, newest first. Portuguese notes are in the app (Advanced › Patch notes).
 
+## Tela! 1.4.9
+
+### New
+
+- Community gallery in Appearance: themes made by other people, imported with one click.
+- History: averages per game and a comparison of two games, with their FPS graphs together.
+- The game's icon shows in the game summary and in the history.
+- New window theme "Screen colors": the window follows the colors of the screen theme.
+- Option to also read the sensors from HWiNFO, for those who already use it (Advanced).
+- The setup explains what each component it installs is for.
+
+### Fixes
+
+- Switching themes, the new screen comes in block by block, without the black screen.
+- Importing and exporting themes and profiles works again.
+- Clean theme: the clock digits have more room and the music no longer touches the weather.
+
 ## Tela! 1.4.8
 
 ### New

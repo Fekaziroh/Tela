@@ -30,7 +30,8 @@ yourself, all set up from a clean window instead of config files.
 - CPU, GPU, RAM, VRAM, disks, network and volume, read by an embedded LibreHardwareMonitor
 - **FPS** with frame-time graph and 1% low (PresentMon, or RTSS when it is open)
 - **Game summary** when a game closes: average/1% low/max FPS, max temperatures, FPS graph
-- **Game history**: every summary is saved; search it, see the FPS graph, export to CSV
+- **Game history**: every summary is saved; search it, see the FPS graph, averages per game, compare two games
+  side by side, export to CSV
 - **Music and video** playing (Spotify, YouTube, any app in the Windows media controls) with progress line;
   during a game it moves to the date's place
 - Network panel with ping, packet loss and internet outage warning
@@ -38,13 +39,15 @@ yourself, all set up from a clean window instead of config files.
   element (move, resize, rotate, font and size) and drag new ones from a palette; alignment guides, zoom,
   copy/paste/duplicate
 - **Screen themes** with different shapes, not just colors (Clean, Full, Cylinder, Lines, Retro), each in
-  landscape and portrait; change any of them in the editor, save your own, export and import them as files
+  landscape and portrait; change any of them in the editor, save your own, export and import them as files;
+  a **community gallery** of themes shared by people, imported with one click
 - **Weather** next to the date (Open-Meteo: only the city name leaves the PC), editable screen texts
 - Landscape and portrait (and both flipped), screen colors, background picture
-- Window themes (automatic, ready-made or your own colors), Portuguese, English, Spanish and Chinese
+- Window themes (automatic, ready-made, your own colors, or the screen's colors), Portuguese, English, Spanish
+  and Chinese
 - Turns the screen off when the PC locks, the monitor sleeps, the PC sleeps or Tela! closes
 - **Presets** (Performance, Default, Custom) and **profiles** you can save, switch, export and import
-- Temperature alerts, screen off at set hours, search in Settings
+- Temperature alerts, screen off at set hours, search in Settings, HWiNFO as an optional sensor source
 - Eco mode when you are away, automatic recovery, diagnostics report
 - Updates itself: a button lights up when a new version is out
 
@@ -65,6 +68,10 @@ yourself, all set up from a clean window instead of config files.
 | ![Cylinder](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-cockpit.png) | ![Lines](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-lines.png) |
 | **Retro** | **Appearance tab** |
 | ![Retro](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/theme-retro.png) | ![Appearance](https://raw.githubusercontent.com/Fekaziroh/Tela/screenshots/appearance.png) |
+
+Made a theme you like? Export it (Appearance › Export…) and post it with a picture in
+[Show and tell](https://github.com/Fekaziroh/Tela/discussions/categories/show-and-tell) (GitHub accepts it inside a
+.zip). Approved themes go to the community gallery (Appearance › Gallery).
 
 ## Install
 

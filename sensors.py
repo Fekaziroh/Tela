@@ -667,6 +667,15 @@ def game_name(exe):
     return base
 
 
+def _icon_of(name):
+    try:
+        import gameicons
+        p = gameicons.find(name)
+        return str(p) if p else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 class Session:
     """One play session: from the game's first frame until its process exits."""
     BINS = 5001          # frametime histogram: 0.05 ms per bin, up to 250 ms
@@ -1069,6 +1078,10 @@ class Collector:
             self.lhm, self._lhm_web = (LhmWeb(""), LhmWeb("")) if demo else make_reader(cfg, base)
             self.sys = System(data.get("net_interface"))
             self._embedded_error = None
+        self.hwinfo = None
+        if data.get("hwinfo") and not demo:
+            import hwinfo
+            self.hwinfo = prev.hwinfo if same("data") and getattr(prev, "hwinfo", None) else hwinfo.Reader()
         self.rtss = prev.rtss if prev is not None else RTSS()
         ncfg = cfg.get("network") or {}
         self.ping = None
@@ -1179,7 +1192,8 @@ class Collector:
             return {"demo": True}
         emb = isinstance(self.lhm, LhmEmbedded)
         return {"lhm": self.lhm.error, "source": self.source, "admin": self.lhm.admin if emb else is_admin(),
-                "embedded_error": self._embedded_error, "fps": self.fps_info()}
+                "embedded_error": self._embedded_error, "fps": self.fps_info(),
+                "hwinfo": None if self.hwinfo is None else {"error": self.hwinfo.error, "count": self.hwinfo.count}}
 
     def in_game(self):
         return self.values.get("fps") is not None
@@ -1236,6 +1250,8 @@ class Collector:
             if self.pm is None or self.fps_source == "auto":
                 self.rtss.read()
             raw = {name: self._resolve(sel) for name, sel in self.aliases.items()}
+            if self.hwinfo is not None:   # HWiNFO's values win for the main sensors it has
+                raw.update({k: v for k, v in self.hwinfo.read().items() if k in self.aliases and v is not None})
         updated = self._apply_intervals(raw)
         self._update_sessions()
         for name in updated:   # every sensor keeps its last values, so a graph shows them as soon as it appears
@@ -1266,6 +1282,7 @@ class Collector:
             "max": {k: s.maxima.get(t) for k, t in self.session_temps.items()},
             "fps_series": downsample(s.fps_samples), "start": now, "ended_at": time.time(),
             "expires": now + 3 + self.summary_seconds, "total": self.summary_seconds,  # +3 s for the entrance
+            "icon": _icon_of(s.name),
         }
 
     def _update_sessions(self):
@@ -1285,6 +1302,9 @@ class Collector:
             except Exception:  # noqa: BLE001
                 pass
             new = Session(game_pid, game_name(exe) if exe else Path(pm.app or "Game").stem)
+            if exe:
+                import gameicons
+                gameicons.ensure(exe, new.name, self.events.append)
             frames, new.last_arrival = pm.frames_since(game_pid, 0.0)
             new.frames(frames)
             self.sessions[game_pid] = new
